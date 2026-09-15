@@ -2,7 +2,7 @@ import { PrismaClient, Role, BusinessCategory } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: [process.env.DATABASE_URL, process.env.POSTGRES_URL].find((u) => u && /^postgres(ql)?:\/\//.test(u)) }) });
 
 const weekday = {
   windows: [{ start: "08:00", end: "18:00" }],

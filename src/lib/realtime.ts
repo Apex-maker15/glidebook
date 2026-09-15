@@ -17,6 +17,7 @@ import { EventEmitter } from "node:events";
 import { randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { prisma } from "@/lib/prisma";
+import { databaseUrl } from "@/lib/database-url";
 import type { RealtimeEvent } from "@/types";
 
 const CHANNEL = "booking_events";
@@ -87,9 +88,9 @@ async function probeDelivery(): Promise<boolean> {
 }
 
 async function connectPgListener(): Promise<boolean> {
-  const url = process.env.DATABASE_URL;
+  const url = databaseUrl();
   if (!url) {
-    markUnavailable("no DATABASE_URL");
+    markUnavailable("no postgres:// connection string");
     return false;
   }
 
