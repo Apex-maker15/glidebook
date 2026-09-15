@@ -144,6 +144,22 @@ function ensurePgListener(): Promise<boolean> {
   return bus.connecting;
 }
 
+export type Transport = "pg" | "local";
+
+/** Resolve which transport is active (runs the LISTEN probe if it has not run yet). */
+export async function ensureTransport(): Promise<Transport> {
+  return (await ensurePgListener()) ? "pg" : "local";
+}
+
+/**
+ * True when events published on another server instance would NOT reach this
+ * one: in-process transport on a multi-instance (serverless) host.
+ */
+export function needsPolling(transport: Transport): boolean {
+  if (transport === "pg") return false;
+  return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.REALTIME_FORCE_POLL);
+}
+
 export async function publish(event: RealtimeEvent): Promise<void> {
   if (bus.pgState === "ready") {
     // Delivered back to us (and every other instance) through the LISTEN connection.

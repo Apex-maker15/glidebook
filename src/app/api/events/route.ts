@@ -1,9 +1,11 @@
 import { requireProvider } from "@/auth";
-import { subscribe } from "@/lib/realtime";
+import { ensureTransport, needsPolling, subscribe } from "@/lib/realtime";
 import type { RealtimeEvent } from "@/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Vercel Hobby allows up to 300s per invocation; EventSource reconnects transparently afterwards.
+export const maxDuration = 300;
 
 const HEARTBEAT_MS = 25_000;
 
@@ -47,9 +49,11 @@ export async function GET(req: Request) {
       };
 
       write(`retry: 3000\n`);
-      send("ready", { providerId: user.id, at: new Date().toISOString() });
-
       unsubscribe = await subscribe(user.id, (event: RealtimeEvent) => send(event.type, event));
+
+      // Tell the client whether it must also poll (multi-instance host without cross-instance delivery).
+      const transport = await ensureTransport();
+      send("ready", { providerId: user.id, at: new Date().toISOString(), transport, poll: needsPolling(transport) });
       heartbeat = setInterval(() => write(`: ping ${Date.now()}\n\n`), HEARTBEAT_MS);
       req.signal.addEventListener("abort", cleanup);
     },

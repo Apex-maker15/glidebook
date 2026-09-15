@@ -51,9 +51,20 @@ export function useRealtimeBookings() {
     const connect = () => {
       if (disposed) return;
       source = new EventSource("/api/events");
-      source.addEventListener("ready", () => {
+      source.addEventListener("ready", (e) => {
         failures = 0;
-        stopPolling();
+        let poll = false;
+        try {
+          poll = Boolean((JSON.parse((e as MessageEvent<string>).data) as { poll?: boolean }).poll);
+        } catch {
+          /* ignore malformed handshake */
+        }
+        if (poll) {
+          // Stream is up, but the host cannot fan out across instances: poll as well.
+          if (!pollTimer) pollTimer = setInterval(() => void load(), POLL_MS);
+        } else {
+          stopPolling();
+        }
         setConnection("live");
         // Catch up on anything that happened while we were disconnected.
         void load();
