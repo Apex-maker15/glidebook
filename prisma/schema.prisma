@@ -1,0 +1,136 @@
+// GlideBook — booking platform for mobile car detailers & pet groomers
+// All timestamps are stored in UTC. Provider-local rendering uses `User.timezone`.
+
+generator client {
+  provider   = "prisma-client-js"
+  // Engine-less client (no Rust binary): runs on any CPU/OS and keeps serverless bundles small.
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PROVIDER
+  CUSTOMER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  PAID
+}
+
+enum BusinessCategory {
+  CAR_DETAILING
+  PET_GROOMING
+}
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  name         String
+  phone        String?
+  passwordHash String? // null for guest customers created through the booking flow
+  role         Role    @default(CUSTOMER)
+
+  // ── Provider profile (only populated when role = PROVIDER) ──────────────
+  businessName        String?
+  slug                String?           @unique
+  category            BusinessCategory?
+  timezone            String            @default("America/New_York")
+  slotIntervalMinutes Int               @default(30) // granularity of bookable start times
+  bufferMinutes       Int               @default(0) // travel / cleanup gap enforced after each job
+  minNoticeMinutes    Int               @default(120) // earliest a customer may book ahead of "now"
+  bookingHorizonDays  Int               @default(60) // furthest date a customer may book
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services         Service[]
+  availability     Availability[]
+  providerBookings Booking[]      @relation("ProviderBookings")
+  customerBookings Booking[]      @relation("CustomerBookings")
+
+  @@index([role])
+}
+
+model Service {
+  id              String  @id @default(cuid())
+  name            String
+  description     String?
+  durationMinutes Int
+  priceCents      Int
+  currency        String  @default("usd")
+  active          Boolean @default(true)
+  sortOrder       Int     @default(0)
+
+  providerId String
+  provider   User   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerId, active, sortOrder])
+}
+
+model Booking {
+  id String @id @default(cuid())
+
+  customerId String
+  customer   User   @relation("CustomerBookings", fields: [customerId], references: [id])
+
+  providerId String
+  provider   User   @relation("ProviderBookings", fields: [providerId], references: [id], onDelete: Cascade)
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  startTime DateTime
+  endTime   DateTime
+  status    BookingStatus @default(PENDING)
+
+  // Snapshot of price at booking time so later service edits never change what was charged.
+  amountCents     Int
+  currency        String  @default("usd")
+  paymentIntentId String? @unique
+  paidAt          DateTime?
+
+  // Where the mobile provider travels to, and what they are working on
+  // (e.g. "2021 Tesla Model 3, black" or "Biscuit — golden retriever, 30 kg").
+  address        String?
+  serviceDetails String?
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerId, startTime])
+  @@index([providerId, status])
+  @@index([customerId])
+}
+
+model Availability {
+  id         String @id @default(cuid())
+  providerId String
+  provider   User   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  dayOfWeek Int // 0 = Sunday … 6 = Saturday, in the provider's timezone
+
+  // { "windows": [{ "start": "09:00", "end": "17:00" }], "breaks": [{ "start": "12:00", "end": "13:00" }] }
+  slots Json
+
+  @@unique([providerId, dayOfWeek])
+}
+
+// Stripe delivers webhooks at-least-once; this table makes processing idempotent.
+model StripeEvent {
+  id          String   @id // Stripe event id (evt_…)
+  type        String
+  processedAt DateTime @default(now())
+}
