@@ -5,11 +5,12 @@ import { ArrowRight, Check, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { spring, staggerContainer, riseVariants } from "@/components/motion";
 import { useBookingStore } from "@/store/booking-store";
+import { useProvider } from "./provider-context";
 import { cn, formatDuration, formatMoney } from "@/lib/utils";
 
 export function StepService() {
   const services = useBookingStore((s) => s.services);
-  const provider = useBookingStore((s) => s.provider)!;
+  const provider = useProvider();
   const isDeposit = provider.depositPercent < 100;
   const serviceId = useBookingStore((s) => s.serviceId);
   const selectService = useBookingStore((s) => s.selectService);

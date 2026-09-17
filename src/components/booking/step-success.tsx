@@ -7,6 +7,7 @@ import { CalendarPlus, MapPin, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { spring } from "@/components/motion";
 import { useBookingStore, selectService } from "@/store/booking-store";
+import { useProvider } from "./provider-context";
 import { api } from "@/lib/client-api";
 import { formatMoney } from "@/lib/utils";
 import type { BookingStatus } from "@/types";
@@ -32,7 +33,7 @@ function icsFor(opts: { title: string; start: string; end: string; location: str
 }
 
 export function StepSuccess() {
-  const provider = useBookingStore((s) => s.provider)!;
+  const provider = useProvider();
   const booking = useBookingStore((s) => s.booking);
   const service = useBookingStore(selectService);
   const customer = useBookingStore((s) => s.customer);

@@ -6,11 +6,12 @@ import { formatInTimeZone } from "date-fns-tz";
 import { addDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useBookingStore } from "@/store/booking-store";
+import { useProvider } from "./provider-context";
 import { Calendar } from "./calendar";
 import { TimeSlots } from "./time-slots";
 
 export function StepDateTime() {
-  const provider = useBookingStore((s) => s.provider)!;
+  const provider = useProvider();
   const date = useBookingStore((s) => s.date);
   const slot = useBookingStore((s) => s.slot);
   const slots = useBookingStore((s) => s.slots);

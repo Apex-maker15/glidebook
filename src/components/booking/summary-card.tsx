@@ -5,11 +5,12 @@ import { formatInTimeZone } from "date-fns-tz";
 import { CalendarDays, Clock, Receipt, Sparkles } from "lucide-react";
 import { spring } from "@/components/motion";
 import { useBookingStore, selectService } from "@/store/booking-store";
+import { useProvider } from "./provider-context";
 import { formatDuration, formatMoney } from "@/lib/utils";
 import { depositFor } from "@/lib/categories";
 
 export function SummaryCard() {
-  const provider = useBookingStore((s) => s.provider)!;
+  const provider = useProvider();
   const service = useBookingStore(selectService);
   const slot = useBookingStore((s) => s.slot);
   const step = useBookingStore((s) => s.step);

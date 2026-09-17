@@ -6,9 +6,10 @@ import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Field, TextArea } from "@/components/ui/primitives";
 import { useBookingStore } from "@/store/booking-store";
+import { useProvider } from "./provider-context";
 
 export function StepCustomer() {
-  const provider = useBookingStore((s) => s.provider)!;
+  const provider = useProvider();
   const customer = useBookingStore((s) => s.customer);
   const errors = useBookingStore((s) => s.customerErrors);
   const setCustomer = useBookingStore((s) => s.setCustomer);
