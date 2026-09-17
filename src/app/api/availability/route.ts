@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireProvider } from "@/auth";
+import { providerScope } from "@/lib/admin";
 import { handle, HttpError, readJson } from "@/lib/api";
 import { parseAvailability } from "@/lib/slots";
 import { availabilityUpsertSchema } from "@/lib/validation";
@@ -16,16 +16,14 @@ async function readSchedule(providerId: string) {
   }));
 }
 
-export const GET = handle(async () => {
-  const user = await requireProvider();
-  if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
-  return NextResponse.json({ days: await readSchedule(user.id) });
+export const GET = handle(async (req: Request) => {
+  const { providerId } = await providerScope(req);
+  return NextResponse.json({ days: await readSchedule(providerId) });
 });
 
 /** PUT replaces the whole weekly schedule. Days omitted from the payload become unavailable. */
 export const PUT = handle(async (req: Request) => {
-  const user = await requireProvider();
-  if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
+  const { providerId } = await providerScope(req);
   const { days } = availabilityUpsertSchema.parse(await readJson(req));
 
   const seen = new Set<number>();
@@ -41,11 +39,11 @@ export const PUT = handle(async (req: Request) => {
   }
 
   await prisma.$transaction([
-    prisma.availability.deleteMany({ where: { providerId: user.id } }),
+    prisma.availability.deleteMany({ where: { providerId } }),
     ...days
       .filter((d) => d.slots.windows.length > 0)
-      .map((d) => prisma.availability.create({ data: { providerId: user.id, dayOfWeek: d.dayOfWeek, slots: d.slots } })),
+      .map((d) => prisma.availability.create({ data: { providerId, dayOfWeek: d.dayOfWeek, slots: d.slots } })),
   ]);
 
-  return NextResponse.json({ days: await readSchedule(user.id) });
+  return NextResponse.json({ days: await readSchedule(providerId) });
 });

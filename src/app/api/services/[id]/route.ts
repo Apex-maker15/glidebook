@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { BookingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireProvider } from "@/auth";
+import { providerScope } from "@/lib/admin";
 import { handle, HttpError, readJson } from "@/lib/api";
 import { serviceInputSchema } from "@/lib/validation";
 
@@ -22,12 +22,11 @@ const select = {
 };
 
 export const PATCH = handle(async (req: Request, ctx: Ctx) => {
-  const user = await requireProvider();
-  if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
+  const { providerId } = await providerScope(req);
   const { id } = await ctx.params;
   const input = serviceInputSchema.partial().parse(await readJson(req));
 
-  const existing = await prisma.service.findFirst({ where: { id, providerId: user.id }, select: { id: true } });
+  const existing = await prisma.service.findFirst({ where: { id, providerId }, select: { id: true } });
   if (!existing) throw new HttpError(404, "Service not found", "NOT_FOUND");
 
   const service = await prisma.service.update({ where: { id }, data: input, select });
@@ -35,13 +34,12 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
 });
 
 /** Hard-delete when unused; otherwise deactivate so historical bookings keep their reference. */
-export const DELETE = handle(async (_req: Request, ctx: Ctx) => {
-  const user = await requireProvider();
-  if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
+export const DELETE = handle(async (req: Request, ctx: Ctx) => {
+  const { providerId } = await providerScope(req);
   const { id } = await ctx.params;
 
   const existing = await prisma.service.findFirst({
-    where: { id, providerId: user.id },
+    where: { id, providerId },
     select: { id: true, _count: { select: { bookings: true } } },
   });
   if (!existing) throw new HttpError(404, "Service not found", "NOT_FOUND");

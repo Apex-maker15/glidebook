@@ -21,7 +21,20 @@ interface FormState {
 
 const emptyForm: FormState = { name: "", description: "", durationMinutes: "60", price: "" };
 
-export function ServicesManager() {
+export interface ManagerProps {
+  /** Admins may manage another provider's data. */
+  providerId?: string;
+  /** Hide the page header when rendered inside another screen. */
+  embedded?: boolean;
+}
+
+function scoped(path: string, providerId?: string) {
+  if (!providerId) return path;
+  const sep = path.includes("?") ? "&" : "?";
+  return `${path}${sep}providerId=${encodeURIComponent(providerId)}`;
+}
+
+export function ServicesManager({ providerId, embedded }: ManagerProps = {}) {
   const [services, setServices] = useState<ServiceDTO[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<ServiceDTO | "new" | null>(null);
@@ -31,10 +44,10 @@ export function ServicesManager() {
   const push = useToastStore((s) => s.push);
 
   useEffect(() => {
-    api<{ services: ServiceDTO[] }>("/api/services")
+    api<{ services: ServiceDTO[] }>(scoped("/api/services", providerId))
       .then((r) => setServices(r.services))
       .catch((e) => setError(errorMessage(e)));
-  }, []);
+  }, [providerId]);
 
   const openNew = () => {
     setForm(emptyForm);
@@ -60,11 +73,11 @@ export function ServicesManager() {
     };
     try {
       if (editing === "new") {
-        const { service } = await api<{ service: ServiceDTO }>("/api/services", { method: "POST", body });
+        const { service } = await api<{ service: ServiceDTO }>(scoped("/api/services", providerId), { method: "POST", body });
         setServices((list) => [...(list ?? []), service]);
         push({ tone: "success", title: "Service added", description: `${service.name} is now bookable.` });
       } else {
-        const { service } = await api<{ service: ServiceDTO }>(`/api/services/${editing.id}`, { method: "PATCH", body });
+        const { service } = await api<{ service: ServiceDTO }>(scoped(`/api/services/${editing.id}`, providerId), { method: "PATCH", body });
         setServices((list) => (list ?? []).map((s) => (s.id === service.id ? service : s)));
         push({ tone: "success", title: "Service updated" });
       }
@@ -82,7 +95,7 @@ export function ServicesManager() {
     const next = { ...s, active: !s.active };
     setServices((list) => (list ?? []).map((x) => (x.id === s.id ? next : x)));
     try {
-      await api(`/api/services/${s.id}`, { method: "PATCH", body: { active: next.active } });
+      await api(scoped(`/api/services/${s.id}`, providerId), { method: "PATCH", body: { active: next.active } });
     } catch (err) {
       setServices((list) => (list ?? []).map((x) => (x.id === s.id ? s : x)));
       push({ tone: "error", title: "Could not update", description: errorMessage(err) });
@@ -93,7 +106,7 @@ export function ServicesManager() {
     const before = services ?? [];
     setServices(before.filter((x) => x.id !== s.id));
     try {
-      const res = await api<{ deleted: boolean; service?: ServiceDTO }>(`/api/services/${s.id}`, { method: "DELETE" });
+      const res = await api<{ deleted: boolean; service?: ServiceDTO }>(scoped(`/api/services/${s.id}`, providerId), { method: "DELETE" });
       if (!res.deleted && res.service) {
         setServices((list) => [...(list ?? []), res.service!].sort((a, b) => a.sortOrder - b.sortOrder));
         push({ tone: "info", title: "Service hidden", description: "It has past bookings, so it was deactivated instead of deleted." });
@@ -110,8 +123,8 @@ export function ServicesManager() {
     <div className="mx-auto max-w-4xl">
       <header className="mb-6 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-muted">Catalogue</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Services</h1>
+          {!embedded && <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-muted">Catalogue</p>}
+          <h1 className={embedded ? "text-lg font-semibold" : "mt-1 text-2xl font-semibold tracking-tight sm:text-3xl"}>Services</h1>
         </div>
         <Button onClick={openNew}>
           <Plus className="size-4" /> New service

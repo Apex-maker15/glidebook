@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireProvider } from "@/auth";
-import { handle, HttpError, readJson } from "@/lib/api";
+import { providerScope } from "@/lib/admin";
+import { handle, readJson } from "@/lib/api";
 import { serviceInputSchema } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -18,11 +18,10 @@ const select = {
   sortOrder: true,
 };
 
-export const GET = handle(async () => {
-  const user = await requireProvider();
-  if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
+export const GET = handle(async (req: Request) => {
+  const { providerId } = await providerScope(req);
   const services = await prisma.service.findMany({
-    where: { providerId: user.id },
+    where: { providerId },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     select,
   });
@@ -30,16 +29,15 @@ export const GET = handle(async () => {
 });
 
 export const POST = handle(async (req: Request) => {
-  const user = await requireProvider();
-  if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
+  const { providerId } = await providerScope(req);
   const input = serviceInputSchema.parse(await readJson(req));
   const [count, provider] = await Promise.all([
-    prisma.service.count({ where: { providerId: user.id } }),
-    prisma.user.findUnique({ where: { id: user.id }, select: { currency: true } }),
+    prisma.service.count({ where: { providerId } }),
+    prisma.user.findUnique({ where: { id: providerId }, select: { currency: true } }),
   ]);
   const service = await prisma.service.create({
     data: {
-      providerId: user.id,
+      providerId,
       currency: provider?.currency ?? "gbp",
       name: input.name,
       description: input.description ?? null,

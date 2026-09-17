@@ -8,7 +8,7 @@ export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
   const user = req.auth?.user;
 
-  if (pathname.startsWith("/dashboard")) {
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
     if (!user) {
       const login = new URL("/login", req.nextUrl.origin);
       login.searchParams.set("next", pathname);
@@ -27,5 +27,5 @@ export const proxy = auth((req) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/login", "/register"],
 };

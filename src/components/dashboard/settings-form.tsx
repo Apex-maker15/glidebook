@@ -23,7 +23,20 @@ interface FormState {
   bookingHorizonDays: string;
 }
 
-export function SettingsForm() {
+export interface ManagerProps {
+  /** Admins may manage another provider's data. */
+  providerId?: string;
+  /** Hide the page header when rendered inside another screen. */
+  embedded?: boolean;
+}
+
+function scoped(path: string, providerId?: string) {
+  if (!providerId) return path;
+  const sep = path.includes("?") ? "&" : "?";
+  return `${path}${sep}providerId=${encodeURIComponent(providerId)}`;
+}
+
+export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
   const [form, setForm] = useState<FormState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<Record<string, string[]>>({});
@@ -31,7 +44,7 @@ export function SettingsForm() {
   const push = useToastStore((s) => s.push);
 
   useEffect(() => {
-    api<{ provider: ProviderDTO }>("/api/settings")
+    api<{ provider: ProviderDTO }>(scoped("/api/settings", providerId))
       .then(({ provider }) =>
         setForm({
           businessName: provider.businessName,
@@ -47,7 +60,7 @@ export function SettingsForm() {
         }),
       )
       .catch((e) => setError(errorMessage(e)));
-  }, []);
+  }, [providerId]);
 
   const set = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((f) => f && { ...f, [k]: e.target.value });
@@ -60,7 +73,7 @@ export function SettingsForm() {
     setSaving(true);
     setIssues({});
     try {
-      await api("/api/settings", {
+      await api(scoped("/api/settings", providerId), {
         method: "PATCH",
         body: {
           businessName: form.businessName,
@@ -87,8 +100,8 @@ export function SettingsForm() {
   return (
     <div className="mx-auto max-w-2xl">
       <header className="mb-6">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-muted">Business</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Settings</h1>
+        {!embedded && <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-muted">Business</p>}
+        <h1 className={embedded ? "text-lg font-semibold" : "mt-1 text-2xl font-semibold tracking-tight sm:text-3xl"}>Settings</h1>
       </header>
 
       <AnimatePresence mode="wait" initial={false}>

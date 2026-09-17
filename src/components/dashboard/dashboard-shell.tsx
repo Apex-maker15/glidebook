@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { motion } from "framer-motion";
-import { CalendarClock, Check, Copy, ExternalLink, LogOut, Settings, Sparkles, Wrench, LayoutDashboard } from "lucide-react";
+import { CalendarClock, Check, Copy, ExternalLink, LogOut, Settings, ShieldCheck, Sparkles, Wrench, LayoutDashboard, Rocket } from "lucide-react";
 import { spring } from "@/components/motion";
 import { useToastStore } from "@/store/toast-store";
 import { cn } from "@/lib/utils";
@@ -15,15 +15,18 @@ const NAV = [
   { href: "/dashboard/services", label: "Services", icon: Wrench },
   { href: "/dashboard/availability", label: "Availability", icon: CalendarClock },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/setup", label: "Get set up", icon: Rocket },
 ];
+const ADMIN_NAV = { href: "/admin", label: "Admin", icon: ShieldCheck };
 
 interface Props {
   businessName: string;
   slug: string;
+  isAdmin?: boolean;
   children: React.ReactNode;
 }
 
-export function DashboardShell({ businessName, slug, children }: Props) {
+export function DashboardShell({ businessName, slug, isAdmin = false, children }: Props) {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
   const push = useToastStore((s) => s.push);
@@ -51,7 +54,7 @@ export function DashboardShell({ businessName, slug, children }: Props) {
         </Link>
 
         <nav className="flex gap-1 lg:mt-8 lg:flex-col" aria-label="Dashboard">
-          {NAV.map((item) => {
+          {[...NAV, ...(isAdmin ? [ADMIN_NAV] : [])].map((item) => {
             const active = item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
             const Icon = item.icon;
             return (

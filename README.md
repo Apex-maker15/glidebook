@@ -86,6 +86,10 @@ Pure function. For a calendar day it walks each working window at `slotIntervalM
 - `POST /api/webhooks/stripe` verifies the signature on the raw body, records the event id, then marks the booking `PAID` (or `CANCELLED` on cancel/refund) and publishes a realtime event.
 - Cancelling a paid booking from the dashboard issues a full refund.
 
+### Done-for-you setup (`/dashboard/setup`, `/admin`)
+
+Providers can build their page themselves for free, or pay a one-off fee (GBP 5, `SETUP_FEE_CENTS` in `src/lib/admin.ts`) and paste their price list. The fee is a Stripe PaymentIntent with `metadata.kind = "setup"`; the webhook marks the `SetupRequest` paid. Emails listed in `ADMIN_EMAILS` see an **Admin** link with the queue: pick a request, edit that provider's services, hours and settings in place (the dashboard APIs accept `?providerId=` for admins), then mark it done.
+
 ### Realtime (`src/lib/realtime.ts`, `/api/events`)
 
 The dashboard opens an `EventSource`. Server side, `publish()` emits to an in-process bus and, when the database provably delivers notifications (a probe is sent after `LISTEN`), through Postgres `NOTIFY` so every server instance sees every event. If the stream cannot be established the client falls back to 15 s polling, and it reconciles every 60 s and on tab focus regardless.

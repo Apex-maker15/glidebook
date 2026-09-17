@@ -67,6 +67,7 @@ model User {
   availability     Availability[]
   providerBookings Booking[]      @relation("ProviderBookings")
   customerBookings Booking[]      @relation("CustomerBookings")
+  setupRequests    SetupRequest[]
 
   @@index([role])
 }
@@ -140,6 +141,32 @@ model Availability {
   slots Json
 
   @@unique([providerId, dayOfWeek])
+}
+
+enum SetupRequestStatus {
+  PENDING_PAYMENT
+  PAID
+  DONE
+}
+
+// "Done-for-you" onboarding: a provider pays a small fee and an admin builds their page.
+model SetupRequest {
+  id         String             @id @default(cuid())
+  providerId String
+  provider   User               @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  status     SetupRequestStatus @default(PENDING_PAYMENT)
+  notes      String // what the provider pasted: services, prices, hours, address
+  feeCents   Int
+  currency   String             @default("gbp")
+
+  paymentIntentId String?   @unique
+  paidAt          DateTime?
+  completedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
 }
 
 // Stripe delivers webhooks at-least-once; this table makes processing idempotent.

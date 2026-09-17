@@ -17,6 +17,19 @@ const DEFAULT_BREAK: TimeWindow = { start: "12:00", end: "12:30" };
 
 type Week = Record<number, AvailabilitySlots | null>;
 
+export interface ManagerProps {
+  /** Admins may manage another provider's data. */
+  providerId?: string;
+  /** Hide the page header when rendered inside another screen. */
+  embedded?: boolean;
+}
+
+function scoped(path: string, providerId?: string) {
+  if (!providerId) return path;
+  const sep = path.includes("?") ? "&" : "?";
+  return `${path}${sep}providerId=${encodeURIComponent(providerId)}`;
+}
+
 function toWeek(days: AvailabilityDTO[]): Week {
   const week: Week = {};
   for (let d = 0; d < 7; d++) week[d] = null;
@@ -24,7 +37,7 @@ function toWeek(days: AvailabilityDTO[]): Week {
   return week;
 }
 
-export function AvailabilityEditor() {
+export function AvailabilityEditor({ providerId, embedded }: ManagerProps = {}) {
   const [week, setWeek] = useState<Week | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -32,10 +45,10 @@ export function AvailabilityEditor() {
   const push = useToastStore((s) => s.push);
 
   useEffect(() => {
-    api<{ days: AvailabilityDTO[] }>("/api/availability")
+    api<{ days: AvailabilityDTO[] }>(scoped("/api/availability", providerId))
       .then((r) => setWeek(toWeek(r.days)))
       .catch((e) => setError(errorMessage(e)));
-  }, []);
+  }, [providerId]);
 
   const update = (day: number, fn: (slots: AvailabilitySlots | null) => AvailabilitySlots | null) => {
     setWeek((w) => (w ? { ...w, [day]: fn(w[day]) } : w));
@@ -49,7 +62,7 @@ export function AvailabilityEditor() {
       const days = Object.entries(week)
         .filter(([, slots]) => slots && slots.windows.length > 0)
         .map(([d, slots]) => ({ dayOfWeek: Number(d), slots: slots! }));
-      const res = await api<{ days: AvailabilityDTO[] }>("/api/availability", { method: "PUT", body: { days } });
+      const res = await api<{ days: AvailabilityDTO[] }>(scoped("/api/availability", providerId), { method: "PUT", body: { days } });
       setWeek(toWeek(res.days));
       setDirty(false);
       push({ tone: "success", title: "Availability saved", description: "New slots are live on your booking page." });
@@ -64,8 +77,8 @@ export function AvailabilityEditor() {
     <div className="mx-auto max-w-4xl">
       <header className="mb-6 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-muted">Weekly hours</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Availability</h1>
+          {!embedded && <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-muted">Weekly hours</p>}
+          <h1 className={embedded ? "text-lg font-semibold" : "mt-1 text-2xl font-semibold tracking-tight sm:text-3xl"}>Availability</h1>
         </div>
         <AnimatePresence>
           {dirty && (

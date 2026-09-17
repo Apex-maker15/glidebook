@@ -72,7 +72,22 @@ async function findBooking(intent: Stripe.PaymentIntent) {
   return bookingId ? prisma.booking.findUnique({ where: { id: bookingId } }) : null;
 }
 
+async function markSetupPaid(intent: Stripe.PaymentIntent) {
+  const byIntent = await prisma.setupRequest.findUnique({ where: { paymentIntentId: intent.id } });
+  const request = byIntent ?? (intent.metadata?.setupRequestId ? await prisma.setupRequest.findUnique({ where: { id: intent.metadata.setupRequestId } }) : null);
+  if (!request) {
+    console.warn(`[stripe] setup payment for unknown request (${intent.id})`);
+    return;
+  }
+  if (request.status !== "PENDING_PAYMENT") return;
+  await prisma.setupRequest.update({
+    where: { id: request.id },
+    data: { status: "PAID", paidAt: new Date(), paymentIntentId: intent.id },
+  });
+}
+
 async function markPaid(intent: Stripe.PaymentIntent) {
+  if (intent.metadata?.kind === "setup") return markSetupPaid(intent);
   const booking = await findBooking(intent);
   if (!booking) {
     console.warn(`[stripe] payment_intent.succeeded for unknown booking (${intent.id})`);
@@ -89,6 +104,7 @@ async function markPaid(intent: Stripe.PaymentIntent) {
 }
 
 async function markCancelled(intent: Stripe.PaymentIntent) {
+  if (intent.metadata?.kind === "setup") return;
   const booking = await findBooking(intent);
   if (!booking || booking.status !== BookingStatus.PENDING) return;
 

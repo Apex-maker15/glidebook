@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { isAdminEmail } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!provider?.slug) redirect("/login");
 
   return (
-    <DashboardShell businessName={provider.businessName ?? "Your business"} slug={provider.slug}>
+    <DashboardShell businessName={provider.businessName ?? "Your business"} slug={provider.slug} isAdmin={isAdminEmail(session.user.email)}>
       {children}
     </DashboardShell>
   );
