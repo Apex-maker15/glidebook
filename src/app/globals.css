@@ -20,6 +20,22 @@
   --accent-soft: rgb(139 124 255 / 0.14);
 }
 
+[data-accent="beauty"] {
+  --accent: #f472b6;
+  --accent-rgb: 244 114 182;
+  --accent-strong: #f9a8d4;
+  --accent-strong-rgb: 249 168 212;
+  --accent-soft: rgb(244 114 182 / 0.14);
+}
+
+[data-accent="hair"] {
+  --accent: #a78bfa;
+  --accent-rgb: 167 139 250;
+  --accent-strong: #c4b5fd;
+  --accent-strong-rgb: 196 181 253;
+  --accent-soft: rgb(167 139 250 / 0.14);
+}
+
 [data-accent="car"] {
   --accent: #38bdf8;
   --accent-rgb: 56 189 248;

@@ -8,10 +8,15 @@ import { fadeVariants } from "@/components/motion";
 import { api, ClientApiError, errorMessage } from "@/lib/client-api";
 import { useToastStore } from "@/store/toast-store";
 import type { ProviderDTO } from "@/types";
+import { CURRENCIES } from "@/lib/categories";
 
 interface FormState {
   businessName: string;
   timezone: string;
+  currency: string;
+  locationMode: "STUDIO" | "MOBILE";
+  studioAddress: string;
+  depositPercent: string;
   slotIntervalMinutes: string;
   bufferMinutes: string;
   minNoticeMinutes: string;
@@ -31,6 +36,10 @@ export function SettingsForm() {
         setForm({
           businessName: provider.businessName,
           timezone: provider.timezone,
+          currency: provider.currency,
+          locationMode: provider.locationMode,
+          studioAddress: provider.studioAddress ?? "",
+          depositPercent: String(provider.depositPercent),
           slotIntervalMinutes: String(provider.slotIntervalMinutes),
           bufferMinutes: String(provider.bufferMinutes),
           minNoticeMinutes: String(provider.minNoticeMinutes),
@@ -40,7 +49,10 @@ export function SettingsForm() {
       .catch((e) => setError(errorMessage(e)));
   }, []);
 
-  const set = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => f && { ...f, [k]: e.target.value });
+  const set = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm((f) => f && { ...f, [k]: e.target.value });
+  const selectCls =
+    "h-12 w-full rounded-2xl border border-line bg-white/[0.04] px-4 text-[15px] text-ink outline-none focus:border-accent/60 [color-scheme:dark]";
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +65,10 @@ export function SettingsForm() {
         body: {
           businessName: form.businessName,
           timezone: form.timezone,
+          currency: form.currency,
+          locationMode: form.locationMode,
+          studioAddress: form.studioAddress.trim() || null,
+          depositPercent: Number(form.depositPercent),
           slotIntervalMinutes: Number(form.slotIntervalMinutes),
           bufferMinutes: Number(form.bufferMinutes),
           minNoticeMinutes: Number(form.minNoticeMinutes),
@@ -89,7 +105,71 @@ export function SettingsForm() {
         ) : (
           <motion.form key="form" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" onSubmit={(e) => void save(e)} className="glass space-y-4 rounded-3xl p-6">
             <Field label="Business name" value={form!.businessName} onChange={set("businessName")} error={issues.businessName?.[0]} required />
-            <Field label="Timezone" value={form!.timezone} onChange={set("timezone")} error={issues.timezone?.[0]} hint="IANA name, e.g. America/Los_Angeles" required />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Timezone" value={form!.timezone} onChange={set("timezone")} error={issues.timezone?.[0]} hint="e.g. Europe/London" required />
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="currency" className="text-[13px] font-medium text-ink-muted">
+                  Currency
+                </label>
+                <select id="currency" value={form!.currency} onChange={set("currency")} className={selectCls}>
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-ink-muted/80">Applies to all your services</p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+              <p className="text-[13px] font-medium text-ink-muted">Where do appointments happen?</p>
+              <div className="mt-2 grid grid-cols-2 gap-2" role="radiogroup">
+                {(
+                  [
+                    { value: "STUDIO", label: "Clients come to me", hint: "Home studio, salon chair" },
+                    { value: "MOBILE", label: "I travel to clients", hint: "Address collected at booking" },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={form!.locationMode === opt.value}
+                    onClick={() => setForm((f) => f && { ...f, locationMode: opt.value })}
+                    className={`rounded-xl border p-3 text-left transition-colors ${
+                      form!.locationMode === opt.value ? "border-accent/60 bg-accent-soft" : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]"
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{opt.label}</p>
+                    <p className="text-[12px] text-ink-muted">{opt.hint}</p>
+                  </button>
+                ))}
+              </div>
+              {form!.locationMode === "STUDIO" && (
+                <Field
+                  className="mt-3"
+                  label="Studio address"
+                  value={form!.studioAddress}
+                  onChange={set("studioAddress")}
+                  error={issues.studioAddress?.[0]}
+                  hint="Shown to clients after they book"
+                  placeholder="12 High Street, Croydon, CR0 1AA"
+                />
+              )}
+            </div>
+
+            <Field
+              label="Deposit (% of service price)"
+              type="number"
+              min={10}
+              max={100}
+              step={5}
+              value={form!.depositPercent}
+              onChange={set("depositPercent")}
+              error={issues.depositPercent?.[0]}
+              hint="100 = full payment upfront. 30 is typical for nails and lashes; the rest is paid on the day."
+            />
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
                 label="Slot interval (minutes)"

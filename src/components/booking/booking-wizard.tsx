@@ -3,7 +3,9 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { Car, PawPrint, ShieldCheck, Sparkles } from "lucide-react";
+import { ShieldCheck, Sparkles } from "lucide-react";
+import { CATEGORIES } from "@/lib/categories";
+import { CategoryIcon } from "@/components/category-icon";
 import { useBookingStore } from "@/store/booking-store";
 import type { ProviderDTO, ServiceDTO } from "@/types";
 import { spring, stepVariants } from "@/components/motion";
@@ -39,10 +41,10 @@ export function BookingWizard({ provider, services, stripePublishableKey }: Prop
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [step]);
 
-  const isCar = provider.category === "CAR_DETAILING";
+  const meta = CATEGORIES[provider.category];
 
   return (
-    <div data-accent={isCar ? "car" : "pet"} className="min-h-dvh">
+    <div data-accent={meta.accent} className="min-h-dvh">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 pt-6 sm:px-6">
         <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
           <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
@@ -64,11 +66,11 @@ export function BookingWizard({ provider, services, stripePublishableKey }: Prop
         >
           <div className="flex items-center gap-4">
             <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent-strong ring-1 ring-accent/30 shadow-glow">
-              {isCar ? <Car className="size-7" /> : <PawPrint className="size-7" />}
+              <CategoryIcon category={provider.category} className="size-7" />
             </div>
             <div>
               <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-ink-muted">
-                {isCar ? "Mobile car detailing" : "Mobile pet grooming"}
+                {meta.tagline}
               </p>
               <h1 className="text-gradient text-2xl font-semibold tracking-tight sm:text-3xl">{provider.businessName}</h1>
             </div>

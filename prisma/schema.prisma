@@ -25,8 +25,17 @@ enum BookingStatus {
 }
 
 enum BusinessCategory {
+  NAILS_BEAUTY
+  HAIR_BARBER
   CAR_DETAILING
   PET_GROOMING
+  OTHER
+}
+
+// Where the appointment happens.
+enum LocationMode {
+  STUDIO // clients come to the provider (home studio, salon chair)
+  MOBILE // provider travels to the client
 }
 
 model User {
@@ -41,7 +50,11 @@ model User {
   businessName        String?
   slug                String?           @unique
   category            BusinessCategory?
-  timezone            String            @default("America/New_York")
+  timezone            String            @default("Europe/London")
+  currency            String            @default("gbp") // ISO 4217, lowercase (Stripe style)
+  locationMode        LocationMode      @default(STUDIO)
+  studioAddress       String? // shown to clients when locationMode = STUDIO
+  depositPercent      Int               @default(100) // 100 = full prepayment, e.g. 30 = 30% deposit
   slotIntervalMinutes Int               @default(30) // granularity of bookable start times
   bufferMinutes       Int               @default(0) // travel / cleanup gap enforced after each job
   minNoticeMinutes    Int               @default(120) // earliest a customer may book ahead of "now"
@@ -64,7 +77,7 @@ model Service {
   description     String?
   durationMinutes Int
   priceCents      Int
-  currency        String  @default("usd")
+  currency        String  @default("gbp")
   active          Boolean @default(true)
   sortOrder       Int     @default(0)
 
@@ -96,8 +109,9 @@ model Booking {
   status    BookingStatus @default(PENDING)
 
   // Snapshot of price at booking time so later service edits never change what was charged.
-  amountCents     Int
-  currency        String  @default("usd")
+  amountCents     Int // full service price
+  depositCents    Int // what is actually charged at checkout (== amountCents for full prepay)
+  currency        String  @default("gbp")
   paymentIntentId String? @unique
   paidAt          DateTime?
 

@@ -199,7 +199,7 @@ export function ServicesManager() {
               required
             />
             <Field
-              label="Price (USD)"
+              label="Price"
               type="number"
               min={1}
               step="0.01"

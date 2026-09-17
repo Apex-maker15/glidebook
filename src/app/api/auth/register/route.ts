@@ -4,6 +4,7 @@ import { Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { handle, HttpError, readJson } from "@/lib/api";
 import { registerSchema } from "@/lib/validation";
+import { CATEGORIES } from "@/lib/categories";
 
 export const runtime = "nodejs";
 
@@ -49,6 +50,10 @@ export const POST = handle(async (req: Request) => {
         slug,
         category: input.category,
         timezone: input.timezone,
+        currency: input.currency,
+        locationMode: input.locationMode ?? CATEGORIES[input.category].defaultLocation,
+        // Beauty pros usually take a deposit; mobile trades usually take full payment.
+        depositPercent: input.category === "NAILS_BEAUTY" || input.category === "HAIR_BARBER" ? 30 : 100,
       };
       const user = existing
         ? await prisma.user.update({

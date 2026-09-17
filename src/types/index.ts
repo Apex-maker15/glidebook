@@ -1,6 +1,6 @@
-import type { BookingStatus, BusinessCategory } from "@prisma/client";
+import type { BookingStatus, BusinessCategory, LocationMode } from "@prisma/client";
 
-export type { BookingStatus, BusinessCategory };
+export type { BookingStatus, BusinessCategory, LocationMode };
 
 export interface TimeWindow {
   start: string; // "HH:mm" in the provider's timezone
@@ -35,6 +35,10 @@ export interface ProviderDTO {
   ownerName: string;
   category: BusinessCategory;
   timezone: string;
+  currency: string;
+  locationMode: LocationMode;
+  studioAddress: string | null;
+  depositPercent: number;
   slotIntervalMinutes: number;
   bufferMinutes: number;
   minNoticeMinutes: number;
@@ -57,6 +61,7 @@ export interface BookingDTO {
   endTime: string;
   status: BookingStatus;
   amountCents: number;
+  depositCents: number;
   currency: string;
   paidAt: string | null;
   address: string | null;

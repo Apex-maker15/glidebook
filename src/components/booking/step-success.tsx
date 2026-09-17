@@ -72,7 +72,7 @@ export function StepSuccess() {
       title: `${service.name} with ${provider.businessName}`,
       start: booking.startTime,
       end: booking.endTime,
-      location: customer.address,
+      location: provider.locationMode === "MOBILE" ? customer.address : (provider.studioAddress ?? ""),
       description: `Booking ${booking.id}. ${provider.phone ? `Provider phone: ${provider.phone}` : ""}`,
     });
     const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
@@ -125,8 +125,10 @@ export function StepSuccess() {
         transition={{ ...spring.soft, delay: 0.28 }}
         className="mt-2 max-w-md text-sm text-ink-muted"
       >
-        {service.name} on <span className="text-ink">{when}</span>. A receipt for{" "}
-        {formatMoney(booking.amountCents, booking.currency)} is on its way to {customer.email}.
+        {service.name} on <span className="text-ink">{when}</span>.{" "}
+        {booking.depositCents < booking.amountCents
+          ? `Your ${formatMoney(booking.depositCents, booking.currency)} deposit is confirmed and the remaining ${formatMoney(booking.amountCents - booking.depositCents, booking.currency)} is paid on the day. A receipt is on its way to ${customer.email}.`
+          : `A receipt for ${formatMoney(booking.amountCents, booking.currency)} is on its way to ${customer.email}.`}
       </motion.p>
 
       <motion.div
@@ -137,7 +139,7 @@ export function StepSuccess() {
       >
         <div className="flex items-start gap-2.5 text-ink-muted">
           <MapPin className="mt-0.5 size-4 shrink-0" />
-          <span>{customer.address}</span>
+          <span>{provider.locationMode === "MOBILE" ? customer.address : provider.studioAddress ?? "Address shared by the provider"}</span>
         </div>
         <div className="mt-1 flex items-center gap-2 text-[12px]">
           <motion.span

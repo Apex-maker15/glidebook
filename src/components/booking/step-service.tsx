@@ -9,6 +9,8 @@ import { cn, formatDuration, formatMoney } from "@/lib/utils";
 
 export function StepService() {
   const services = useBookingStore((s) => s.services);
+  const provider = useBookingStore((s) => s.provider)!;
+  const isDeposit = provider.depositPercent < 100;
   const serviceId = useBookingStore((s) => s.serviceId);
   const selectService = useBookingStore((s) => s.selectService);
   const next = useBookingStore((s) => s.next);
@@ -17,7 +19,10 @@ export function StepService() {
     <div>
       <header className="mb-6">
         <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Choose a service</h2>
-        <p className="mt-1 text-sm text-ink-muted">Pricing is all-inclusive. We come to you.</p>
+        <p className="mt-1 text-sm text-ink-muted">
+          {provider.locationMode === "MOBILE" ? "Pricing is all-inclusive. We come to you." : "Pricing is all-inclusive."}
+          {isDeposit ? ` A ${provider.depositPercent}% deposit secures your slot; the rest is paid on the day.` : ""}
+        </p>
       </header>
 
       {services.length === 0 ? (

@@ -6,6 +6,7 @@ import { CalendarDays, Clock, Receipt, Sparkles } from "lucide-react";
 import { spring } from "@/components/motion";
 import { useBookingStore, selectService } from "@/store/booking-store";
 import { formatDuration, formatMoney } from "@/lib/utils";
+import { depositFor } from "@/lib/categories";
 
 export function SummaryCard() {
   const provider = useBookingStore((s) => s.provider)!;
@@ -28,7 +29,10 @@ export function SummaryCard() {
     },
   ].filter(Boolean) as { key: string; icon: React.ReactNode; label: string; detail: string }[];
 
-  const total = service ? formatMoney(service.priceCents, service.currency) : null;
+  const total = service ? formatMoney(service.priceCents, provider.currency) : null;
+  const depositCents = service ? depositFor(service.priceCents, provider.depositPercent, provider.currency) : 0;
+  const isDeposit = service ? depositCents < service.priceCents : false;
+  const dueToday = service ? formatMoney(depositCents, provider.currency) : null;
 
   return (
     <>
@@ -89,7 +93,14 @@ export function SummaryCard() {
             </AnimatePresence>
           </div>
           <p className="mt-1 flex items-center gap-1 text-[12px] text-ink-muted/80">
-            <Clock className="size-3" /> {step === "success" ? "Paid" : "Charged at checkout"}
+            <Clock className="size-3" />{" "}
+            {step === "success"
+              ? isDeposit
+                ? `${dueToday} deposit paid`
+                : "Paid"
+              : isDeposit
+                ? `${dueToday} deposit today, rest on the day`
+                : "Charged at checkout"}
           </p>
         </motion.div>
       </motion.aside>
@@ -112,7 +123,7 @@ export function SummaryCard() {
                 {slot ? `${formatInTimeZone(new Date(slot.start), provider.timezone, "EEE, MMM d")} · ${slot.label}` : formatDuration(service.durationMinutes)}
               </p>
             </div>
-            <span className="text-base font-semibold tabular-nums">{total}</span>
+            <span className="text-base font-semibold tabular-nums">{isDeposit ? dueToday : total}</span>
           </motion.div>
         )}
       </AnimatePresence>

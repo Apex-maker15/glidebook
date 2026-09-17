@@ -1,6 +1,6 @@
 # GlideBook
 
-Micro-SaaS booking for mobile car detailers and pet groomers. Customers pick a service, a slot, pay upfront with Stripe, and the job lands on the provider's dashboard in real time.
+Micro-SaaS booking for independent beauty pros (nail techs, lash artists, barbers) and mobile services (detailers, groomers). Clients pick a service and a slot, pay a deposit or the full price with Stripe, and the appointment lands on the provider's dashboard in real time.
 
 **Stack:** Next.js 16 (App Router, React 19) · Tailwind CSS · Framer Motion · Lucide · Prisma 6 (engine-less, `pg` driver adapter) · PostgreSQL · NextAuth.js v5 · Stripe (Payment Element + webhooks) · Zustand · Server-Sent Events with Postgres `LISTEN/NOTIFY`.
 
@@ -22,6 +22,7 @@ Demo logins (password `password123`):
 
 | Provider | Email | Booking page |
 | --- | --- | --- |
+| Polished by Amara (nails, GBP, 30% deposit) | `demo@polishedbyamara.com` | `/book/polished-by-amara` |
 | Shine Mobile Detailing (car) | `demo@shinemobile.com` | `/book/shine-mobile` |
 | Paws on Wheels Grooming (pet) | `demo@pawsonwheels.com` | `/book/paws-on-wheels` |
 
@@ -66,9 +67,9 @@ Then import the repo into Vercel, paste the env vars, deploy. Set `NEXT_PUBLIC_A
 
 ### Data model (`prisma/schema.prisma`)
 
-- `User` - `PROVIDER` or `CUSTOMER`. Providers carry their business profile: `slug`, `category`, `timezone`, `slotIntervalMinutes`, `bufferMinutes` (travel gap), `minNoticeMinutes`, `bookingHorizonDays`. Customers are created as guests on their first booking.
+- `User` - `PROVIDER` or `CUSTOMER`. Providers carry their business profile: `slug`, `category` (nails/beauty, hair, detailing, grooming, other), `timezone`, `currency`, `locationMode` (clients come to a studio vs. provider travels), `studioAddress`, `depositPercent` (100 = full prepay), `slotIntervalMinutes`, `bufferMinutes`, `minNoticeMinutes`, `bookingHorizonDays`. Customers are created as guests on their first booking.
 - `Service` - name, duration, price in cents.
-- `Booking` - `PENDING → PAID | CONFIRMED | CANCELLED`, UTC instants, price snapshot, `paymentIntentId`.
+- `Booking` - `PENDING → PAID | CONFIRMED | CANCELLED`, UTC instants, price snapshot (`amountCents`) plus what was actually charged (`depositCents`), `paymentIntentId`.
 - `Availability` - one row per weekday with `{ windows: [{start,end}], breaks: [{start,end}] }` in the provider's local time.
 - `StripeEvent` - processed webhook ids for idempotency.
 
@@ -103,7 +104,8 @@ The dashboard opens an `EventSource`. Server side, `publish()` emits to an in-pr
 
 | Script | What it does |
 | --- | --- |
-| `npm run dev` | Next.js dev server |
+| `npm run dev` | Next.js dev server (Turbopack) |
+| `npm run dev:webpack` | Dev server with webpack - use on Windows-on-ARM / machines that block native binaries |
 | `npm run build` / `start` | Production build / serve |
 | `npm run db:local` | Zero-install local Postgres (PGlite) on port 5433 |
 | `npm run db:setup` | `prisma migrate deploy` + seed |

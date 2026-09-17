@@ -33,10 +33,14 @@ export const POST = handle(async (req: Request) => {
   const user = await requireProvider();
   if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
   const input = serviceInputSchema.parse(await readJson(req));
-  const count = await prisma.service.count({ where: { providerId: user.id } });
+  const [count, provider] = await Promise.all([
+    prisma.service.count({ where: { providerId: user.id } }),
+    prisma.user.findUnique({ where: { id: user.id }, select: { currency: true } }),
+  ]);
   const service = await prisma.service.create({
     data: {
       providerId: user.id,
+      currency: provider?.currency ?? "gbp",
       name: input.name,
       description: input.description ?? null,
       durationMinutes: input.durationMinutes,

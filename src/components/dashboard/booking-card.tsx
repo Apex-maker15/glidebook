@@ -66,7 +66,14 @@ export const BookingCard = forwardRef<HTMLDivElement, Props>(function BookingCar
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
                 <p className="truncate font-semibold leading-tight">{booking.customer.name}</p>
-                <span className="shrink-0 text-sm font-semibold tabular-nums">{formatMoney(booking.amountCents, booking.currency)}</span>
+                <span className="shrink-0 text-right text-sm font-semibold tabular-nums">
+                  {formatMoney(booking.amountCents, booking.currency)}
+                  {booking.depositCents < booking.amountCents && (
+                    <span className="block text-[11px] font-medium text-ink-muted">
+                      {formatMoney(booking.depositCents, booking.currency)} deposit
+                    </span>
+                  )}
+                </span>
               </div>
               <p className="mt-0.5 truncate text-[13px] text-ink-muted">{booking.service.name}</p>
             </div>
@@ -150,7 +157,7 @@ export const BookingCard = forwardRef<HTMLDivElement, Props>(function BookingCar
         open={confirmCancel}
         onClose={() => setConfirmCancel(false)}
         title="Cancel and refund?"
-        description={`${booking.customer.name} paid ${formatMoney(booking.amountCents, booking.currency)}. Cancelling refunds the full amount to their card.`}
+        description={`${booking.customer.name} paid ${formatMoney(booking.depositCents, booking.currency)}. Cancelling refunds it to their card.`}
       >
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setConfirmCancel(false)}>

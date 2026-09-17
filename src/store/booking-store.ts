@@ -17,7 +17,9 @@ export interface CustomerForm {
 export interface CheckoutSession {
   clientSecret: string;
   paymentIntentId: string;
+  /** Amount charged now (deposit or full price). */
   amountCents: number;
+  totalCents: number;
   currency: string;
   holdExpiresAt: string;
 }
@@ -99,11 +101,11 @@ const initialState: BookingState = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateCustomer(c: CustomerForm): Partial<Record<keyof CustomerForm, string>> {
+function validateCustomer(c: CustomerForm, requireAddress: boolean): Partial<Record<keyof CustomerForm, string>> {
   const errors: Partial<Record<keyof CustomerForm, string>> = {};
   if (c.name.trim().length < 2) errors.name = "Please enter your full name";
   if (!EMAIL_RE.test(c.email.trim())) errors.email = "Enter a valid email address";
-  if (c.address.trim().length < 5) errors.address = "Where should we come to?";
+  if (requireAddress && c.address.trim().length < 5) errors.address = "Where should we come to?";
   if (c.phone.trim() && c.phone.trim().length < 7) errors.phone = "That phone number looks too short";
   return errors;
 }
@@ -208,7 +210,7 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
     const { provider, serviceId, slot, customer, goTo } = get();
     if (!provider || !serviceId || !slot) return;
 
-    const errors = validateCustomer(customer);
+    const errors = validateCustomer(customer, provider.locationMode === "MOBILE");
     if (Object.keys(errors).length > 0) {
       set({ customerErrors: errors });
       return;
@@ -229,7 +231,7 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
             email: customer.email.trim(),
             phone: customer.phone.trim() || null,
           },
-          address: customer.address.trim(),
+          address: provider.locationMode === "MOBILE" ? customer.address.trim() : null,
           serviceDetails: customer.serviceDetails.trim() || null,
           notes: customer.notes.trim() || null,
         },

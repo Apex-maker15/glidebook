@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, ArrowLeft, Lock } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Lock, MapPin } from "lucide-react";
+import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Field, TextArea } from "@/components/ui/primitives";
 import { useBookingStore } from "@/store/booking-store";
@@ -16,7 +17,8 @@ export function StepCustomer() {
   const submitError = useBookingStore((s) => s.submitError);
   const back = useBookingStore((s) => s.back);
 
-  const isCar = provider.category === "CAR_DETAILING";
+  const meta = CATEGORIES[provider.category];
+  const mobile = provider.locationMode === "MOBILE";
 
   return (
     <form
@@ -28,7 +30,9 @@ export function StepCustomer() {
     >
       <header className="mb-6">
         <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Your details</h2>
-        <p className="mt-1 text-sm text-ink-muted">We only use this to confirm and find you on the day.</p>
+        <p className="mt-1 text-sm text-ink-muted">
+          {mobile ? "We only use this to confirm and find you on the day." : "We only use this to confirm your appointment."}
+        </p>
       </header>
 
       <AnimatePresence initial={false}>
@@ -83,27 +87,37 @@ export function StepCustomer() {
           error={errors.phone}
         />
         <Field
-          label={isCar ? "Vehicle (optional)" : "Pet (optional)"}
+          label={meta.detailsLabel}
           name="serviceDetails"
-          placeholder={isCar ? "2021 Tesla Model 3, black" : "Biscuit, golden retriever, 30 kg"}
+          placeholder={meta.detailsPlaceholder}
           value={customer.serviceDetails}
           onChange={(e) => setCustomer({ serviceDetails: e.target.value })}
         />
-        <Field
-          className="sm:col-span-2"
-          label="Service address"
-          name="address"
-          autoComplete="street-address"
-          placeholder="Street, city, ZIP"
-          value={customer.address}
-          onChange={(e) => setCustomer({ address: e.target.value })}
-          error={errors.address}
-        />
+        {mobile ? (
+          <Field
+            className="sm:col-span-2"
+            label="Service address"
+            name="address"
+            autoComplete="street-address"
+            placeholder="Street, town, postcode"
+            value={customer.address}
+            onChange={(e) => setCustomer({ address: e.target.value })}
+            error={errors.address}
+          />
+        ) : provider.studioAddress ? (
+          <div className="flex items-start gap-2.5 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-sm sm:col-span-2">
+            <MapPin className="mt-0.5 size-4 shrink-0 text-accent-strong" />
+            <div>
+              <p className="font-medium">Where to go</p>
+              <p className="text-ink-muted">{provider.studioAddress}</p>
+            </div>
+          </div>
+        ) : null}
         <TextArea
           className="sm:col-span-2"
           label="Notes for the provider (optional)"
           name="notes"
-          placeholder="Gate code, parking instructions, anything we should know"
+          placeholder={mobile ? "Gate code, parking instructions, anything we should know" : "Anything else before your appointment"}
           value={customer.notes}
           onChange={(e) => setCustomer({ notes: e.target.value })}
         />

@@ -29,8 +29,10 @@ export const registerSchema = z.object({
   email: z.email().max(160),
   password: z.string().min(8).max(128),
   businessName: z.string().trim().min(2).max(80),
-  category: z.enum(["CAR_DETAILING", "PET_GROOMING"]),
+  category: z.enum(["NAILS_BEAUTY", "HAIR_BARBER", "CAR_DETAILING", "PET_GROOMING", "OTHER"]),
   timezone: z.string().min(3).max(64),
+  currency: z.enum(["gbp", "usd", "eur"]).default("gbp"),
+  locationMode: z.enum(["STUDIO", "MOBILE"]).optional(),
 });
 
 export const loginSchema = z.object({
@@ -56,7 +58,8 @@ export const createBookingSchema = z.object({
     email: z.email().max(160),
     phone: z.string().trim().max(32).optional().nullable(),
   }),
-  address: z.string().trim().min(5).max(200),
+  // Required only when the provider travels to the client (validated in the route).
+  address: z.string().trim().max(200).optional().nullable(),
   serviceDetails: z.string().trim().max(200).optional().nullable(),
   notes: z.string().trim().max(500).optional().nullable(),
 });
@@ -68,6 +71,10 @@ export const updateBookingStatusSchema = z.object({
 export const providerSettingsSchema = z.object({
   businessName: z.string().trim().min(2).max(80).optional(),
   timezone: z.string().min(3).max(64).optional(),
+  currency: z.enum(["gbp", "usd", "eur"]).optional(),
+  locationMode: z.enum(["STUDIO", "MOBILE"]).optional(),
+  studioAddress: z.string().trim().max(200).optional().nullable(),
+  depositPercent: z.number().int().min(10).max(100).optional(),
   slotIntervalMinutes: z.number().int().min(5).max(120).optional(),
   bufferMinutes: z.number().int().min(0).max(180).optional(),
   minNoticeMinutes: z.number().int().min(0).max(10080).optional(),

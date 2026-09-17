@@ -43,11 +43,12 @@ export const POST = handle(async (req: Request) => {
 
   if (booking.paymentIntentId) {
     const existing = await stripe.paymentIntents.retrieve(booking.paymentIntentId);
-    if (existing.status !== "canceled" && existing.amount === booking.amountCents && existing.client_secret) {
+    if (existing.status !== "canceled" && existing.amount === booking.depositCents && existing.client_secret) {
       return NextResponse.json({
         clientSecret: existing.client_secret,
         paymentIntentId: existing.id,
-        amountCents: booking.amountCents,
+        amountCents: booking.depositCents,
+        totalCents: booking.amountCents,
         currency: booking.currency,
         holdExpiresAt: holdExpiresAt.toISOString(),
       });
@@ -56,18 +57,18 @@ export const POST = handle(async (req: Request) => {
 
   const intent = await stripe.paymentIntents.create(
     {
-      amount: booking.amountCents,
+      amount: booking.depositCents,
       currency: booking.currency,
       automatic_payment_methods: { enabled: true },
       receipt_email: booking.customer.email,
-      description: `${booking.service.name} — ${booking.provider.businessName ?? "GlideBook"}`,
+      description: `${booking.depositCents < booking.amountCents ? "Deposit for " : ""}${booking.service.name} — ${booking.provider.businessName ?? "GlideBook"}`,
       metadata: {
         bookingId: booking.id,
         providerId: booking.providerId,
         customerId: booking.customerId,
       },
     },
-    { idempotencyKey: `booking_${booking.id}_${booking.amountCents}` },
+    { idempotencyKey: `booking_${booking.id}_${booking.depositCents}` },
   );
 
   await prisma.booking.update({
@@ -78,7 +79,8 @@ export const POST = handle(async (req: Request) => {
   return NextResponse.json({
     clientSecret: intent.client_secret,
     paymentIntentId: intent.id,
-    amountCents: booking.amountCents,
+    amountCents: booking.depositCents,
+    totalCents: booking.amountCents,
     currency: booking.currency,
     holdExpiresAt: holdExpiresAt.toISOString(),
   });

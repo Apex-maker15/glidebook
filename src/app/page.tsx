@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, Car, CreditCard, PawPrint, Radio, Sparkles, Timer } from "lucide-react";
+import { ArrowRight, CalendarCheck, CreditCard, Radio, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Reveal } from "@/components/reveal";
+import { CategoryIcon } from "@/components/category-icon";
+import { CATEGORIES } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 
@@ -9,12 +11,12 @@ export default async function HomePage() {
   const providers = await prisma.user.findMany({
     where: { role: "PROVIDER", slug: { not: null }, businessName: { not: null } },
     select: { slug: true, businessName: true, category: true, _count: { select: { services: { where: { active: true } } } } },
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" },
     take: 12,
   });
 
   return (
-    <div className="min-h-dvh">
+    <div data-accent="beauty" className="min-h-dvh">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 pt-6 sm:px-6">
         <span className="flex items-center gap-2 text-sm font-semibold tracking-tight">
           <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
@@ -24,7 +26,7 @@ export default async function HomePage() {
         </span>
         <nav className="flex items-center gap-2 text-sm">
           <Link href="/login" className="rounded-xl px-3 py-2 text-ink-muted transition-colors hover:bg-white/5 hover:text-ink">
-            Provider sign in
+            Sign in
           </Link>
           <Link href="/register" className="rounded-xl bg-white/[0.06] px-3.5 py-2 font-medium transition-colors hover:bg-white/10">
             Start free
@@ -36,18 +38,18 @@ export default async function HomePage() {
         <section className="pt-20 text-center sm:pt-28">
           <Reveal>
             <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[12px] text-ink-muted">
-              <Radio className="size-3 text-accent-strong" /> Live bookings, zero refreshes
+              <Sparkles className="size-3 text-accent-strong" /> For nail techs, lash artists & beauty pros
             </p>
           </Reveal>
           <Reveal delay={0.06}>
             <h1 className="text-gradient mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-tight sm:text-6xl">
-              Booking that feels as polished as your work.
+              Stop chasing deposits in your DMs.
             </h1>
           </Reveal>
           <Reveal delay={0.12}>
             <p className="mx-auto mt-5 max-w-xl text-base text-ink-muted sm:text-lg">
-              A luxury booking experience for mobile car detailers and pet groomers. Customers pick a slot, pay upfront, and
-              the job lands on your dashboard the instant the card clears.
+              A free booking page that looks as good as your work. Clients pick a slot, pay their deposit, and land on your
+              schedule instantly. No monthly fee, no more no-shows.
             </p>
           </Reveal>
           <Reveal delay={0.18}>
@@ -70,9 +72,21 @@ export default async function HomePage() {
 
         <section className="mt-24 grid gap-4 sm:grid-cols-3">
           {[
-            { icon: <Timer className="size-5" />, title: "Conflict-proof slots", body: "Overlaps, breaks, travel buffers and notice periods are enforced server-side inside a locked transaction." },
-            { icon: <CreditCard className="size-5" />, title: "Paid before you drive", body: "Stripe Payment Element is embedded in the last step. No-shows stop costing you fuel." },
-            { icon: <Radio className="size-5" />, title: "Real-time dashboard", body: "Paid jobs slide into your schedule live over a persistent stream, with a glow so you never miss one." },
+            {
+              icon: <CreditCard className="size-5" />,
+              title: "Deposits, automatically",
+              body: "Set 30%, 50% or full payment. Clients pay by card before the slot is theirs, so cancellations stop costing you.",
+            },
+            {
+              icon: <CalendarCheck className="size-5" />,
+              title: "Only real availability",
+              body: "Your hours, breaks and gaps between clients are enforced server-side. Double bookings are impossible.",
+            },
+            {
+              icon: <Radio className="size-5" />,
+              title: "Live schedule",
+              body: "New appointments slide onto your dashboard the moment the deposit clears, with a glow so you never miss one.",
+            },
           ].map((f, i) => (
             <Reveal key={f.title} delay={0.08 * i}>
               <div className="glass h-full rounded-3xl p-6">
@@ -84,6 +98,12 @@ export default async function HomePage() {
           ))}
         </section>
 
+        <Reveal>
+          <p className="mt-10 text-center text-[13px] text-ink-muted">
+            Also works for barbers, mobile detailers, pet groomers and any appointment-based service.
+          </p>
+        </Reveal>
+
         {providers.length > 0 && (
           <section className="mt-24">
             <Reveal>
@@ -91,21 +111,21 @@ export default async function HomePage() {
             </Reveal>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {providers.map((p, i) => {
-                const car = p.category === "CAR_DETAILING";
+                const meta = CATEGORIES[p.category ?? "OTHER"];
                 return (
                   <Reveal key={p.slug} delay={0.06 * i}>
                     <Link
                       href={`/book/${p.slug}`}
-                      data-accent={car ? "car" : "pet"}
+                      data-accent={meta.accent}
                       className="glass group flex items-center gap-4 rounded-3xl p-5 transition-all hover:-translate-y-0.5 hover:bg-white/[0.07]"
                     >
                       <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent-strong ring-1 ring-accent/30">
-                        {car ? <Car className="size-6" /> : <PawPrint className="size-6" />}
+                        <CategoryIcon category={p.category ?? "OTHER"} className="size-6" />
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-semibold">{p.businessName}</span>
                         <span className="block text-[13px] text-ink-muted">
-                          {car ? "Mobile car detailing" : "Mobile pet grooming"} · {p._count.services} services
+                          {meta.tagline} · {p._count.services} services
                         </span>
                       </span>
                       <ArrowRight className="size-4 text-ink-muted transition-transform group-hover:translate-x-0.5 group-hover:text-ink" />

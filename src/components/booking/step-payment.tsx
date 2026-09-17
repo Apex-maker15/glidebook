@@ -126,6 +126,7 @@ function CheckoutForm() {
   const paymentError = useBookingStore((s) => s.paymentError);
   const setPaymentStatus = useBookingStore((s) => s.setPaymentStatus);
   const [elementReady, setElementReady] = useState(false);
+  const isDeposit = checkout.amountCents < checkout.totalCents;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,11 +202,15 @@ function CheckoutForm() {
         loading={paymentStatus === "processing"}
       >
         <Lock className="size-4" />
-        Pay {formatMoney(checkout.amountCents, checkout.currency)}
+        {isDeposit ? "Pay " : "Pay "}
+        {formatMoney(checkout.amountCents, checkout.currency)}
+        {isDeposit ? " deposit" : ""}
         {service ? ` for ${service.name}` : ""}
       </Button>
       <p className="text-center text-[12px] text-ink-muted">
-        You will be charged now. Cancellations by the provider are refunded in full.
+        {isDeposit
+          ? `The remaining ${formatMoney(checkout.totalCents - checkout.amountCents, checkout.currency)} is paid on the day. Cancellations by the provider are refunded in full.`
+          : "You will be charged now. Cancellations by the provider are refunded in full."}
       </p>
     </form>
   );

@@ -28,6 +28,12 @@ export const PATCH = handle(async (req: Request) => {
       throw new HttpError(422, "Unknown timezone", "BAD_TIMEZONE");
     }
   }
+  if (input.locationMode === "STUDIO" && input.studioAddress !== undefined && !input.studioAddress?.trim()) {
+    throw new HttpError(422, "Add your studio address so clients know where to go", "STUDIO_ADDRESS_REQUIRED");
+  }
   const row = await prisma.user.update({ where: { id: user.id }, data: input, select: providerSelect });
+  if (input.currency) {
+    await prisma.service.updateMany({ where: { providerId: user.id }, data: { currency: input.currency } });
+  }
   return NextResponse.json({ provider: toProviderDTO(row) });
 });

@@ -5,7 +5,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Car, PawPrint, Sparkles } from "lucide-react";
+import { AlertTriangle, Sparkles } from "lucide-react";
+import type { BusinessCategory } from "@prisma/client";
+import { CATEGORIES, CATEGORY_ORDER, CURRENCIES } from "@/lib/categories";
+import { CategoryIcon } from "@/components/category-icon";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/primitives";
 import { spring } from "@/components/motion";
@@ -105,8 +108,9 @@ export function RegisterForm() {
     email: "",
     password: "",
     businessName: "",
-    category: "CAR_DETAILING" as "CAR_DETAILING" | "PET_GROOMING",
-    timezone: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "America/New_York",
+    category: "NAILS_BEAUTY" as BusinessCategory,
+    currency: "gbp" as "gbp" | "usd" | "eur",
+    timezone: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "Europe/London",
   });
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [error, setError] = useState<string | null>(null);
@@ -135,7 +139,7 @@ export function RegisterForm() {
   return (
     <Shell
       title="Create your booking page"
-      subtitle="Free to start. Stripe fees apply only when you get paid."
+      subtitle="Free to start. Take deposits, stop chasing no-shows."
       footer={
         <>
           Already have an account?{" "}
@@ -148,32 +152,28 @@ export function RegisterForm() {
       <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
         <ErrorBanner message={error} />
 
-        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Business type">
-          {(
-            [
-              { value: "CAR_DETAILING", label: "Car detailing", icon: <Car className="size-4" />, accent: "car" },
-              { value: "PET_GROOMING", label: "Pet grooming", icon: <PawPrint className="size-4" />, accent: "pet" },
-            ] as const
-          ).map((opt) => {
-            const active = form.category === opt.value;
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Business type">
+          {CATEGORY_ORDER.map((value) => {
+            const meta = CATEGORIES[value];
+            const active = form.category === value;
             return (
               <motion.button
-                key={opt.value}
+                key={value}
                 type="button"
                 role="radio"
                 aria-checked={active}
-                data-accent={opt.accent}
-                onClick={() => setForm((f) => ({ ...f, category: opt.value }))}
+                data-accent={meta.accent}
+                onClick={() => setForm((f) => ({ ...f, category: value }))}
                 whileTap={{ scale: 0.97 }}
                 transition={spring.snappy}
                 className={cn(
-                  "relative flex h-12 items-center justify-center gap-2 rounded-2xl border text-sm font-medium transition-colors",
+                  "relative flex h-12 items-center justify-center gap-2 rounded-2xl border px-2 text-[13px] font-medium transition-colors",
                   active ? "border-accent/60 bg-accent-soft text-ink" : "border-white/[0.08] bg-white/[0.03] text-ink-muted hover:bg-white/[0.06]",
                 )}
               >
                 {active && <motion.span layoutId="category-active" transition={spring.morph} className="absolute inset-0 rounded-2xl ring-1 ring-accent/60 shadow-glow" />}
                 <span className="relative flex items-center gap-2">
-                  {opt.icon} {opt.label}
+                  <CategoryIcon category={value} className="size-4" /> {meta.label}
                 </span>
               </motion.button>
             );
@@ -193,7 +193,26 @@ export function RegisterForm() {
           hint="At least 8 characters"
           required
         />
-        <Field label="Timezone" value={form.timezone} onChange={set("timezone")} error={errors.timezone?.[0]} hint="IANA name, e.g. America/Chicago" required />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="currency" className="text-[13px] font-medium text-ink-muted">
+              Currency
+            </label>
+            <select
+              id="currency"
+              value={form.currency}
+              onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value as typeof f.currency }))}
+              className="h-12 rounded-2xl border border-line bg-white/[0.04] px-4 text-[15px] text-ink outline-none focus:border-accent/60 [color-scheme:dark]"
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Field label="Timezone" value={form.timezone} onChange={set("timezone")} error={errors.timezone?.[0]} hint="e.g. Europe/London" required />
+        </div>
         <Button type="submit" size="lg" className="w-full" loading={loading}>
           Create account
         </Button>

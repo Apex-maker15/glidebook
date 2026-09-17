@@ -8,6 +8,7 @@ import { activeBookingWhere, bookingInclude, expireStaleHolds, toBookingDTO } fr
 import { dayBounds, dateInZone, isSlotBookable, parseAvailability, dayOfWeekFor, type ScheduleConfig } from "@/lib/slots";
 import { publish } from "@/lib/realtime";
 import { createBookingSchema } from "@/lib/validation";
+import { depositFor } from "@/lib/categories";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,6 +51,10 @@ export const POST = handle(async (req: Request) => {
     select: {
       id: true,
       timezone: true,
+      currency: true,
+      locationMode: true,
+      studioAddress: true,
+      depositPercent: true,
       slotIntervalMinutes: true,
       bufferMinutes: true,
       minNoticeMinutes: true,
@@ -58,6 +63,12 @@ export const POST = handle(async (req: Request) => {
     },
   });
   if (!provider) throw new HttpError(404, "Provider not found", "NOT_FOUND");
+
+  // Mobile providers need somewhere to drive to; studio providers already know where the client is going.
+  const address = provider.locationMode === "MOBILE" ? (input.address ?? "").trim() : provider.studioAddress;
+  if (provider.locationMode === "MOBILE" && (!address || address.length < 5)) {
+    throw new HttpError(422, "Please tell us where to come to", "ADDRESS_REQUIRED");
+  }
 
   const service = await prisma.service.findFirst({
     where: { id: input.serviceId, providerId: provider.id, active: true },
@@ -117,8 +128,9 @@ export const POST = handle(async (req: Request) => {
           endTime: end,
           status: BookingStatus.PENDING,
           amountCents: service.priceCents,
-          currency: service.currency,
-          address: input.address,
+          depositCents: depositFor(service.priceCents, provider.depositPercent, provider.currency),
+          currency: provider.currency,
+          address,
           serviceDetails: input.serviceDetails ?? null,
           notes: input.notes ?? null,
         },
