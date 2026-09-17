@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarCheck, CreditCard, Radio, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Reveal } from "@/components/reveal";
+import { Faq, HowItWorks } from "@/components/landing-sections";
 import { CategoryIcon } from "@/components/category-icon";
 import { CATEGORIES } from "@/lib/categories";
 
@@ -104,6 +105,8 @@ export default async function HomePage() {
           </p>
         </Reveal>
 
+        <HowItWorks />
+
         {providers.length > 0 && (
           <section className="mt-24">
             <Reveal>
@@ -136,6 +139,21 @@ export default async function HomePage() {
             </div>
           </section>
         )}
+
+        <Faq />
+
+        <Reveal>
+          <section className="mt-24 text-center">
+            <h2 className="text-gradient text-3xl font-semibold tracking-tight sm:text-4xl">Your booking page in 10 minutes.</h2>
+            <p className="mx-auto mt-3 max-w-md text-sm text-ink-muted">Free forever for the DIY route. Deposits from your very first client.</p>
+            <Link
+              href="/register"
+              className="mt-6 inline-flex h-12 items-center gap-2 rounded-2xl bg-accent px-6 text-sm font-semibold text-black shadow-glow transition-transform hover:-translate-y-0.5"
+            >
+              Create your booking page <ArrowRight className="size-4" />
+            </Link>
+          </section>
+        </Reveal>
       </main>
     </div>
   );

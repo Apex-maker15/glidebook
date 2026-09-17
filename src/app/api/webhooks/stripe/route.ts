@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
 import { bookingInclude, toBookingDTO } from "@/lib/bookings";
 import { publish } from "@/lib/realtime";
+import { notifyBookingConfirmed } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -101,6 +102,7 @@ async function markPaid(intent: Stripe.PaymentIntent) {
     include: bookingInclude,
   });
   await publish({ type: "booking.updated", providerId: updated.providerId, booking: toBookingDTO(updated) });
+  await notifyBookingConfirmed(updated.id);
 }
 
 async function markCancelled(intent: Stripe.PaymentIntent) {

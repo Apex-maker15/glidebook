@@ -7,6 +7,7 @@ import { bookingInclude, toBookingDTO } from "@/lib/bookings";
 import { getStripe } from "@/lib/stripe";
 import { publish } from "@/lib/realtime";
 import { updateBookingStatusSchema } from "@/lib/validation";
+import { notifyBookingCancelled, notifyBookingConfirmed } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,6 +62,7 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
     throw new HttpError(409, "Booking is already cancelled", "BAD_TRANSITION");
   }
 
+  let refunded = false;
   if (status === "CANCELLED" && booking.paymentIntentId) {
     const stripe = getStripe();
     const pi = await stripe.paymentIntents.retrieve(booking.paymentIntentId);
@@ -69,6 +71,7 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
         { payment_intent: pi.id, reason: "requested_by_customer" },
         { idempotencyKey: `refund_${booking.id}` },
       );
+      refunded = true;
     } else if (pi.status !== "canceled") {
       await stripe.paymentIntents.cancel(pi.id);
     }
@@ -76,10 +79,14 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
 
   const updated = await prisma.booking.update({
     where: { id },
-    data: { status },
+    data: { status, ...(status === "CANCELLED" ? { cancelledBy: "provider" } : {}) },
     include: bookingInclude,
   });
   const dto = toBookingDTO(updated);
   await publish({ type: "booking.updated", providerId: updated.providerId, booking: dto });
+  if (status === "CONFIRMED") await notifyBookingConfirmed(updated.id);
+  if (status === "CANCELLED" && booking.status !== BookingStatus.PENDING) {
+    await notifyBookingCancelled(updated.id, { refunded, byProvider: true });
+  }
   return NextResponse.json({ booking: dto });
 });

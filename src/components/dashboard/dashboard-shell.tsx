@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { motion } from "framer-motion";
-import { CalendarClock, Check, Copy, ExternalLink, LogOut, Settings, ShieldCheck, Sparkles, Wrench, LayoutDashboard, Rocket } from "lucide-react";
+import { CalendarClock, Check, Copy, ExternalLink, LogOut, MessageCircle, Settings, ShieldCheck, Sparkles, Wrench, LayoutDashboard, Rocket } from "lucide-react";
 import { spring } from "@/components/motion";
 import { useToastStore } from "@/store/toast-store";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,8 @@ export function DashboardShell({ businessName, slug, isAdmin = false, children }
   const push = useToastStore((s) => s.push);
 
   const bookingUrl = typeof window !== "undefined" ? `${window.location.origin}/book/${slug}` : `/book/${slug}`;
+
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Book your next appointment with ${businessName} here: ${bookingUrl}`)}`;
 
   const copyLink = async () => {
     try {
@@ -87,6 +89,16 @@ export function DashboardShell({ businessName, slug, isAdmin = false, children }
                 {copied ? <Check className="size-3.5 text-emerald-300" /> : <Copy className="size-3.5" />}
                 {copied ? "Copied" : "Copy link"}
               </button>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex size-8 items-center justify-center rounded-lg bg-white/[0.06] transition-colors hover:bg-white/10"
+                aria-label="Share on WhatsApp"
+                title="Share on WhatsApp"
+              >
+                <MessageCircle className="size-3.5" />
+              </a>
               <Link
                 href={`/book/${slug}`}
                 target="_blank"

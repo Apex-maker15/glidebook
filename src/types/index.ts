@@ -39,6 +39,7 @@ export interface ProviderDTO {
   locationMode: LocationMode;
   studioAddress: string | null;
   depositPercent: number;
+  cancelNoticeHours: number;
   slotIntervalMinutes: number;
   bufferMinutes: number;
   minNoticeMinutes: number;

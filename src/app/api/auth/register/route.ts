@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { handle, HttpError, readJson } from "@/lib/api";
 import { registerSchema } from "@/lib/validation";
 import { CATEGORIES } from "@/lib/categories";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,7 @@ function slugify(input: string) {
 }
 
 export const POST = handle(async (req: Request) => {
+  rateLimit(req, "register", 10, 60 * 60_000);
   const input = registerSchema.parse(await readJson(req));
   const email = input.email.toLowerCase();
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
-import { CalendarPlus, MapPin, RotateCcw } from "lucide-react";
+import { CalendarPlus, ExternalLink, MapPin, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { spring } from "@/components/motion";
 import { useBookingStore, selectService } from "@/store/booking-store";
@@ -38,6 +38,7 @@ export function StepSuccess() {
   const service = useBookingStore(selectService);
   const customer = useBookingStore((s) => s.customer);
   const reset = useBookingStore((s) => s.reset);
+  const manageUrl = useBookingStore((s) => s.manageUrl);
   const [serverStatus, setServerStatus] = useState<BookingStatus | null>(null);
 
   // Reconcile with the webhook-driven status; the UI already shows success optimistically.
@@ -163,6 +164,11 @@ export function StepSuccess() {
         <Button variant="secondary" onClick={downloadIcs}>
           <CalendarPlus className="size-4" /> Add to calendar
         </Button>
+        {manageUrl && (
+          <a href={manageUrl} className="inline-flex h-11 items-center gap-2 rounded-2xl px-5 text-sm font-medium text-ink-muted transition-colors hover:bg-white/5 hover:text-ink">
+            <ExternalLink className="size-4" /> Manage booking
+          </a>
+        )}
         <Button variant="ghost" onClick={reset}>
           <RotateCcw className="size-4" /> Book another
         </Button>

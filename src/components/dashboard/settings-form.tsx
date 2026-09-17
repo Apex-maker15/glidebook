@@ -17,6 +17,7 @@ interface FormState {
   locationMode: "STUDIO" | "MOBILE";
   studioAddress: string;
   depositPercent: string;
+  cancelNoticeHours: string;
   slotIntervalMinutes: string;
   bufferMinutes: string;
   minNoticeMinutes: string;
@@ -53,6 +54,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           locationMode: provider.locationMode,
           studioAddress: provider.studioAddress ?? "",
           depositPercent: String(provider.depositPercent),
+          cancelNoticeHours: String(provider.cancelNoticeHours),
           slotIntervalMinutes: String(provider.slotIntervalMinutes),
           bufferMinutes: String(provider.bufferMinutes),
           minNoticeMinutes: String(provider.minNoticeMinutes),
@@ -82,6 +84,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           locationMode: form.locationMode,
           studioAddress: form.studioAddress.trim() || null,
           depositPercent: Number(form.depositPercent),
+          cancelNoticeHours: Number(form.cancelNoticeHours),
           slotIntervalMinutes: Number(form.slotIntervalMinutes),
           bufferMinutes: Number(form.bufferMinutes),
           minNoticeMinutes: Number(form.minNoticeMinutes),
@@ -172,17 +175,30 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
               )}
             </div>
 
-            <Field
-              label="Deposit (% of service price)"
-              type="number"
-              min={10}
-              max={100}
-              step={5}
-              value={form!.depositPercent}
-              onChange={set("depositPercent")}
-              error={issues.depositPercent?.[0]}
-              hint="100 = full payment upfront. 30 is typical for nails and lashes; the rest is paid on the day."
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Deposit (% of service price)"
+                type="number"
+                min={10}
+                max={100}
+                step={5}
+                value={form!.depositPercent}
+                onChange={set("depositPercent")}
+                error={issues.depositPercent?.[0]}
+                hint="100 = full payment upfront. 30 is typical for nails and lashes."
+              />
+              <Field
+                label="Free cancellation up to (hours before)"
+                type="number"
+                min={0}
+                max={168}
+                step={1}
+                value={form!.cancelNoticeHours}
+                onChange={set("cancelNoticeHours")}
+                error={issues.cancelNoticeHours?.[0]}
+                hint="Clients cancelling with more notice than this are refunded automatically."
+              />
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
                 label="Slot interval (minutes)"

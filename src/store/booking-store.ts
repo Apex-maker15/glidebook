@@ -47,6 +47,7 @@ interface BookingState {
   customerErrors: Partial<Record<keyof CustomerForm, string>>;
 
   booking: BookingDTO | null;
+  manageUrl: string | null;
   checkout: CheckoutSession | null;
   submitStatus: "idle" | "submitting" | "error";
   submitError: string | null;
@@ -92,6 +93,7 @@ const initialState: BookingState = {
   customer: emptyCustomer,
   customerErrors: {},
   booking: null,
+  manageUrl: null,
   checkout: null,
   submitStatus: "idle",
   submitError: null,
@@ -220,7 +222,7 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
     goTo("payment");
 
     try {
-      const { booking } = await api<{ booking: BookingDTO }>("/api/bookings", {
+      const { booking, manageUrl } = await api<{ booking: BookingDTO; manageUrl: string }>("/api/bookings", {
         method: "POST",
         body: {
           providerId: provider.id,
@@ -236,7 +238,7 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
           notes: customer.notes.trim() || null,
         },
       });
-      set({ booking });
+      set({ booking, manageUrl });
 
       const checkout = await api<CheckoutSession>("/api/checkout", { method: "POST", body: { bookingId: booking.id } });
       set({ checkout, submitStatus: "idle" });

@@ -55,6 +55,7 @@ model User {
   locationMode        LocationMode      @default(STUDIO)
   studioAddress       String? // shown to clients when locationMode = STUDIO
   depositPercent      Int               @default(100) // 100 = full prepayment, e.g. 30 = 30% deposit
+  cancelNoticeHours   Int               @default(24) // clients cancelling with more notice than this get their deposit back
   slotIntervalMinutes Int               @default(30) // granularity of bookable start times
   bufferMinutes       Int               @default(0) // travel / cleanup gap enforced after each job
   minNoticeMinutes    Int               @default(120) // earliest a customer may book ahead of "now"
@@ -115,6 +116,11 @@ model Booking {
   currency        String  @default("gbp")
   paymentIntentId String? @unique
   paidAt          DateTime?
+
+  // Secret for the client's self-service link (view / cancel) - never exposed to the provider UI.
+  manageToken    String    @unique @default(cuid())
+  reminderSentAt DateTime?
+  cancelledBy    String? // "client" | "provider" | "system"
 
   // Where the mobile provider travels to, and what they are working on
   // (e.g. "2021 Tesla Model 3, black" or "Biscuit — golden retriever, 30 kg").

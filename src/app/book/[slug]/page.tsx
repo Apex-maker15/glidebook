@@ -29,7 +29,14 @@ async function loadProvider(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await loadProvider(slug);
-  return { title: data ? `Book ${data.provider.businessName}` : "Not found" };
+  if (!data) return { title: "Not found" };
+  const cheapest = data.services.length ? Math.min(...data.services.map((s) => s.priceCents)) : null;
+  const description = `Book ${data.provider.businessName} online${cheapest !== null ? ` - from ${new Intl.NumberFormat("en-GB", { style: "currency", currency: data.provider.currency.toUpperCase(), minimumFractionDigits: 0 }).format(cheapest / 100)}` : ""}. Pick a time, pay your deposit by card, done.`;
+  return {
+    title: `Book ${data.provider.businessName}`,
+    description,
+    openGraph: { title: `Book ${data.provider.businessName}`, description },
+  };
 }
 
 export default async function BookPage({ params }: Props) {

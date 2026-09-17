@@ -90,6 +90,14 @@ Pure function. For a calendar day it walks each working window at `slotIntervalM
 
 Providers can build their page themselves for free, or pay a one-off fee (GBP 5, `SETUP_FEE_CENTS` in `src/lib/admin.ts`) and paste their price list. The fee is a Stripe PaymentIntent with `metadata.kind = "setup"`; the webhook marks the `SetupRequest` paid. Emails listed in `ADMIN_EMAILS` see an **Admin** link with the queue: pick a request, edit that provider's services, hours and settings in place (the dashboard APIs accept `?providerId=` for admins), then mark it done.
 
+### Email, reminders and client self-service
+
+- `src/lib/email.ts` sends over any SMTP provider (`SMTP_URL`, `EMAIL_FROM`); templates in `src/emails/` are React Email components. Without SMTP configured, sends are logged and skipped.
+- On payment (or provider confirmation) the client gets a confirmation with an `.ics` invite and the provider gets a new-booking alert. Cancellations notify both sides.
+- `/api/cron/reminders` runs daily via `vercel.json` (set `CRON_SECRET`) and emails clients whose appointment is 12-40 hours away.
+- Every email links to `/b/<bookingId>?t=<manageToken>`, where the client can add the appointment to Google Calendar or cancel; cancelling outside `cancelNoticeHours` refunds the deposit automatically.
+- `/book/<slug>/opengraph-image` renders a branded preview card for links shared on Instagram, WhatsApp and iMessage.
+
 ### Realtime (`src/lib/realtime.ts`, `/api/events`)
 
 The dashboard opens an `EventSource`. Server side, `publish()` emits to an in-process bus and, when the database provably delivers notifications (a probe is sent after `LISTEN`), through Postgres `NOTIFY` so every server instance sees every event. If the stream cannot be established the client falls back to 15 s polling, and it reconciles every 60 s and on tab focus regardless.

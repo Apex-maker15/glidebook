@@ -9,6 +9,8 @@ import { dayBounds, dateInZone, isSlotBookable, parseAvailability, dayOfWeekFor,
 import { publish } from "@/lib/realtime";
 import { createBookingSchema } from "@/lib/validation";
 import { depositFor } from "@/lib/categories";
+import { manageUrlFor } from "@/lib/notifications";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,6 +41,7 @@ export const GET = handle(async (req: Request) => {
 
 /** POST /api/bookings — public: create a PENDING hold after server-side slot validation. */
 export const POST = handle(async (req: Request) => {
+  rateLimit(req, "bookings", 20, 10 * 60_000);
   const input = createBookingSchema.parse(await readJson(req));
   const start = new Date(input.startTime);
   if (start.getSeconds() !== 0 || start.getMilliseconds() !== 0) {
@@ -142,5 +145,5 @@ export const POST = handle(async (req: Request) => {
 
   const dto = toBookingDTO(booking);
   await publish({ type: "booking.created", providerId: provider.id, booking: dto });
-  return NextResponse.json({ booking: dto }, { status: 201 });
+  return NextResponse.json({ booking: dto, manageUrl: manageUrlFor(booking) }, { status: 201 });
 });

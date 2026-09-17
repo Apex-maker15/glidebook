@@ -75,6 +75,7 @@ export const providerSettingsSchema = z.object({
   locationMode: z.enum(["STUDIO", "MOBILE"]).optional(),
   studioAddress: z.string().trim().max(200).optional().nullable(),
   depositPercent: z.number().int().min(10).max(100).optional(),
+  cancelNoticeHours: z.number().int().min(0).max(168).optional(),
   slotIntervalMinutes: z.number().int().min(5).max(120).optional(),
   bufferMinutes: z.number().int().min(0).max(180).optional(),
   minNoticeMinutes: z.number().int().min(0).max(10080).optional(),
