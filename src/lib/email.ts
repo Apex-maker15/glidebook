@@ -70,7 +70,14 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
   }
 }
 
+/**
+ * Absolute URL for links in emails and Stripe return URLs. Falls back to the
+ * production domain Vercel injects, so a fresh deploy works before anyone sets
+ * NEXT_PUBLIC_APP_URL.
+ */
 export function appUrl(path = ""): string {
-  const base = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const configured = process.env.NEXT_PUBLIC_APP_URL;
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+  const base = (configured || (vercel ? `https://${vercel}` : "http://localhost:3000")).replace(/\/$/, "");
   return `${base}${path}`;
 }
