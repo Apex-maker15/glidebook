@@ -219,10 +219,12 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
     }
 
     set({ submitStatus: "submitting", submitError: null, checkout: null, paymentStatus: "idle", paymentError: null });
-    goTo("payment");
+    // Pay-on-the-day providers have no payment step: keep the form (with its
+    // loading button) until the server confirms, then jump straight to success.
+    if (provider.takesDeposits) goTo("payment");
 
     try {
-      const { booking, manageUrl } = await api<{ booking: BookingDTO; manageUrl: string }>("/api/bookings", {
+      const { booking, manageUrl, requiresPayment } = await api<{ booking: BookingDTO; manageUrl: string; requiresPayment: boolean }>("/api/bookings", {
         method: "POST",
         body: {
           providerId: provider.id,
@@ -239,6 +241,13 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
         },
       });
       set({ booking, manageUrl });
+
+      if (!requiresPayment) {
+        // Provider is not taking deposits: the booking is already confirmed server-side.
+        set({ submitStatus: "idle", paymentStatus: "succeeded" });
+        goTo("success");
+        return;
+      }
 
       const checkout = await api<CheckoutSession>("/api/checkout", { method: "POST", body: { bookingId: booking.id } });
       set({ checkout, submitStatus: "idle" });
@@ -281,7 +290,8 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
     set({ paymentStatus: status, paymentError: error });
     if (status === "succeeded") {
       set((s) => ({
-        booking: s.booking ? { ...s.booking, status: "PAID", paidAt: new Date().toISOString() } : s.booking,
+        booking:
+          s.booking && s.booking.depositCents > 0 ? { ...s.booking, status: "PAID", paidAt: new Date().toISOString() } : s.booking,
       }));
       get().goTo("success");
     }

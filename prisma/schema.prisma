@@ -1,4 +1,4 @@
-// GlideBook — booking platform for mobile car detailers & pet groomers
+// GlideBook — deposit-first booking pages for nail techs, beauty pros and other appointment businesses
 // All timestamps are stored in UTC. Provider-local rendering uses `User.timezone`.
 
 generator client {
@@ -56,6 +56,16 @@ model User {
   studioAddress       String? // shown to clients when locationMode = STUDIO
   depositPercent      Int               @default(100) // 100 = full prepayment, e.g. 30 = 30% deposit
   cancelNoticeHours   Int               @default(24) // clients cancelling with more notice than this get their deposit back
+  country             String            @default("GB") // ISO 3166-1 alpha-2; fixed once the Stripe account exists
+
+  // ── Stripe Connect (Express) ─────────────────────────────────────────────
+  // Deposits are charged on the platform and transferred to this account, minus the platform fee.
+  // Until charges are enabled the booking page runs in "no deposit" mode and bookings confirm instantly.
+  stripeAccountId        String?   @unique
+  stripeChargesEnabled   Boolean   @default(false)
+  stripePayoutsEnabled   Boolean   @default(false)
+  stripeDetailsSubmitted Boolean   @default(false)
+  stripeConnectedAt      DateTime?
   slotIntervalMinutes Int               @default(30) // granularity of bookable start times
   bufferMinutes       Int               @default(0) // travel / cleanup gap enforced after each job
   minNoticeMinutes    Int               @default(120) // earliest a customer may book ahead of "now"
@@ -112,7 +122,8 @@ model Booking {
 
   // Snapshot of price at booking time so later service edits never change what was charged.
   amountCents     Int // full service price
-  depositCents    Int // what is actually charged at checkout (== amountCents for full prepay)
+  depositCents    Int // what is actually charged at checkout (== amountCents for full prepay, 0 when no deposit is taken)
+  platformFeeCents Int    @default(0) // GlideBook's cut of the deposit (Stripe application fee)
   currency        String  @default("gbp")
   paymentIntentId String? @unique
   paidAt          DateTime?

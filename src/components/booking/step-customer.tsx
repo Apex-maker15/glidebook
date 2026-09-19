@@ -129,7 +129,7 @@ export function StepCustomer() {
           <ArrowLeft className="size-4" /> Back
         </Button>
         <Button type="submit" size="lg" loading={submitStatus === "submitting"}>
-          <Lock className="size-4" /> Continue to payment
+          <Lock className="size-4" /> {provider.takesDeposits ? "Continue to payment" : "Confirm booking"}
         </Button>
       </div>
     </form>

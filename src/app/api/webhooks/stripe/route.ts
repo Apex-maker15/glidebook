@@ -6,6 +6,7 @@ import { getStripe } from "@/lib/stripe";
 import { bookingInclude, toBookingDTO } from "@/lib/bookings";
 import { publish } from "@/lib/realtime";
 import { notifyBookingConfirmed } from "@/lib/notifications";
+import { applyAccount } from "@/lib/payments";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,6 +53,9 @@ export async function POST(req: Request) {
         break;
       case "charge.refunded":
         await markRefunded(event.data.object);
+        break;
+      case "account.updated":
+        await syncAccount(event.data.object);
         break;
       default:
         break;
@@ -116,6 +120,15 @@ async function markCancelled(intent: Stripe.PaymentIntent) {
     include: bookingInclude,
   });
   await publish({ type: "booking.updated", providerId: updated.providerId, booking: toBookingDTO(updated) });
+}
+
+/** Connected account finished onboarding (or lost a capability): keep the provider's flags in step. */
+async function syncAccount(account: Stripe.Account) {
+  const provider =
+    (await prisma.user.findUnique({ where: { stripeAccountId: account.id }, select: { id: true } })) ??
+    (account.metadata?.providerId ? await prisma.user.findUnique({ where: { id: account.metadata.providerId }, select: { id: true } }) : null);
+  if (!provider) return;
+  await applyAccount(provider.id, account);
 }
 
 async function markRefunded(charge: Stripe.Charge) {

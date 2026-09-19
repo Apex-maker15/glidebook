@@ -6,6 +6,7 @@ import { handle, HttpError, readJson } from "@/lib/api";
 import { registerSchema } from "@/lib/validation";
 import { CATEGORIES } from "@/lib/categories";
 import { rateLimit } from "@/lib/rate-limit";
+import { countryForCurrency } from "@/lib/payments";
 
 export const runtime = "nodejs";
 
@@ -53,6 +54,7 @@ export const POST = handle(async (req: Request) => {
         category: input.category,
         timezone: input.timezone,
         currency: input.currency,
+        country: input.country ?? countryForCurrency(input.currency),
         locationMode: input.locationMode ?? CATEGORIES[input.category].defaultLocation,
         // Beauty pros usually take a deposit; mobile trades usually take full payment.
         depositPercent: input.category === "NAILS_BEAUTY" || input.category === "HAIR_BARBER" ? 30 : 100,

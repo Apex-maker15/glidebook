@@ -11,6 +11,8 @@ import { createBookingSchema } from "@/lib/validation";
 import { depositFor } from "@/lib/categories";
 import { manageUrlFor } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
+import { canTakeDeposits, platformFeeFor } from "@/lib/payments";
+import { notifyBookingConfirmed } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,6 +64,8 @@ export const POST = handle(async (req: Request) => {
       bufferMinutes: true,
       minNoticeMinutes: true,
       bookingHorizonDays: true,
+      stripeAccountId: true,
+      stripeChargesEnabled: true,
       availability: { select: { dayOfWeek: true, slots: true } },
     },
   });
@@ -90,6 +94,11 @@ export const POST = handle(async (req: Request) => {
   const end = new Date(start.getTime() + service.durationMinutes * 60_000);
   const bounds = dayBounds(date, config.timezone, 24 * 60);
   const email = input.customer.email.toLowerCase();
+
+  // Providers who have not connected Stripe still get a working page: bookings
+  // confirm instantly with nothing to pay online, and they collect on the day.
+  const requiresPayment = canTakeDeposits(provider);
+  const depositCents = requiresPayment ? depositFor(service.priceCents, provider.depositPercent, provider.currency) : 0;
 
   const booking = await prisma.$transaction(
     async (tx) => {
@@ -129,9 +138,10 @@ export const POST = handle(async (req: Request) => {
           serviceId: service.id,
           startTime: start,
           endTime: end,
-          status: BookingStatus.PENDING,
+          status: requiresPayment ? BookingStatus.PENDING : BookingStatus.CONFIRMED,
           amountCents: service.priceCents,
-          depositCents: depositFor(service.priceCents, provider.depositPercent, provider.currency),
+          depositCents,
+          platformFeeCents: platformFeeFor(depositCents),
           currency: provider.currency,
           address,
           serviceDetails: input.serviceDetails ?? null,
@@ -145,5 +155,6 @@ export const POST = handle(async (req: Request) => {
 
   const dto = toBookingDTO(booking);
   await publish({ type: "booking.created", providerId: provider.id, booking: dto });
-  return NextResponse.json({ booking: dto, manageUrl: manageUrlFor(booking) }, { status: 201 });
+  if (!requiresPayment) await notifyBookingConfirmed(booking.id);
+  return NextResponse.json({ booking: dto, manageUrl: manageUrlFor(booking), requiresPayment }, { status: 201 });
 });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COUNTRY_CODES } from "@/lib/platform";
 
 const hhmm = z
   .string()
@@ -32,6 +33,7 @@ export const registerSchema = z.object({
   category: z.enum(["NAILS_BEAUTY", "HAIR_BARBER", "CAR_DETAILING", "PET_GROOMING", "OTHER"]),
   timezone: z.string().min(3).max(64),
   currency: z.enum(["gbp", "usd", "eur"]).default("gbp"),
+  country: z.enum(COUNTRY_CODES).optional(),
   locationMode: z.enum(["STUDIO", "MOBILE"]).optional(),
 });
 
@@ -72,6 +74,7 @@ export const providerSettingsSchema = z.object({
   businessName: z.string().trim().min(2).max(80).optional(),
   timezone: z.string().min(3).max(64).optional(),
   currency: z.enum(["gbp", "usd", "eur"]).optional(),
+  country: z.enum(COUNTRY_CODES).optional(),
   locationMode: z.enum(["STUDIO", "MOBILE"]).optional(),
   studioAddress: z.string().trim().max(200).optional().nullable(),
   depositPercent: z.number().int().min(10).max(100).optional(),

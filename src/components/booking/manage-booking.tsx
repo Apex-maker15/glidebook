@@ -27,7 +27,8 @@ export interface ManageBookingProps {
     timezone: string;
     location: string | null;
     totalLabel: string;
-    paidLabel: string;
+    /** Null when nothing was paid online (provider collects on the day). */
+    paidLabel: string | null;
     balanceLabel: string | null;
     cancelNoticeHours: number;
     refundable: boolean;
@@ -99,7 +100,9 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-ink-muted">
               {result.refunded
                 ? `Your ${b.paidLabel} payment is being refunded to your card. It usually shows within 5-10 working days.`
-                : `Cancelled. As this was within ${b.cancelNoticeHours} hours of the appointment, the ${b.paidLabel} deposit is not refunded.`}
+                : b.paidLabel
+                  ? `Cancelled. As this was within ${b.cancelNoticeHours} hours of the appointment, the ${b.paidLabel} deposit is not refunded.`
+                  : "Cancelled. Nothing was paid online, so there is nothing to refund."}
             </div>
           </motion.div>
         )}
@@ -124,14 +127,22 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
           </p>
         )}
         <p className="border-t border-white/[0.08] pt-3 text-ink-muted">
-          Paid <span className="font-semibold text-ink">{b.paidLabel}</span>
-          {b.balanceLabel && (
+          {b.paidLabel ? (
             <>
-              {" "}
-              · <span className="font-semibold text-ink">{b.balanceLabel}</span> due on the day
+              Paid <span className="font-semibold text-ink">{b.paidLabel}</span>
+              {b.balanceLabel && (
+                <>
+                  {" "}
+                  · <span className="font-semibold text-ink">{b.balanceLabel}</span> due on the day
+                </>
+              )}{" "}
+              · total {b.totalLabel}
             </>
-          )}{" "}
-          · total {b.totalLabel}
+          ) : (
+            <>
+              <span className="font-semibold text-ink">{b.totalLabel}</span> to pay on the day
+            </>
+          )}
         </p>
       </div>
 
@@ -155,7 +166,9 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
       )}
 
       <p className="mt-6 text-[12px] text-ink-muted">
-        Cancellation policy: cancel more than {b.cancelNoticeHours} hours before your appointment for an automatic refund. Later than that, the deposit is kept.
+        {b.paidLabel
+          ? `Cancellation policy: cancel more than ${b.cancelNoticeHours} hours before your appointment for an automatic refund. Later than that, the deposit is kept.`
+          : `Please cancel at least ${b.cancelNoticeHours} hours before your appointment so the slot can go to someone else.`}
       </p>
 
       <Modal
@@ -163,9 +176,11 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
         onClose={() => setConfirm(false)}
         title="Cancel this booking?"
         description={
-          b.refundable
-            ? `You're outside the ${b.cancelNoticeHours}-hour window, so your ${b.paidLabel} payment will be refunded automatically.`
-            : `This is within ${b.cancelNoticeHours} hours of the appointment, so the ${b.paidLabel} deposit will not be refunded.`
+          !b.paidLabel
+            ? "The slot will be released straight away and the provider will be told."
+            : b.refundable
+              ? `You're outside the ${b.cancelNoticeHours}-hour window, so your ${b.paidLabel} payment will be refunded automatically.`
+              : `This is within ${b.cancelNoticeHours} hours of the appointment, so the ${b.paidLabel} deposit will not be refunded.`
         }
       >
         {error && <p className="mb-3 text-sm text-red-300">{error}</p>}

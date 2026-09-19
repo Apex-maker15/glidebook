@@ -65,7 +65,7 @@ export default async function ManageBookingPage({ params, searchParams }: Props)
             timezone: tz,
             location: b.provider.locationMode === "MOBILE" ? b.address : (b.provider.studioAddress ?? null),
             totalLabel: formatMoney(b.amountCents, b.currency),
-            paidLabel: formatMoney(b.depositCents, b.currency),
+            paidLabel: b.depositCents > 0 ? formatMoney(b.depositCents, b.currency) : null,
             balanceLabel: b.amountCents > b.depositCents ? formatMoney(b.amountCents - b.depositCents, b.currency) : null,
             cancelNoticeHours: b.provider.cancelNoticeHours,
             refundable: hoursUntil >= b.provider.cancelNoticeHours,

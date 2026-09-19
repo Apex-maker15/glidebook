@@ -26,7 +26,7 @@ const FILTERS: { value: StatusFilter; label: string }[] = [
   { value: "CANCELLED", label: "Cancelled" },
 ];
 
-export function BookingBoard({ timezone }: { timezone: string }) {
+export function BookingBoard({ timezone, currency }: { timezone: string; currency: string }) {
   useRealtimeBookings();
 
   const bookingMap = useDashboardStore((s) => s.bookings);
@@ -48,7 +48,8 @@ export function BookingBoard({ timezone }: { timezone: string }) {
     const todayKey = formatInTimeZone(new Date(), timezone, "yyyy-MM-dd");
     const today = bookings.filter((b) => b.status !== "CANCELLED" && formatInTimeZone(new Date(b.startTime), timezone, "yyyy-MM-dd") === todayKey);
     const weekAhead = upcoming.filter((b) => b.status !== "CANCELLED" && new Date(b.startTime).getTime() < now + 7 * 86_400_000);
-    const revenue = weekAhead.filter((b) => b.status === "PAID").reduce((sum, b) => sum + b.amountCents, 0);
+    // What has actually been collected up front for the coming week (deposits, or full price for prepay providers).
+    const revenue = weekAhead.filter((b) => b.status === "PAID").reduce((sum, b) => sum + b.depositCents, 0);
     return { today: today.length, week: weekAhead.length, revenue, pending: upcoming.filter((b) => b.status === "PENDING").length };
   }, [bookings, upcoming, now, timezone]);
 
@@ -67,7 +68,7 @@ export function BookingBoard({ timezone }: { timezone: string }) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Today" value={String(stats.today)} loading={status === "loading"} />
         <Stat label="Next 7 days" value={String(stats.week)} loading={status === "loading"} />
-        <Stat label="Paid this week" value={formatMoney(stats.revenue)} loading={status === "loading"} />
+        <Stat label="Collected this week" value={formatMoney(stats.revenue, currency)} loading={status === "loading"} />
         <Stat label="Awaiting payment" value={String(stats.pending)} loading={status === "loading"} accent={stats.pending > 0} />
       </div>
 

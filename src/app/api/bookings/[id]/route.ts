@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { handle, HttpError, readJson } from "@/lib/api";
 import { bookingInclude, toBookingDTO } from "@/lib/bookings";
-import { getStripe } from "@/lib/stripe";
+import { refundBookingPayment } from "@/lib/payments";
 import { publish } from "@/lib/realtime";
 import { updateBookingStatusSchema } from "@/lib/validation";
 import { notifyBookingCancelled, notifyBookingConfirmed } from "@/lib/notifications";
@@ -62,20 +62,8 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
     throw new HttpError(409, "Booking is already cancelled", "BAD_TRANSITION");
   }
 
-  let refunded = false;
-  if (status === "CANCELLED" && booking.paymentIntentId) {
-    const stripe = getStripe();
-    const pi = await stripe.paymentIntents.retrieve(booking.paymentIntentId);
-    if (pi.status === "succeeded") {
-      await stripe.refunds.create(
-        { payment_intent: pi.id, reason: "requested_by_customer" },
-        { idempotencyKey: `refund_${booking.id}` },
-      );
-      refunded = true;
-    } else if (pi.status !== "canceled") {
-      await stripe.paymentIntents.cancel(pi.id);
-    }
-  }
+  // Provider-initiated cancellations always refund; the client did nothing wrong.
+  const { refunded } = status === "CANCELLED" ? await refundBookingPayment(booking) : { refunded: false };
 
   const updated = await prisma.booking.update({
     where: { id },

@@ -9,11 +9,14 @@ import { api, ClientApiError, errorMessage } from "@/lib/client-api";
 import { useToastStore } from "@/store/toast-store";
 import type { ProviderDTO } from "@/types";
 import { CURRENCIES } from "@/lib/categories";
+import { COUNTRIES } from "@/lib/platform";
 
 interface FormState {
   businessName: string;
   timezone: string;
   currency: string;
+  country: string;
+  stripeConnected: boolean;
   locationMode: "STUDIO" | "MOBILE";
   studioAddress: string;
   depositPercent: string;
@@ -51,6 +54,8 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           businessName: provider.businessName,
           timezone: provider.timezone,
           currency: provider.currency,
+          country: provider.country,
+          stripeConnected: provider.stripeConnected,
           locationMode: provider.locationMode,
           studioAddress: provider.studioAddress ?? "",
           depositPercent: String(provider.depositPercent),
@@ -81,6 +86,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           businessName: form.businessName,
           timezone: form.timezone,
           currency: form.currency,
+          country: form.country,
           locationMode: form.locationMode,
           studioAddress: form.studioAddress.trim() || null,
           depositPercent: Number(form.depositPercent),
@@ -136,6 +142,22 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
                 </select>
                 <p className="text-xs text-ink-muted/80">Applies to all your services</p>
               </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="country" className="text-[13px] font-medium text-ink-muted">
+                Country
+              </label>
+              <select id="country" value={form!.country} onChange={set("country")} className={selectCls} disabled={form!.stripeConnected}>
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-ink-muted/80">
+                {form!.stripeConnected ? "Locked: your Stripe account is registered here." : "Where your business is registered. Used when you connect Stripe for payouts."}
+              </p>
+              {issues.country?.[0] && <p className="text-xs text-red-300">{issues.country[0]}</p>}
             </div>
 
             <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">

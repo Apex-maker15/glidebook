@@ -31,8 +31,9 @@ export function SummaryCard() {
   ].filter(Boolean) as { key: string; icon: React.ReactNode; label: string; detail: string }[];
 
   const total = service ? formatMoney(service.priceCents, provider.currency) : null;
-  const depositCents = service ? depositFor(service.priceCents, provider.depositPercent, provider.currency) : 0;
-  const isDeposit = service ? depositCents < service.priceCents : false;
+  const depositCents = service && provider.takesDeposits ? depositFor(service.priceCents, provider.depositPercent, provider.currency) : 0;
+  const isDeposit = service ? depositCents > 0 && depositCents < service.priceCents : false;
+  const payOnDay = !provider.takesDeposits;
   const dueToday = service ? formatMoney(depositCents, provider.currency) : null;
 
   return (
@@ -95,13 +96,15 @@ export function SummaryCard() {
           </div>
           <p className="mt-1 flex items-center gap-1 text-[12px] text-ink-muted/80">
             <Clock className="size-3" />{" "}
-            {step === "success"
-              ? isDeposit
-                ? `${dueToday} deposit paid`
-                : "Paid"
-              : isDeposit
-                ? `${dueToday} deposit today, rest on the day`
-                : "Charged at checkout"}
+            {payOnDay
+              ? "Pay on the day"
+              : step === "success"
+                ? isDeposit
+                  ? `${dueToday} deposit paid`
+                  : "Paid"
+                : isDeposit
+                  ? `${dueToday} deposit today, rest on the day`
+                  : "Charged at checkout"}
           </p>
         </motion.div>
       </motion.aside>

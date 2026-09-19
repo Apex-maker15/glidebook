@@ -52,7 +52,7 @@ export function StepSuccess() {
         const res = await api<{ booking: { status: BookingStatus } }>(`/api/bookings/${booking.id}`);
         if (cancelled) return;
         setServerStatus(res.booking.status);
-        if (res.booking.status === "PAID" || attempts >= 12) return;
+        if (res.booking.status === "PAID" || res.booking.status === "CONFIRMED" || attempts >= 12) return;
       } catch {
         if (cancelled || attempts >= 12) return;
       }
@@ -67,7 +67,8 @@ export function StepSuccess() {
   if (!booking || !service) return null;
 
   const when = formatInTimeZone(new Date(booking.startTime), provider.timezone, "EEEE, MMMM d 'at' h:mm a");
-  const confirmed = serverStatus === "PAID";
+  const payOnDay = booking.depositCents === 0;
+  const confirmed = payOnDay || serverStatus === "PAID" || serverStatus === "CONFIRMED";
 
   const downloadIcs = () => {
     const ics = icsFor({
@@ -128,9 +129,11 @@ export function StepSuccess() {
         className="mt-2 max-w-md text-sm text-ink-muted"
       >
         {service.name} on <span className="text-ink">{when}</span>.{" "}
-        {booking.depositCents < booking.amountCents
-          ? `Your ${formatMoney(booking.depositCents, booking.currency)} deposit is confirmed and the remaining ${formatMoney(booking.amountCents - booking.depositCents, booking.currency)} is paid on the day. A receipt is on its way to ${customer.email}.`
-          : `A receipt for ${formatMoney(booking.amountCents, booking.currency)} is on its way to ${customer.email}.`}
+        {payOnDay
+          ? `Nothing to pay now - ${formatMoney(booking.amountCents, booking.currency)} is paid on the day. A confirmation is on its way to ${customer.email}.`
+          : booking.depositCents < booking.amountCents
+            ? `Your ${formatMoney(booking.depositCents, booking.currency)} deposit is confirmed and the remaining ${formatMoney(booking.amountCents - booking.depositCents, booking.currency)} is paid on the day. A receipt is on its way to ${customer.email}.`
+            : `A receipt for ${formatMoney(booking.amountCents, booking.currency)} is on its way to ${customer.email}.`}
       </motion.p>
 
       <motion.div
@@ -150,7 +153,7 @@ export function StepSuccess() {
             animate={confirmed ? {} : { opacity: [1, 0.4, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
           />
-          <span className="text-ink-muted">{confirmed ? "Payment confirmed" : "Finalising payment with your bank"}</span>
+          <span className="text-ink-muted">{payOnDay ? "Booking confirmed" : confirmed ? "Payment confirmed" : "Finalising payment with your bank"}</span>
           <span className="ml-auto font-mono text-ink-muted/60">#{booking.id.slice(-6).toUpperCase()}</span>
         </div>
       </motion.div>

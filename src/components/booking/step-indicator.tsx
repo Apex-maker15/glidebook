@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
 import { STEPS, useBookingStore, type Step } from "@/store/booking-store";
+import { useProvider } from "./provider-context";
 
 const labels: Record<Exclude<Step, "success">, string> = {
   service: "Service",
@@ -13,14 +14,17 @@ const labels: Record<Exclude<Step, "success">, string> = {
   payment: "Payment",
 };
 
-const visibleSteps = STEPS.filter((s): s is Exclude<Step, "success"> => s !== "success");
+const allSteps = STEPS.filter((s): s is Exclude<Step, "success"> => s !== "success");
+const noPaymentSteps = allSteps.filter((s) => s !== "payment");
 
 export function StepIndicator() {
+  const provider = useProvider();
+  const visibleSteps = provider.takesDeposits ? allSteps : noPaymentSteps;
   const step = useBookingStore((s) => s.step);
   const goTo = useBookingStore((s) => s.goTo);
   const serviceId = useBookingStore((s) => s.serviceId);
   const slot = useBookingStore((s) => s.slot);
-  const current = step === "success" ? visibleSteps.length : visibleSteps.indexOf(step);
+  const current = step === "success" ? visibleSteps.length : Math.max(0, visibleSteps.indexOf(step as Exclude<Step, "success">));
 
   const canJump = (i: number) => {
     if (step === "success" || step === "payment") return false;

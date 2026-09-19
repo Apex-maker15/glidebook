@@ -14,12 +14,12 @@ const STEPS = [
 ];
 
 const FAQ = [
-  { q: "Is it really free?", a: "Yes. There is no monthly fee. Stripe takes its standard card fee on each payment (about 1.5% + 20p in the UK), the same as any card machine." },
+  { q: "Is it really free?", a: "Yes - no monthly fee and no card needed to start. When a client pays a deposit through your page, GlideBook keeps 3% (minimum 30p) and Stripe takes its usual card fee (about 1.5% + 20p in the UK). Not booked? You pay nothing." },
   { q: "How do deposits work?", a: "You choose a percentage - most nail techs use 30-50%. The client pays it by card when booking; the rest is paid to you on the day however you like." },
   { q: "What if a client cancels?", a: "They get a link to cancel themselves. Cancel outside your notice window (24 hours by default) and the deposit refunds automatically. Inside it, you keep the deposit." },
   { q: "Do clients need an account?", a: "No. They book as guests with their name and email, and get a confirmation with a calendar invite and a reminder the day before." },
   { q: "Can I still take bookings by DM?", a: "Of course - just add them to your schedule and the slot disappears from your page so nobody double-books you." },
-  { q: "Where does the money go?", a: "Straight to your own Stripe account. GlideBook never holds your money." },
+  { q: "Where does the money go?", a: "Into your own Stripe account, which you connect in two minutes from the dashboard. Stripe pays it out to your bank automatically. GlideBook never holds your money." },
 ];
 
 export function HowItWorks() {

@@ -45,6 +45,10 @@ export interface ProviderDTO {
   minNoticeMinutes: number;
   bookingHorizonDays: number;
   phone: string | null;
+  country: string;
+  /** False until the provider's Stripe account can accept charges; bookings then confirm without payment. */
+  takesDeposits: boolean;
+  stripeConnected: boolean;
 }
 
 export interface SlotDTO {
@@ -63,6 +67,7 @@ export interface BookingDTO {
   status: BookingStatus;
   amountCents: number;
   depositCents: number;
+  platformFeeCents: number;
   currency: string;
   paidAt: string | null;
   address: string | null;

@@ -29,6 +29,12 @@ export const PATCH = handle(async (req: Request) => {
   if (input.locationMode === "STUDIO" && input.studioAddress !== undefined && !input.studioAddress?.trim()) {
     throw new HttpError(422, "Add your studio address so clients know where to go", "STUDIO_ADDRESS_REQUIRED");
   }
+  if (input.country) {
+    const current = await prisma.user.findUnique({ where: { id: providerId }, select: { stripeAccountId: true, country: true } });
+    if (current?.stripeAccountId && current.country !== input.country) {
+      throw new HttpError(422, "Country cannot change once Stripe is connected", "COUNTRY_LOCKED");
+    }
+  }
   const row = await prisma.user.update({ where: { id: providerId }, data: input, select: providerSelect });
   if (input.currency) {
     await prisma.service.updateMany({ where: { providerId }, data: { currency: input.currency } });

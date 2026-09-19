@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { motion } from "framer-motion";
-import { CalendarClock, Check, Copy, ExternalLink, LogOut, MessageCircle, Settings, ShieldCheck, Sparkles, Wrench, LayoutDashboard, Rocket } from "lucide-react";
+import { CalendarClock, Check, Copy, ExternalLink, Landmark, LogOut, MessageCircle, Settings, ShieldCheck, Sparkles, Wrench, LayoutDashboard, Rocket } from "lucide-react";
 import { spring } from "@/components/motion";
 import { useToastStore } from "@/store/toast-store";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ const NAV = [
   { href: "/dashboard", label: "Schedule", icon: LayoutDashboard },
   { href: "/dashboard/services", label: "Services", icon: Wrench },
   { href: "/dashboard/availability", label: "Availability", icon: CalendarClock },
+  { href: "/dashboard/payments", label: "Payments", icon: Landmark },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/setup", label: "Get set up", icon: Rocket },
 ];
@@ -26,12 +27,16 @@ interface Props {
   children: React.ReactNode;
 }
 
+const subscribeNoop = () => () => {};
+
 export function DashboardShell({ businessName, slug, isAdmin = false, children }: Props) {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
   const push = useToastStore((s) => s.push);
 
-  const bookingUrl = typeof window !== "undefined" ? `${window.location.origin}/book/${slug}` : `/book/${slug}`;
+  // Origin is only known in the browser; render the relative path on the server so hydration matches.
+  const origin = useSyncExternalStore(subscribeNoop, () => window.location.origin, () => "");
+  const bookingUrl = `${origin}/book/${slug}`;
 
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Book your next appointment with ${businessName} here: ${bookingUrl}`)}`;
 

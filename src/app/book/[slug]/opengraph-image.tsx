@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES } from "@/lib/categories";
 import { formatMoney } from "@/lib/utils";
+import { canTakeDeposits } from "@/lib/payments";
 
 export const runtime = "nodejs";
 export const alt = "Book online";
@@ -29,6 +30,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       category: true,
       depositPercent: true,
       currency: true,
+      stripeAccountId: true,
+      stripeChargesEnabled: true,
       services: { where: { active: true }, orderBy: { sortOrder: "asc" }, take: 3, select: { name: true, priceCents: true } },
     },
   });
@@ -37,7 +40,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const accent = ACCENT[meta.accent];
   const name = p?.businessName ?? "GlideBook";
   const services = p?.services ?? [];
-  const deposit = p && p.depositPercent < 100 ? `${p.depositPercent}% deposit secures your slot` : "Pay securely by card";
+  const deposit = !p || !canTakeDeposits(p) ? "pick a time in seconds" : p.depositPercent < 100 ? `${p.depositPercent}% deposit secures your slot` : "pay securely by card";
 
   return new ImageResponse(
     (

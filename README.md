@@ -79,7 +79,16 @@ Pure function. For a calendar day it walks each working window at `slotIntervalM
 
 `POST /api/bookings` re-runs the same engine **inside a transaction holding `pg_advisory_xact_lock(hashtext(providerId))`**, so two customers can never take the same slot. Unpaid `PENDING` holds expire after `BOOKING_HOLD_MINUTES`; their PaymentIntents are cancelled lazily on the next read, no cron needed.
 
-### Payments
+### Payments and how GlideBook earns
+
+Two revenue streams, both automatic:
+
+1. **Per-booking fee.** Providers connect their own Stripe account from `/dashboard/payments` (Stripe Express hosted onboarding, ~2 minutes on a phone). Deposits are created as *destination charges* on the platform account with `transfer_data.destination` = the provider and `application_fee_amount` = `PLATFORM_FEE_PERCENT` of the deposit (floor `PLATFORM_FEE_MIN_CENTS`). Stripe pays the provider out; the fee stays on the platform balance. Refunds reverse the transfer and the fee. Until a provider's account has `charges_enabled`, their page runs in **pay-on-the-day mode**: bookings confirm instantly with no card step, so the product is usable from minute one and the dashboard nudges them to connect.
+2. **Done-for-you setup.** A flat fee charged directly on the platform account (see below).
+
+Enable Connect once in the Stripe dashboard (Connect → Get started → platform). Test mode needs no activation.
+
+#### Checkout flow
 
 - `POST /api/checkout` creates (or reuses) a PaymentIntent for the booking's snapshotted amount with an idempotency key, and returns the `clientSecret`.
 - The last wizard step embeds `<PaymentElement>` and confirms with `redirect: "if_required"`. Redirect-based methods land on `/book/return`.

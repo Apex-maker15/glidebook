@@ -26,7 +26,8 @@ export interface BookingEmailProps {
   timezone: string;
   location: string | null;
   totalLabel: string;
-  paidLabel: string;
+  /** Amount paid online, or null when the provider collects everything on the day. */
+  paidLabel: string | null;
   /** e.g. "£31.50" or null when fully paid. */
   balanceLabel: string | null;
   manageUrl: string;
@@ -48,10 +49,16 @@ function Details({ p }: { p: BookingEmailProps }) {
           <span style={styles.label}>Where</span> {p.location}
         </Text>
       )}
-      <Text style={styles.row}>
-        <span style={styles.label}>Paid</span> {p.paidLabel}
-        {p.balanceLabel ? ` · ${p.balanceLabel} due on the day` : ""}
-      </Text>
+      {p.paidLabel ? (
+        <Text style={styles.row}>
+          <span style={styles.label}>Paid</span> {p.paidLabel}
+          {p.balanceLabel ? ` · ${p.balanceLabel} due on the day` : ""}
+        </Text>
+      ) : (
+        <Text style={styles.row}>
+          <span style={styles.label}>To pay</span> {p.totalLabel} on the day
+        </Text>
+      )}
     </Section>
   );
 }
@@ -126,7 +133,9 @@ export function BookingCancelledEmail(p: BookingEmailProps & { refunded: boolean
           <Text style={styles.p}>
             {p.refunded
               ? `Your ${p.paidLabel} payment is being refunded to the original card. It usually shows within 5-10 working days.`
-              : `As the cancellation was within ${p.cancelNoticeHours} hours of the appointment, the ${p.paidLabel} deposit is not refunded.`}
+              : p.paidLabel
+                ? `As the cancellation was within ${p.cancelNoticeHours} hours of the appointment, the ${p.paidLabel} deposit is not refunded.`
+                : "Nothing was paid online, so there is nothing to refund."}
           </Text>
           <Details p={p} />
           <Footer />
@@ -146,7 +155,7 @@ export interface ProviderAlertProps {
   location: string | null;
   serviceDetails: string | null;
   notes: string | null;
-  paidLabel: string;
+  paidLabel: string | null;
   balanceLabel: string | null;
   dashboardUrl: string;
   kind: "new" | "cancelled";
@@ -194,8 +203,8 @@ export function ProviderAlertEmail(p: ProviderAlertProps) {
               </Text>
             )}
             <Text style={styles.row}>
-              <span style={styles.label}>Paid</span> {p.paidLabel}
-              {p.balanceLabel ? ` · ${p.balanceLabel} to collect on the day` : ""}
+              <span style={styles.label}>{p.paidLabel ? "Paid" : "To collect"}</span> {p.paidLabel ?? p.balanceLabel}
+              {p.paidLabel && p.balanceLabel ? ` · ${p.balanceLabel} to collect on the day` : p.paidLabel ? "" : " on the day"}
             </Text>
           </Section>
           <Button href={p.dashboardUrl} style={styles.button}>

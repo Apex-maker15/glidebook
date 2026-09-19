@@ -1,6 +1,7 @@
 import { BookingStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
+import { canTakeDeposits } from "@/lib/payments";
 import { publish } from "@/lib/realtime";
 import type { BookingDTO, ProviderDTO } from "@/types";
 
@@ -25,6 +26,7 @@ export function toBookingDTO(b: BookingWithRelations): BookingDTO {
     amountCents: b.amountCents,
     depositCents: b.depositCents,
     currency: b.currency,
+    platformFeeCents: b.platformFeeCents,
     paidAt: b.paidAt?.toISOString() ?? null,
     address: b.address,
     serviceDetails: b.serviceDetails,
@@ -53,6 +55,9 @@ export const providerSelect = {
   minNoticeMinutes: true,
   bookingHorizonDays: true,
   phone: true,
+  country: true,
+  stripeAccountId: true,
+  stripeChargesEnabled: true,
 } satisfies Prisma.UserSelect;
 
 type ProviderRow = Prisma.UserGetPayload<{ select: typeof providerSelect }>;
@@ -76,6 +81,9 @@ export function toProviderDTO(p: ProviderRow): ProviderDTO | null {
     minNoticeMinutes: p.minNoticeMinutes,
     bookingHorizonDays: p.bookingHorizonDays,
     phone: p.phone,
+    country: p.country,
+    takesDeposits: canTakeDeposits(p),
+    stripeConnected: Boolean(p.stripeAccountId),
   };
 }
 

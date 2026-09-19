@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { handle, HttpError, readJson } from "@/lib/api";
 import { bookingInclude, toBookingDTO } from "@/lib/bookings";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { refundBookingPayment } from "@/lib/payments";
 import { publish } from "@/lib/realtime";
 import { notifyBookingCancelled } from "@/lib/notifications";
 
@@ -35,15 +36,13 @@ export const POST = handle(async (req: Request, ctx: { params: Promise<{ id: str
 
   let refunded = false;
   if (booking.paymentIntentId && isStripeConfigured()) {
-    const stripe = getStripe();
-    const pi = await stripe.paymentIntents.retrieve(booking.paymentIntentId);
-    if (pi.status === "succeeded") {
-      if (refundable) {
-        await stripe.refunds.create({ payment_intent: pi.id, reason: "requested_by_customer" }, { idempotencyKey: `refund_${booking.id}` });
-        refunded = true;
-      }
-    } else if (pi.status !== "canceled") {
-      await stripe.paymentIntents.cancel(pi.id);
+    if (refundable) {
+      ({ refunded } = await refundBookingPayment(booking));
+    } else {
+      // Inside the notice window the provider keeps the deposit; only tidy up an unpaid intent.
+      const stripe = getStripe();
+      const pi = await stripe.paymentIntents.retrieve(booking.paymentIntentId);
+      if (pi.status !== "succeeded" && pi.status !== "canceled") await stripe.paymentIntents.cancel(pi.id);
     }
   }
 

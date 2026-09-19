@@ -61,9 +61,11 @@ export function BookingWizard({
             </span>
             GlideBook
           </Link>
-          <span className="hidden items-center gap-1.5 text-xs text-ink-muted sm:flex">
-            <ShieldCheck className="size-3.5" /> Secure checkout by Stripe
-          </span>
+          {provider.takesDeposits && (
+            <span className="hidden items-center gap-1.5 text-xs text-ink-muted sm:flex">
+              <ShieldCheck className="size-3.5" /> Secure checkout by Stripe
+            </span>
+          )}
         </header>
 
         <main
@@ -127,6 +129,14 @@ export function BookingWizard({
               <SummaryCard />
             </div>
           </LayoutGroup>
+
+          <p className="mt-10 text-center text-[12px] text-ink-muted/70">
+            Powered by{" "}
+            <Link href="/?ref=book" className="font-medium text-ink-muted transition-colors hover:text-ink">
+              GlideBook
+            </Link>{" "}
+            · Get your own booking page, free
+          </p>
         </main>
       </div>
     </ProviderProvider>

@@ -70,7 +70,7 @@ export const BookingCard = forwardRef<HTMLDivElement, Props>(function BookingCar
                   {formatMoney(booking.amountCents, booking.currency)}
                   {booking.depositCents < booking.amountCents && (
                     <span className="block text-[11px] font-medium text-ink-muted">
-                      {formatMoney(booking.depositCents, booking.currency)} deposit
+                      {booking.depositCents > 0 ? `${formatMoney(booking.depositCents, booking.currency)} deposit` : "pay on the day"}
                     </span>
                   )}
                 </span>
