@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, ExternalLink, Inbox, Mail, Phone, RotateCcw } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, Inbox, Mail, Phone, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
 import { ServicesManager } from "@/components/dashboard/services-manager";
@@ -75,7 +75,10 @@ export function SetupQueue() {
   return (
     <div className="mx-auto max-w-7xl">
       <header className="mb-6">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-muted">Admin</p>
+        <Link href="/admin" className="mb-2 inline-flex items-center gap-1.5 text-[13px] text-ink-muted hover:text-ink">
+          <ArrowLeft className="size-3.5" /> Overview
+        </Link>
+        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-muted">Owner</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Done-for-you setups</h1>
       </header>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
 import { CalendarDays, Columns3, Inbox, List, RefreshCw, Wifi, WifiOff } from "lucide-react";
@@ -10,6 +10,7 @@ import { sortBookings, useDashboardStore, type Connection, type StatusFilter } f
 import { useRealtimeBookings } from "./use-realtime";
 import { BookingCard } from "./booking-card";
 import { cn, formatMoney } from "@/lib/utils";
+import { useNow } from "@/lib/use-now";
 import type { BookingDTO, BookingStatus } from "@/types";
 
 const COLUMNS: { status: BookingStatus; title: string; hint: string }[] = [
@@ -220,16 +221,6 @@ export function BookingBoard({ timezone, currency }: { timezone: string; currenc
       </AnimatePresence>
     </div>
   );
-}
-
-/** Current time, refreshed on an interval so "upcoming" stays correct on long-lived tabs. */
-function useNow(intervalMs: number) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), intervalMs);
-    return () => clearInterval(id);
-  }, [intervalMs]);
-  return now;
 }
 
 function Stat({ label, value, loading, accent }: { label: string; value: string; loading: boolean; accent?: boolean }) {

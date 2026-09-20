@@ -18,7 +18,7 @@ const NAV = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/setup", label: "Get set up", icon: Rocket },
 ];
-const ADMIN_NAV = { href: "/admin", label: "Admin", icon: ShieldCheck };
+const ADMIN_NAV = { href: "/admin", label: "Owner", icon: ShieldCheck };
 
 interface Props {
   businessName: string;

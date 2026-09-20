@@ -2,12 +2,16 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { HttpError } from "@/lib/api";
 
+/** The owner's account always has admin; ADMIN_EMAILS can add more. */
+const DEFAULT_ADMIN_EMAILS = ["apexdrive289@gmail.com"];
+
 /** Comma-separated list of admin emails, e.g. ADMIN_EMAILS="you@example.com,ops@example.com". */
 export function adminEmails(): string[] {
-  return (process.env.ADMIN_EMAILS ?? "")
+  const configured = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
+  return [...new Set([...DEFAULT_ADMIN_EMAILS, ...configured])];
 }
 
 export function isAdminEmail(email: string | null | undefined): boolean {

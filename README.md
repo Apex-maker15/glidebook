@@ -99,7 +99,11 @@ Enable Connect once in the Stripe dashboard (Connect → Get started → platfor
 - `POST /api/webhooks/stripe` verifies the signature on the raw body, records the event id, then marks the booking `PAID` (or `CANCELLED` on cancel/refund) and publishes a realtime event.
 - Cancelling a paid booking from the dashboard issues a full refund.
 
-### Done-for-you setup (`/dashboard/setup`, `/admin`)
+### Owner panel (`/admin`)
+
+The owner's email (`DEFAULT_ADMIN_EMAILS` in `src/lib/admin.ts`, extendable with `ADMIN_EMAILS`) sees an **Owner** link: platform revenue and deposits per currency, every provider with their Stripe state and activity, the latest bookings across the platform, and a per-provider workbench (`/admin/providers/:id`) with that provider's bookings and the same services / hours / settings editors, acting on their behalf via `?providerId=`.
+
+### Done-for-you setup (`/dashboard/setup`, `/admin/setup`)
 
 Providers can build their page themselves for free, or pay a one-off fee (GBP 5, `SETUP_FEE_CENTS` in `src/lib/admin.ts`) and paste their price list. The fee is a Stripe PaymentIntent with `metadata.kind = "setup"`; the webhook marks the `SetupRequest` paid. Emails listed in `ADMIN_EMAILS` see an **Admin** link with the queue: pick a request, edit that provider's services, hours and settings in place (the dashboard APIs accept `?providerId=` for admins), then mark it done.
 
