@@ -26,11 +26,15 @@ export function StepService() {
               ? `Pricing is all-inclusive. We come to you across ${provider.serviceAreas}.`
               : "Pricing is all-inclusive. We come to you."
             : "Pricing is all-inclusive."}
-          {isDeposit
-            ? ` A ${provider.depositPercent}% deposit secures your slot; the rest is paid on the day.`
-            : provider.takesDeposits
-              ? " Paid securely by card when you book."
-              : " Nothing to pay online - you pay on the day."}
+          {provider.depositMode === "link"
+            ? provider.depositPercent < 100
+              ? ` A ${provider.depositPercent}% deposit secures your slot - paid via ${provider.businessName}'s payment link right after booking.`
+              : ` Paid in full via ${provider.businessName}'s payment link right after booking.`
+            : isDeposit
+              ? ` A ${provider.depositPercent}% deposit secures your slot; the rest is paid on the day.`
+              : provider.takesDeposits
+                ? " Paid securely by card when you book."
+                : " Nothing to pay online - you pay on the day."}
         </p>
       </header>
 

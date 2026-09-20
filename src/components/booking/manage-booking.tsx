@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarPlus, Clock, MapPin, Phone, XCircle } from "lucide-react";
+import { CalendarPlus, CreditCard, Clock, MapPin, Phone, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { StatusBadge } from "@/components/ui/primitives";
@@ -29,6 +29,10 @@ export interface ManageBookingProps {
     totalLabel: string;
     /** Null when nothing was paid online (provider collects on the day). */
     paidLabel: string | null;
+    /** Provider's payment link while the deposit is still due. */
+    depositLink: string | null;
+    /** Deposit is handled outside GlideBook, so refunds are between client and provider. */
+    manualDeposit: boolean;
     balanceLabel: string | null;
     cancelNoticeHours: number;
     refundable: boolean;
@@ -100,9 +104,11 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-ink-muted">
               {result.refunded
                 ? `Your ${b.paidLabel} payment is being refunded to your card. It usually shows within 5-10 working days.`
-                : b.paidLabel
-                  ? `Cancelled. As this was within ${b.cancelNoticeHours} hours of the appointment, the ${b.paidLabel} deposit is not refunded.`
-                  : "Cancelled. Nothing was paid online, so there is nothing to refund."}
+                : b.manualDeposit && b.paidLabel
+                  ? `Cancelled. ${b.businessName} handles your ${b.paidLabel} deposit directly - contact them about a refund.`
+                  : b.paidLabel
+                    ? `Cancelled. As this was within ${b.cancelNoticeHours} hours of the appointment, the ${b.paidLabel} deposit is not refunded.`
+                    : "Cancelled. Nothing was paid online, so there is nothing to refund."}
             </div>
           </motion.div>
         )}
@@ -148,6 +154,11 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
 
       {!cancelled && !b.isPast && (
         <div className="mt-6 flex flex-wrap gap-2">
+          {b.depositLink && (
+            <a href={b.depositLink} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-accent px-4 text-sm font-semibold text-black shadow-glow">
+              <CreditCard className="size-4" /> Pay {b.paidLabel} deposit
+            </a>
+          )}
           <a href={googleCalendarUrl} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-white/[0.08] px-4 text-sm font-medium transition-colors hover:bg-white/[0.12]">
             <CalendarPlus className="size-4" /> Add to Google Calendar
           </a>
@@ -178,7 +189,9 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
         description={
           !b.paidLabel
             ? "The slot will be released straight away and the provider will be told."
-            : b.refundable
+            : b.manualDeposit
+              ? `The slot will be released and ${b.businessName} will be told. Any deposit refund is arranged with them directly.`
+              : b.refundable
               ? `You're outside the ${b.cancelNoticeHours}-hour window, so your ${b.paidLabel} payment will be refunded automatically.`
               : `This is within ${b.cancelNoticeHours} hours of the appointment, so the ${b.paidLabel} deposit will not be refunded.`
         }

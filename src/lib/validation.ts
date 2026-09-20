@@ -68,11 +68,20 @@ export const createBookingSchema = z.object({
 });
 
 export const updateBookingStatusSchema = z.object({
-  status: z.enum(["CONFIRMED", "CANCELLED"]),
+  // PAID is only accepted for deposits collected outside GlideBook (payment links), marked by the provider.
+  status: z.enum(["CONFIRMED", "CANCELLED", "PAID"]),
 });
 
 export const providerSettingsSchema = z.object({
   businessName: z.string().trim().min(2).max(80).optional(),
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use letters, numbers and single dashes, e.g. shine-detailing")
+    .min(3)
+    .max(48)
+    .optional(),
   email: z.email().max(160).optional(),
   phone: z.string().trim().max(32).optional().nullable(),
   timezone: z.string().min(3).max(64).optional(),
@@ -83,6 +92,7 @@ export const providerSettingsSchema = z.object({
   serviceAreas: z.string().trim().max(300).optional().nullable(),
   serviceAreaCodes: z.string().trim().max(300).optional().nullable(),
   depositPercent: z.number().int().min(10).max(100).optional(),
+  depositLinkUrl: z.url({ protocol: /^https$/ }).max(300).optional().nullable(),
   cancelNoticeHours: z.number().int().min(0).max(168).optional(),
   slotIntervalMinutes: z.number().int().min(5).max(120).optional(),
   bufferMinutes: z.number().int().min(0).max(180).optional(),

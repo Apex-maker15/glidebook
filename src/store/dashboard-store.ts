@@ -23,7 +23,7 @@ interface DashboardState {
 interface DashboardActions {
   load(): Promise<void>;
   applyEvent(event: RealtimeEvent): void;
-  updateStatus(id: string, status: "CONFIRMED" | "CANCELLED"): Promise<void>;
+  updateStatus(id: string, status: "CONFIRMED" | "CANCELLED" | "PAID"): Promise<void>;
   clearHighlight(id: string): void;
   setConnection(c: Connection): void;
   setView(v: BoardView): void;
@@ -98,11 +98,15 @@ export const useDashboardStore = create<DashboardStore>()((set, get) => ({
       set((s) => ({ bookings: { ...s.bookings, [id]: booking } }));
       useToastStore.getState().push({
         tone: "success",
-        title: status === "CANCELLED" ? "Booking cancelled" : "Booking confirmed",
+        title: status === "CANCELLED" ? "Booking cancelled" : status === "PAID" ? "Deposit marked as received" : "Booking confirmed",
         description:
           status === "CANCELLED" && before.status === "PAID"
-            ? `${booking.customer.name} will be refunded automatically.`
-            : `${booking.customer.name} has been notified.`,
+            ? before.depositLink
+              ? `${booking.customer.name} paid through your link - refund them yourself if you owe one.`
+              : `${booking.customer.name} will be refunded automatically.`
+            : status === "PAID"
+              ? `${booking.customer.name}'s slot is locked in.`
+              : `${booking.customer.name} has been notified.`,
       });
     } catch (err) {
       set((s) => ({ bookings: { ...s.bookings, [id]: before } }));

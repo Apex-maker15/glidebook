@@ -29,6 +29,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       businessName: true,
       category: true,
       depositPercent: true,
+      depositLinkUrl: true,
       currency: true,
       stripeAccountId: true,
       stripeAccountLive: true,
@@ -41,7 +42,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const accent = ACCENT[meta.accent];
   const name = p?.businessName ?? "GlideBook";
   const services = p?.services ?? [];
-  const deposit = !p || !canTakeDeposits(p) ? "pick a time in seconds" : p.depositPercent < 100 ? `${p.depositPercent}% deposit secures your slot` : "pay securely by card";
+  const deposit =
+    !p || (!canTakeDeposits(p) && !p.depositLinkUrl)
+      ? "pick a time in seconds"
+      : p.depositPercent < 100
+        ? `${p.depositPercent}% deposit secures your slot`
+        : "pay securely online";
 
   return new ImageResponse(
     (

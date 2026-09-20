@@ -62,6 +62,7 @@ export const POST = handle(async (req: Request) => {
       studioAddress: true,
       serviceAreaCodes: true,
       depositPercent: true,
+      depositLinkUrl: true,
       slotIntervalMinutes: true,
       bufferMinutes: true,
       minNoticeMinutes: true,
@@ -106,10 +107,13 @@ export const POST = handle(async (req: Request) => {
   const bounds = dayBounds(date, config.timezone, 24 * 60);
   const email = input.customer.email.toLowerCase();
 
-  // Providers who have not connected Stripe still get a working page: bookings
-  // confirm instantly with nothing to pay online, and they collect on the day.
+  // Three ways a deposit can work:
+  //  card - Stripe is connected: hold the slot, charge on the next step.
+  //  link - provider has their own payment link: confirm the slot, send the client to the link, provider marks it paid.
+  //  none - nothing online; the provider collects on the day.
   const requiresPayment = canTakeDeposits(provider);
-  const depositCents = requiresPayment ? depositFor(service.priceCents, provider.depositPercent, provider.currency) : 0;
+  const viaLink = !requiresPayment && Boolean(provider.depositLinkUrl);
+  const depositCents = requiresPayment || viaLink ? depositFor(service.priceCents, provider.depositPercent, provider.currency) : 0;
 
   const booking = await prisma.$transaction(
     async (tx) => {
@@ -152,7 +156,8 @@ export const POST = handle(async (req: Request) => {
           status: requiresPayment ? BookingStatus.PENDING : BookingStatus.CONFIRMED,
           amountCents: service.priceCents,
           depositCents,
-          platformFeeCents: platformFeeFor(depositCents),
+          platformFeeCents: requiresPayment ? platformFeeFor(depositCents) : 0,
+          depositLink: viaLink ? provider.depositLinkUrl : null,
           currency: provider.currency,
           address,
           postcode,

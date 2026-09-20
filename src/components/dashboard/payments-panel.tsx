@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, ArrowUpRight, BadgeCheck, Banknote, CircleDashed, Landmark, RefreshCw, ShieldCheck } from "lucide-react";
@@ -291,13 +292,25 @@ function FeeExplainer({ data }: { data: ConnectResponse }) {
   const example = 1500;
   const fee = Math.min(example, Math.max(minCents, Math.round((example * percent) / 100)));
   return (
-    <div className="glass rounded-3xl p-5 text-sm text-ink-muted">
-      <p className="font-medium text-ink">How the fee works</p>
-      <p className="mt-1">
-        GlideBook keeps {percent}% of each deposit (minimum {formatMoney(minCents, cur)}), taken automatically before the payout. Stripe
-        charges its standard card fee on top. On a {formatMoney(example, cur)} deposit that is {formatMoney(fee, cur)} to us; the rest goes to you.
-        Nothing is charged when you are not booked.
-      </p>
+    <div className="space-y-4">
+      <div className="glass rounded-3xl p-5 text-sm text-ink-muted">
+        <p className="font-medium text-ink">{percent > 0 ? "How the fee works" : "GlideBook takes nothing"}</p>
+        <p className="mt-1">
+          {percent > 0
+            ? `GlideBook keeps ${percent}% of each deposit (minimum ${formatMoney(minCents, cur)}), taken automatically before the payout. Stripe charges its standard card fee on top. On a ${formatMoney(example, cur)} deposit that is ${formatMoney(fee, cur)} to us; the rest goes to you.`
+            : "No commission, no monthly fee. Stripe charges its standard card fee on each payment (about 1.5% + 20p in the UK) - that goes to Stripe, not to GlideBook. Everything else is yours."}
+        </p>
+      </div>
+      <div className="glass rounded-3xl p-5 text-sm text-ink-muted">
+        <p className="font-medium text-ink">Prefer your own payment link?</p>
+        <p className="mt-1">
+          Skip Stripe entirely: paste your PayPal.me, Monzo.me, Revolut or Stripe payment link under{" "}
+          <Link href="/dashboard/settings" className="text-accent-strong hover:underline">
+            Settings
+          </Link>
+          . Clients are sent there for the deposit right after booking, and you tap <span className="text-ink">Deposit received</span> on the booking when it lands.
+        </p>
+      </div>
     </div>
   );
 }

@@ -118,7 +118,8 @@ export function SetupQueue() {
                   </span>
                 </div>
                 <p className="mt-0.5 text-[12px] text-ink-muted">
-                  {item.provider.category ? CATEGORIES[item.provider.category].label : "Uncategorised"} · paid {formatMoney(item.feeCents, item.currency)} ·{" "}
+                  {item.provider.category ? CATEGORIES[item.provider.category].label : "Uncategorised"} ·{" "}
+                  {item.feeCents > 0 ? `paid ${formatMoney(item.feeCents, item.currency)}` : "free"} ·{" "}
                   {item.provider._count.services} services, {item.provider._count.availability} days set
                 </p>
               </button>

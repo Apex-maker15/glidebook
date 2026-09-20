@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
-import { CalendarPlus, ExternalLink, MapPin, RotateCcw } from "lucide-react";
+import { CalendarPlus, CreditCard, ExternalLink, MapPin, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { spring } from "@/components/motion";
 import { useBookingStore, selectService } from "@/store/booking-store";
@@ -68,7 +68,8 @@ export function StepSuccess() {
 
   const when = formatInTimeZone(new Date(booking.startTime), provider.timezone, "EEEE, MMMM d 'at' h:mm a");
   const payOnDay = booking.depositCents === 0;
-  const confirmed = payOnDay || serverStatus === "PAID" || serverStatus === "CONFIRMED";
+  const viaLink = Boolean(booking.depositLink);
+  const confirmed = payOnDay || viaLink || serverStatus === "PAID" || serverStatus === "CONFIRMED";
 
   const downloadIcs = () => {
     const ics = icsFor({
@@ -131,7 +132,9 @@ export function StepSuccess() {
         {service.name} on <span className="text-ink">{when}</span>.{" "}
         {payOnDay
           ? `Nothing to pay now - ${formatMoney(booking.amountCents, booking.currency)} is paid on the day. A confirmation is on its way to ${customer.email}.`
-          : booking.depositCents < booking.amountCents
+          : viaLink
+            ? `Your slot is held. Pay the ${formatMoney(booking.depositCents, booking.currency)} deposit now through ${provider.businessName}'s payment link to lock it in${booking.depositCents < booking.amountCents ? `; the remaining ${formatMoney(booking.amountCents - booking.depositCents, booking.currency)} is paid on the day` : ""}. The link is also in your confirmation email.`
+            : booking.depositCents < booking.amountCents
             ? `Your ${formatMoney(booking.depositCents, booking.currency)} deposit is confirmed and the remaining ${formatMoney(booking.amountCents - booking.depositCents, booking.currency)} is paid on the day. A receipt is on its way to ${customer.email}.`
             : `A receipt for ${formatMoney(booking.amountCents, booking.currency)} is on its way to ${customer.email}.`}
       </motion.p>
@@ -153,7 +156,9 @@ export function StepSuccess() {
             animate={confirmed ? {} : { opacity: [1, 0.4, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
           />
-          <span className="text-ink-muted">{payOnDay ? "Booking confirmed" : confirmed ? "Payment confirmed" : "Finalising payment with your bank"}</span>
+          <span className="text-ink-muted">
+            {payOnDay ? "Booking confirmed" : viaLink ? "Booked - deposit due via link" : confirmed ? "Payment confirmed" : "Finalising payment with your bank"}
+          </span>
           <span className="ml-auto font-mono text-ink-muted/60">#{booking.id.slice(-6).toUpperCase()}</span>
         </div>
       </motion.div>
@@ -164,6 +169,16 @@ export function StepSuccess() {
         transition={{ ...spring.soft, delay: 0.44 }}
         className="mt-6 flex flex-wrap items-center justify-center gap-3"
       >
+        {viaLink && (
+          <a
+            href={booking.depositLink!}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-accent px-5 text-sm font-semibold text-black shadow-glow transition-transform hover:-translate-y-0.5"
+          >
+            <CreditCard className="size-4" /> Pay {formatMoney(booking.depositCents, booking.currency)} deposit
+          </a>
+        )}
         <Button variant="secondary" onClick={downloadIcs}>
           <CalendarPlus className="size-4" /> Add to calendar
         </Button>

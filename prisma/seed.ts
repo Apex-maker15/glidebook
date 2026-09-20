@@ -94,16 +94,16 @@ async function main() {
   });
 
   const nailTech = await prisma.user.upsert({
-    where: { email: "demo@polishedbyamara.com" },
+    where: { email: "demo@polishedbyapex.com" },
     update: {},
     create: {
-      email: "demo@polishedbyamara.com",
+      email: "demo@polishedbyapex.com",
       name: "Amara Okafor",
       phone: "+44 7700 900123",
       passwordHash,
       role: Role.PROVIDER,
-      businessName: "Polished by Amara",
-      slug: "polished-by-amara",
+      businessName: "Polished by Apex",
+      slug: "polished-by-apex",
       category: BusinessCategory.NAILS_BEAUTY,
       timezone: "Europe/London",
       currency: "gbp",

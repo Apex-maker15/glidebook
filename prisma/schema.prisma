@@ -57,6 +57,7 @@ model User {
   serviceAreas        String? // MOBILE: human-readable coverage, e.g. "Phoenix, Scottsdale, Tempe"
   serviceAreaCodes    String? // MOBILE: comma-separated ZIP/postcode prefixes that are accepted, e.g. "850, 852, 853"
   depositPercent      Int               @default(100) // 100 = full prepayment, e.g. 30 = 30% deposit
+  depositLinkUrl      String? // provider's own payment link (PayPal, Monzo, Revolut, Stripe link) used when no Stripe account is connected
   cancelNoticeHours   Int               @default(24) // clients cancelling with more notice than this get their deposit back
   country             String            @default("GB") // ISO 3166-1 alpha-2; fixed once the Stripe account exists
 
@@ -129,6 +130,7 @@ model Booking {
   platformFeeCents Int    @default(0) // GlideBook's cut of the deposit (Stripe application fee)
   currency        String  @default("gbp")
   paymentIntentId String? @unique
+  depositLink     String? // snapshot of the provider's payment link when the deposit is paid outside GlideBook
   paidAt          DateTime?
 
   // Secret for the client's self-service link (view / cancel) - never exposed to the provider UI.

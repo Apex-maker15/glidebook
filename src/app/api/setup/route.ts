@@ -43,7 +43,9 @@ export const GET = handle(async () => {
 export const POST = handle(async (req: Request) => {
   const user = await requireProvider();
   if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
-  if (!isStripeConfigured()) throw new HttpError(503, "Payments are not configured on this server yet", "STRIPE_NOT_CONFIGURED");
+  if (SETUP_FEE_CENTS > 0 && !isStripeConfigured()) {
+    throw new HttpError(503, "Payments are not configured on this server yet", "STRIPE_NOT_CONFIGURED");
+  }
   const { notes } = bodySchema.parse(await readJson(req));
 
   const existing = await prisma.setupRequest.findFirst({
@@ -51,6 +53,15 @@ export const POST = handle(async (req: Request) => {
     select: { id: true },
   });
   if (existing) throw new HttpError(409, "You already have a setup in progress", "ALREADY_REQUESTED");
+
+  if (SETUP_FEE_CENTS === 0) {
+    // Free: the request goes straight into the admin queue as ready to build.
+    const request = await prisma.setupRequest.create({
+      data: { providerId: user.id, notes, feeCents: 0, currency: SETUP_FEE_CURRENCY, status: "PAID", paidAt: new Date() },
+      select,
+    });
+    return NextResponse.json({ request, clientSecret: null, amountCents: 0, currency: SETUP_FEE_CURRENCY }, { status: 201 });
+  }
 
   const request = await prisma.setupRequest.create({
     data: { providerId: user.id, notes, feeCents: SETUP_FEE_CENTS, currency: SETUP_FEE_CURRENCY },

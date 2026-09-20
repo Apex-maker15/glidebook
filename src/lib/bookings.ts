@@ -27,6 +27,7 @@ export function toBookingDTO(b: BookingWithRelations): BookingDTO {
     depositCents: b.depositCents,
     currency: b.currency,
     platformFeeCents: b.platformFeeCents,
+    depositLink: b.depositLink,
     paidAt: b.paidAt?.toISOString() ?? null,
     address: b.address,
     postcode: b.postcode,
@@ -52,6 +53,7 @@ export const providerSelect = {
   serviceAreas: true,
   serviceAreaCodes: true,
   depositPercent: true,
+  depositLinkUrl: true,
   cancelNoticeHours: true,
   slotIntervalMinutes: true,
   bufferMinutes: true,
@@ -82,6 +84,7 @@ export function toProviderDTO(p: ProviderRow): ProviderDTO | null {
     serviceAreas: p.serviceAreas,
     serviceAreaCodes: p.serviceAreaCodes,
     depositPercent: p.depositPercent,
+    depositLinkUrl: p.depositLinkUrl,
     cancelNoticeHours: p.cancelNoticeHours,
     slotIntervalMinutes: p.slotIntervalMinutes,
     bufferMinutes: p.bufferMinutes,
@@ -90,6 +93,7 @@ export function toProviderDTO(p: ProviderRow): ProviderDTO | null {
     phone: p.phone,
     country: p.country,
     takesDeposits: canTakeDeposits(p),
+    depositMode: canTakeDeposits(p) ? "card" : p.depositLinkUrl ? "link" : "none",
     stripeConnected: accountUsable(p),
   };
 }

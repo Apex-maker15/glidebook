@@ -56,7 +56,7 @@ export const CATEGORIES: Record<BusinessCategory, CategoryMeta> = {
   },
 };
 
-export const CATEGORY_ORDER: BusinessCategory[] = ["NAILS_BEAUTY", "HAIR_BARBER", "CAR_DETAILING", "PET_GROOMING", "OTHER"];
+export const CATEGORY_ORDER: BusinessCategory[] = ["CAR_DETAILING", "NAILS_BEAUTY", "HAIR_BARBER", "PET_GROOMING", "OTHER"];
 
 export const CURRENCIES = [
   { code: "gbp", label: "GBP (£)" },

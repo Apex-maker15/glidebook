@@ -66,6 +66,8 @@ export default async function ManageBookingPage({ params, searchParams }: Props)
             location: b.provider.locationMode === "MOBILE" ? b.address : (b.provider.studioAddress ?? null),
             totalLabel: formatMoney(b.amountCents, b.currency),
             paidLabel: b.depositCents > 0 ? formatMoney(b.depositCents, b.currency) : null,
+            depositLink: b.status === "CONFIRMED" ? b.depositLink : null,
+            manualDeposit: Boolean(b.depositLink),
             balanceLabel: b.amountCents > b.depositCents ? formatMoney(b.amountCents - b.depositCents, b.currency) : null,
             cancelNoticeHours: b.provider.cancelNoticeHours,
             refundable: hoursUntil >= b.provider.cancelNoticeHours,

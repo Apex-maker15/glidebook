@@ -6,8 +6,9 @@ function clamp(n: number, lo: number, hi: number) {
   return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : lo;
 }
 
-export const PLATFORM_FEE_PERCENT = clamp(Number(process.env.PLATFORM_FEE_PERCENT ?? 3), 0, 30);
-export const PLATFORM_FEE_MIN_CENTS = clamp(Number(process.env.PLATFORM_FEE_MIN_CENTS ?? 30), 0, 500);
+// GlideBook is free: no commission unless PLATFORM_FEE_PERCENT is explicitly set.
+export const PLATFORM_FEE_PERCENT = clamp(Number(process.env.PLATFORM_FEE_PERCENT ?? 0), 0, 30);
+export const PLATFORM_FEE_MIN_CENTS = clamp(Number(process.env.PLATFORM_FEE_MIN_CENTS ?? 0), 0, 500);
 
 /** GlideBook's cut of a deposit in minor units; never more than the deposit itself. */
 export function platformFeeFor(depositCents: number): number {

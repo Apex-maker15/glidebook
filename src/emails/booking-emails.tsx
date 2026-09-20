@@ -33,6 +33,8 @@ export interface BookingEmailProps {
   manageUrl: string;
   cancelNoticeHours: number;
   providerPhone?: string | null;
+  /** Provider's own payment link when the deposit is collected outside GlideBook. */
+  depositLink?: string | null;
 }
 
 function Details({ p }: { p: BookingEmailProps }) {
@@ -51,7 +53,8 @@ function Details({ p }: { p: BookingEmailProps }) {
       )}
       {p.paidLabel ? (
         <Text style={styles.row}>
-          <span style={styles.label}>Paid</span> {p.paidLabel}
+          <span style={styles.label}>{p.depositLink ? "Deposit" : "Paid"}</span> {p.paidLabel}
+          {p.depositLink ? " via payment link" : ""}
           {p.balanceLabel ? ` · ${p.balanceLabel} due on the day` : ""}
         </Text>
       ) : (
@@ -82,13 +85,24 @@ export function BookingConfirmedEmail(p: BookingEmailProps) {
         <Container style={styles.container}>
           <Text style={styles.eyebrow}>{p.businessName}</Text>
           <Heading style={styles.h1}>You&apos;re booked, {first}.</Heading>
-          <Text style={styles.p}>Your appointment is confirmed. A calendar invite is attached so it lands in your diary.</Text>
+          <Text style={styles.p}>
+            {p.depositLink
+              ? `Your slot is held. Please pay the ${p.paidLabel} deposit through ${p.businessName}'s payment link to lock it in. A calendar invite is attached so it lands in your diary.`
+              : "Your appointment is confirmed. A calendar invite is attached so it lands in your diary."}
+          </Text>
           <Details p={p} />
-          <Button href={p.manageUrl} style={styles.button}>
+          {p.depositLink && (
+            <Button href={p.depositLink} style={styles.button}>
+              Pay {p.paidLabel} deposit
+            </Button>
+          )}
+          <Button href={p.manageUrl} style={p.depositLink ? { ...styles.button, marginTop: 10 } : styles.button}>
             View or manage booking
           </Button>
           <Text style={{ ...styles.muted, marginTop: 18 }}>
-            Need to cancel? Do it more than {p.cancelNoticeHours} hours before and your payment is refunded automatically.
+            {p.depositLink
+              ? `Need to cancel? Do it more than ${p.cancelNoticeHours} hours before and ${p.businessName} will refund your deposit.`
+              : `Need to cancel? Do it more than ${p.cancelNoticeHours} hours before and your payment is refunded automatically.`}
           </Text>
           <Footer />
         </Container>

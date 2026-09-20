@@ -201,7 +201,7 @@ function Stats({ data }: { data: Overview }) {
   if (s.setupRevenueCents > 0 && !s.byCurrency.some((c) => c.currency === "gbp")) fees.push({ currency: "gbp", cents: s.setupRevenueCents });
   const cards = [
     {
-      label: "Your revenue",
+      label: fees.some((f) => f.cents > 0) ? "Your revenue" : "Your revenue (free platform)",
       value: moneyList(fees),
       sub: `${moneyList(s.byCurrency.map((c) => ({ currency: c.currency, cents: c.feeMonthCents })))} fees last 30 days · ${s.setupsPaid} setups paid`,
       accent: true,

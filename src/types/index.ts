@@ -43,6 +43,8 @@ export interface ProviderDTO {
   /** MOBILE providers: comma-separated ZIP/postcode prefixes accepted at booking. */
   serviceAreaCodes: string | null;
   depositPercent: number;
+  /** Provider's own payment link, used for deposits when no Stripe account is connected. */
+  depositLinkUrl: string | null;
   cancelNoticeHours: number;
   slotIntervalMinutes: number;
   bufferMinutes: number;
@@ -52,6 +54,8 @@ export interface ProviderDTO {
   country: string;
   /** False until the provider's Stripe account can accept charges; bookings then confirm without payment. */
   takesDeposits: boolean;
+  /** card = Stripe on the page, link = provider's own payment link after booking, none = pay on the day. */
+  depositMode: "card" | "link" | "none";
   stripeConnected: boolean;
 }
 
@@ -77,6 +81,8 @@ export interface BookingDTO {
   amountCents: number;
   depositCents: number;
   platformFeeCents: number;
+  /** Set when the deposit is paid through the provider's own payment link (no Stripe). */
+  depositLink: string | null;
   currency: string;
   paidAt: string | null;
   address: string | null;

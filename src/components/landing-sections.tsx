@@ -8,18 +8,19 @@ import { spring } from "@/components/motion";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
-  { n: "01", title: "Add your services", body: "Gel, BIAB, infills, removals - with your prices and how long each takes. Or paste your price list and we set it up for £5." },
-  { n: "02", title: "Drop the link in your bio", body: "Your page shows only the times you actually have free, with a gap between clients if you want one." },
-  { n: "03", title: "Deposits land before you do", body: "Clients pay by card to lock the slot. Late cancellations keep the deposit; early ones refund automatically." },
+  { n: "01", title: "Add your packages", body: "Gold, Platinum, Diamond - by vehicle size, with your prices and how long each takes. Or paste your price list and we set it up for you, free." },
+  { n: "02", title: "Drop the link in your bio", body: "Your page shows only the times you actually have free, only to clients inside the areas you cover, with a travel buffer between jobs." },
+  { n: "03", title: "Deposits land before you drive", body: "Clients pay to lock the slot - by card on the page, or through your own payment link. Late cancellations keep the deposit." },
 ];
 
 const FAQ = [
-  { q: "Is it really free?", a: "Yes - no monthly fee and no card needed to start. When a client pays a deposit through your page, GlideBook keeps 3% (minimum 30p) and Stripe takes its usual card fee (about 1.5% + 20p in the UK). Not booked? You pay nothing." },
-  { q: "How do deposits work?", a: "You choose a percentage - most nail techs use 30-50%. The client pays it by card when booking; the rest is paid to you on the day however you like." },
+  { q: "Is it really free?", a: "Yes. GlideBook takes nothing: no monthly fee, no commission, no setup charge. If you take card deposits through Stripe, Stripe charges its usual card fee (about 1.5% + 20p in the UK) - that goes to Stripe, not to us." },
+  { q: "How do deposits work?", a: "You choose a percentage - most detailers take 25-50%. The client pays it when booking, either by card on the page (your own Stripe) or through your own payment link; the rest is paid on the day however you like." },
   { q: "What if a client cancels?", a: "They get a link to cancel themselves. Cancel outside your notice window (24 hours by default) and the deposit refunds automatically. Inside it, you keep the deposit." },
+  { q: "Can I limit where I travel?", a: "Yes. In Settings, list the areas you cover and the ZIP or postcode prefixes you accept. The booking form asks for the client's ZIP and turns away anything outside your area before they can book." },
   { q: "Do clients need an account?", a: "No. They book as guests with their name and email, and get a confirmation with a calendar invite and a reminder the day before." },
   { q: "Can I still take bookings by DM?", a: "Of course - just add them to your schedule and the slot disappears from your page so nobody double-books you." },
-  { q: "Where does the money go?", a: "Into your own Stripe account, which you connect in two minutes from the dashboard. Stripe pays it out to your bank automatically. GlideBook never holds your money." },
+  { q: "Where does the money go?", a: "Straight to you. Take card deposits on the page through your own Stripe account, or send clients to your own payment link (PayPal, Monzo, Revolut, Stripe link) and confirm the deposit with one tap. GlideBook never holds or takes any of it." },
 ];
 
 export function HowItWorks() {

@@ -22,7 +22,7 @@ Demo logins (password `password123`):
 
 | Provider | Email | Booking page |
 | --- | --- | --- |
-| Polished by Amara (nails, GBP, 30% deposit) | `demo@polishedbyamara.com` | `/book/polished-by-amara` |
+| Polished by Apex (nails, GBP, 30% deposit) | `demo@polishedbyapex.com` | `/book/polished-by-apex` |
 | Shine Mobile Detailing (car) | `demo@shinemobile.com` | `/book/shine-mobile` |
 | Paws on Wheels Grooming (pet) | `demo@pawsonwheels.com` | `/book/paws-on-wheels` |
 
@@ -83,9 +83,15 @@ Pure function. For a calendar day it walks each working window at `slotIntervalM
 
 `POST /api/bookings` re-runs the same engine **inside a transaction holding `pg_advisory_xact_lock(hashtext(providerId))`**, so two customers can never take the same slot. Unpaid `PENDING` holds expire after `BOOKING_HOLD_MINUTES`; their PaymentIntents are cancelled lazily on the next read, no cron needed.
 
-### Payments and how GlideBook earns
+### Payments
 
-Two revenue streams, both automatic:
+GlideBook is free for providers: `PLATFORM_FEE_PERCENT` defaults to 0 and the done-for-you setup has no fee (`SETUP_FEE_CENTS = 0`). Both can be switched on later without code changes. Deposits reach the provider one of three ways, chosen automatically per provider:
+
+- **card** - the provider has connected a Stripe account: the booking page takes the deposit on the spot (below).
+- **link** - the provider pasted their own payment link (PayPal.me, Monzo.me, Revolut, Stripe link) in Settings: the booking is confirmed immediately, the client is sent to the link (on the success screen, in the email and on the manage page), and the provider taps **Deposit received** on the booking, which marks it `PAID`. Refunds are between them.
+- **none** - nothing online; bookings confirm instantly and the provider collects on the day.
+
+Optional revenue streams, both automatic once enabled:
 
 1. **Per-booking fee.** Providers connect their own Stripe account from `/dashboard/payments` (Stripe Express hosted onboarding, ~2 minutes on a phone). Deposits are created as *destination charges* on the platform account with `transfer_data.destination` = the provider and `application_fee_amount` = `PLATFORM_FEE_PERCENT` of the deposit (floor `PLATFORM_FEE_MIN_CENTS`). Stripe pays the provider out; the fee stays on the platform balance. Refunds reverse the transfer and the fee. Until a provider's account has `charges_enabled`, their page runs in **pay-on-the-day mode**: bookings confirm instantly with no card step, so the product is usable from minute one and the dashboard nudges them to connect.
 2. **Done-for-you setup.** A flat fee charged directly on the platform account (see below).

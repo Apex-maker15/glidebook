@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarCheck, CreditCard, Radio, Sparkles } from "lucide-react";
+import { ArrowRight, CreditCard, MapPinned, Radio, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Reveal } from "@/components/reveal";
 import { Faq, HowItWorks } from "@/components/landing-sections";
@@ -10,14 +10,16 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const providers = await prisma.user.findMany({
-    where: { role: "PROVIDER", slug: { not: null }, businessName: { not: null } },
+    where: { role: "PROVIDER", slug: { not: null }, businessName: { not: null }, services: { some: { active: true } } },
     select: { slug: true, businessName: true, category: true, _count: { select: { services: { where: { active: true } } } } },
     orderBy: { createdAt: "desc" },
     take: 12,
   });
+  // Detailers are the focus right now: show them first, then everyone else.
+  providers.sort((a, b) => Number(b.category === "CAR_DETAILING") - Number(a.category === "CAR_DETAILING"));
 
   return (
-    <div data-accent="beauty" className="min-h-dvh">
+    <div data-accent="car" className="min-h-dvh">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 pt-6 sm:px-6">
         <span className="flex items-center gap-2 text-sm font-semibold tracking-tight">
           <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
@@ -39,18 +41,18 @@ export default async function HomePage() {
         <section className="pt-20 text-center sm:pt-28">
           <Reveal>
             <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[12px] text-ink-muted">
-              <Sparkles className="size-3 text-accent-strong" /> For nail techs, lash artists & beauty pros
+              <Sparkles className="size-3 text-accent-strong" /> For mobile detailers & car valeters
             </p>
           </Reveal>
           <Reveal delay={0.06}>
             <h1 className="text-gradient mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-tight sm:text-6xl">
-              Stop chasing deposits in your DMs.
+              Deposits before you drive out.
             </h1>
           </Reveal>
           <Reveal delay={0.12}>
             <p className="mx-auto mt-5 max-w-xl text-base text-ink-muted sm:text-lg">
-              A free booking page that looks as good as your work. Clients pick a slot, pay their deposit, and land on your
-              schedule instantly. No monthly fee, no more no-shows.
+              A free booking page for mobile detailing. Clients pick a package by vehicle size, choose a time inside your
+              service area and pay a deposit - so the job is real before you load the van. No monthly fee, no commission.
             </p>
           </Reveal>
           <Reveal delay={0.18}>
@@ -76,17 +78,17 @@ export default async function HomePage() {
             {
               icon: <CreditCard className="size-5" />,
               title: "Deposits, automatically",
-              body: "Set 30%, 50% or full payment. Clients pay by card before the slot is theirs, so cancellations stop costing you.",
+              body: "Set 25%, 50% or full payment. Clients pay before the slot is theirs, so a cancelled Saturday stops costing you fuel and a day.",
             },
             {
-              icon: <CalendarCheck className="size-5" />,
-              title: "Only real availability",
-              body: "Your hours, breaks and gaps between clients are enforced server-side. Double bookings are impossible.",
+              icon: <MapPinned className="size-5" />,
+              title: "Your service area, enforced",
+              body: "List the cities you cover and the ZIP prefixes you accept. Anyone outside them cannot book, so you never drive across the state for one wash.",
             },
             {
               icon: <Radio className="size-5" />,
-              title: "Live schedule",
-              body: "New appointments slide onto your dashboard the moment the deposit clears, with a glow so you never miss one.",
+              title: "Packages by vehicle size",
+              body: "Gold, Platinum, Diamond - priced for cars, SUVs, trucks and vans - with the time each really takes, plus a travel buffer between jobs.",
             },
           ].map((f, i) => (
             <Reveal key={f.title} delay={0.08 * i}>
@@ -101,7 +103,7 @@ export default async function HomePage() {
 
         <Reveal>
           <p className="mt-10 text-center text-[13px] text-ink-muted">
-            Also works for barbers, mobile detailers, pet groomers and any appointment-based service.
+            Also works for nail techs, barbers, pet groomers and any appointment-based service.
           </p>
         </Reveal>
 
@@ -145,7 +147,7 @@ export default async function HomePage() {
         <Reveal>
           <section className="mt-24 text-center">
             <h2 className="text-gradient text-3xl font-semibold tracking-tight sm:text-4xl">Your booking page in 10 minutes.</h2>
-            <p className="mx-auto mt-3 max-w-md text-sm text-ink-muted">Free forever for the DIY route. Deposits from your very first client.</p>
+            <p className="mx-auto mt-3 max-w-md text-sm text-ink-muted">Free forever. Deposits from your very first client.</p>
             <Link
               href="/register"
               className="mt-6 inline-flex h-12 items-center gap-2 rounded-2xl bg-accent px-6 text-sm font-semibold text-black shadow-glow transition-transform hover:-translate-y-0.5"

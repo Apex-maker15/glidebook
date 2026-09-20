@@ -29,6 +29,7 @@ export const BookingCard = forwardRef<HTMLDivElement, Props>(function BookingCar
   const end = new Date(booking.endTime);
   const isPast = end.getTime() < Date.now();
   const canConfirm = booking.status === "PENDING";
+  const awaitingLinkDeposit = booking.status === "CONFIRMED" && Boolean(booking.depositLink) && booking.depositCents > 0;
   const canCancel = booking.status !== "CANCELLED" && !isPast;
 
   return (
@@ -70,7 +71,9 @@ export const BookingCard = forwardRef<HTMLDivElement, Props>(function BookingCar
                   {formatMoney(booking.amountCents, booking.currency)}
                   {booking.depositCents < booking.amountCents && (
                     <span className="block text-[11px] font-medium text-ink-muted">
-                      {booking.depositCents > 0 ? `${formatMoney(booking.depositCents, booking.currency)} deposit` : "pay on the day"}
+                      {booking.depositCents > 0
+                        ? `${formatMoney(booking.depositCents, booking.currency)} deposit${awaitingLinkDeposit ? " · awaiting" : booking.depositLink ? " · via link" : ""}`
+                        : "pay on the day"}
                     </span>
                   )}
                 </span>
@@ -137,13 +140,18 @@ export const BookingCard = forwardRef<HTMLDivElement, Props>(function BookingCar
                   <Check className="size-3.5" /> Confirm
                 </Button>
               )}
+              {awaitingLinkDeposit && !isPast && (
+                <Button size="sm" className="flex-1" disabled={pending} onClick={() => void updateStatus(booking.id, "PAID")}>
+                  <Check className="size-3.5" /> Deposit received
+                </Button>
+              )}
               {canCancel && (
                 <Button
                   size="sm"
-                  variant={canConfirm ? "ghost" : "danger"}
-                  className={cn(!canConfirm && "flex-1")}
+                  variant={canConfirm || awaitingLinkDeposit ? "ghost" : "danger"}
+                  className={cn(!canConfirm && !awaitingLinkDeposit && "flex-1")}
                   disabled={pending}
-                  onClick={() => (booking.status === "PAID" ? setConfirmCancel(true) : void updateStatus(booking.id, "CANCELLED"))}
+                  onClick={() => (booking.status === "PAID" && !booking.depositLink ? setConfirmCancel(true) : void updateStatus(booking.id, "CANCELLED"))}
                 >
                   <X className="size-3.5" /> Cancel
                 </Button>

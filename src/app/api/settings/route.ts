@@ -29,6 +29,10 @@ export const PATCH = handle(async (req: Request) => {
   if (input.locationMode === "STUDIO" && input.studioAddress !== undefined && !input.studioAddress?.trim()) {
     throw new HttpError(422, "Add your studio address so clients know where to go", "STUDIO_ADDRESS_REQUIRED");
   }
+  if (input.slug) {
+    const taken = await prisma.user.findFirst({ where: { slug: input.slug, NOT: { id: providerId } }, select: { id: true } });
+    if (taken) throw new HttpError(409, "That booking link is already taken", "SLUG_TAKEN");
+  }
   if (input.email) {
     input.email = input.email.toLowerCase();
     const taken = await prisma.user.findFirst({ where: { email: input.email, NOT: { id: providerId } }, select: { id: true } });

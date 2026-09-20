@@ -13,6 +13,7 @@ import { COUNTRIES } from "@/lib/platform";
 
 interface FormState {
   businessName: string;
+  slug: string;
   email: string;
   phone: string;
   timezone: string;
@@ -24,6 +25,7 @@ interface FormState {
   serviceAreas: string;
   serviceAreaCodes: string;
   depositPercent: string;
+  depositLinkUrl: string;
   cancelNoticeHours: string;
   slotIntervalMinutes: string;
   bufferMinutes: string;
@@ -56,6 +58,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
       .then(({ provider }) =>
         setForm({
           businessName: provider.businessName,
+          slug: provider.slug,
           email: provider.email,
           phone: provider.phone ?? "",
           timezone: provider.timezone,
@@ -67,6 +70,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           serviceAreas: provider.serviceAreas ?? "",
           serviceAreaCodes: provider.serviceAreaCodes ?? "",
           depositPercent: String(provider.depositPercent),
+          depositLinkUrl: provider.depositLinkUrl ?? "",
           cancelNoticeHours: String(provider.cancelNoticeHours),
           slotIntervalMinutes: String(provider.slotIntervalMinutes),
           bufferMinutes: String(provider.bufferMinutes),
@@ -92,6 +96,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
         method: "PATCH",
         body: {
           businessName: form.businessName,
+          slug: form.slug.trim().toLowerCase(),
           email: form.email.trim(),
           phone: form.phone.trim() || null,
           timezone: form.timezone,
@@ -102,6 +107,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           serviceAreas: form.serviceAreas.trim() || null,
           serviceAreaCodes: form.serviceAreaCodes.trim() || null,
           depositPercent: Number(form.depositPercent),
+          depositLinkUrl: form.depositLinkUrl.trim() || null,
           cancelNoticeHours: Number(form.cancelNoticeHours),
           slotIntervalMinutes: Number(form.slotIntervalMinutes),
           bufferMinutes: Number(form.bufferMinutes),
@@ -138,7 +144,17 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           </motion.p>
         ) : (
           <motion.form key="form" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" onSubmit={(e) => void save(e)} className="glass space-y-4 rounded-3xl p-6">
-            <Field label="Business name" value={form!.businessName} onChange={set("businessName")} error={issues.businessName?.[0]} required />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Business name" value={form!.businessName} onChange={set("businessName")} error={issues.businessName?.[0]} required />
+              <Field
+                label="Booking link"
+                value={form!.slug}
+                onChange={set("slug")}
+                error={issues.slug?.[0]}
+                hint={`glidebook.vercel.app/book/${form!.slug || "your-name"} - changing it breaks links you already shared`}
+                required
+              />
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Login email" type="email" value={form!.email} onChange={set("email")} error={issues.email?.[0]} hint="Booking alerts go here too" required />
               <Field label="Phone (shown to clients after booking)" type="tel" value={form!.phone} onChange={set("phone")} error={issues.phone?.[0]} />
@@ -244,6 +260,16 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
                 onChange={set("depositPercent")}
                 error={issues.depositPercent?.[0]}
                 hint="100 = full payment upfront. 30 is typical for nails and lashes."
+              />
+              <Field
+                className="sm:col-span-2"
+                label="Deposit payment link (optional)"
+                type="url"
+                value={form!.depositLinkUrl}
+                onChange={set("depositLinkUrl")}
+                error={issues.depositLinkUrl?.[0]}
+                hint="No Stripe? Paste your PayPal.me, Monzo.me, Revolut or Stripe payment link. Clients are sent there for the deposit after booking; you tap 'Deposit received' in your schedule."
+                placeholder="https://paypal.me/yourname or https://monzo.me/yourname"
               />
               <Field
                 label="Free cancellation up to (hours before)"

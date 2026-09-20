@@ -80,7 +80,13 @@ export function SetupOffer({ publishableKey }: Props) {
     setSubmitting(true);
     setError(null);
     try {
-      const r = await api<{ clientSecret: string }>("/api/setup", { method: "POST", body: { notes } });
+      const r = await api<{ clientSecret: string | null; request: SetupRequest }>("/api/setup", { method: "POST", body: { notes } });
+      if (!r.clientSecret) {
+        // Free setup: no payment step, the request is already queued.
+        setRequest(r.request);
+        push({ tone: "success", title: "Request sent", description: "We'll build your page from what you sent." });
+        return;
+      }
       setPayment({ clientSecret: r.clientSecret });
     } catch (err) {
       const msg = err instanceof ClientApiError && err.issues?.notes?.[0] ? err.issues.notes[0] : errorMessage(err);
@@ -90,7 +96,8 @@ export function SetupOffer({ publishableKey }: Props) {
     }
   };
 
-  const feeLabel = formatMoney(fee.cents, fee.currency);
+  const free = fee.cents === 0;
+  const feeLabel = free ? "Free" : formatMoney(fee.cents, fee.currency);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -121,7 +128,7 @@ export function SetupOffer({ publishableKey }: Props) {
                 <Clock className="size-8 text-accent-strong" />
                 <h2 className="mt-3 text-lg font-semibold">{request ? "We're on it" : "Payment received - confirming"}</h2>
                 <p className="mt-1 text-sm text-ink-muted">
-                  Thanks for the {feeLabel}. We will build your services and hours from what you sent, usually within 24 hours.
+                  {free ? "Thanks!" : `Thanks for the ${feeLabel}.`} We will build your services and hours from what you sent, usually within 24 hours.
                   You will see them appear under Services and Availability.
                 </p>
               </>
@@ -177,7 +184,7 @@ export function SetupOffer({ publishableKey }: Props) {
               </span>
               <h2 className="mt-4 text-lg font-semibold">We set it up for you</h2>
               <p className="mt-1 text-2xl font-semibold tracking-tight">
-                {feeLabel} <span className="text-sm font-normal text-ink-muted">one-off</span>
+                {feeLabel} {!free && <span className="text-sm font-normal text-ink-muted">one-off</span>}
               </p>
               <p className="mt-2 text-sm text-ink-muted">
                 Paste your price list and hours below (or a screenshot&apos;s worth of text). We build your services, durations,
@@ -192,11 +199,11 @@ export function SetupOffer({ publishableKey }: Props) {
                 rows={8}
                 error={error ?? undefined}
               />
-              {!publishableKey && (
+              {!free && !publishableKey && (
                 <p className="mt-2 text-[12px] text-amber-200">Payments are not configured on this server yet.</p>
               )}
-              <Button className="mt-4 w-full" size="lg" loading={submitting} disabled={!publishableKey || notes.trim().length < 20} onClick={() => void start()}>
-                Continue to pay {feeLabel}
+              <Button className="mt-4 w-full" size="lg" loading={submitting} disabled={(!free && !publishableKey) || notes.trim().length < 20} onClick={() => void start()}>
+                {free ? "Send it - we'll build it" : `Continue to pay ${feeLabel}`}
               </Button>
             </motion.div>
           </motion.div>

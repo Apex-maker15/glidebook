@@ -61,13 +61,19 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
   if (status === "CANCELLED" && booking.status === BookingStatus.CANCELLED) {
     throw new HttpError(409, "Booking is already cancelled", "BAD_TRANSITION");
   }
+  if (status === "PAID") {
+    // Only deposits collected outside GlideBook (payment link) can be marked paid by hand.
+    if (booking.paymentIntentId || booking.depositCents <= 0 || booking.status !== BookingStatus.CONFIRMED) {
+      throw new HttpError(409, "This booking cannot be marked as paid", "BAD_TRANSITION");
+    }
+  }
 
   // Provider-initiated cancellations always refund; the client did nothing wrong.
   const { refunded } = status === "CANCELLED" ? await refundBookingPayment(booking) : { refunded: false };
 
   const updated = await prisma.booking.update({
     where: { id },
-    data: { status, ...(status === "CANCELLED" ? { cancelledBy: "provider" } : {}) },
+    data: { status, ...(status === "CANCELLED" ? { cancelledBy: "provider" } : {}), ...(status === "PAID" ? { paidAt: new Date() } : {}) },
     include: bookingInclude,
   });
   const dto = toBookingDTO(updated);

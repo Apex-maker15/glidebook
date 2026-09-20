@@ -59,5 +59,5 @@ export async function requireAdmin(): Promise<{ id: string; email: string }> {
   return { id: user.id, email: user.email! };
 }
 
-export const SETUP_FEE_CENTS = 500; // £5.00
+export const SETUP_FEE_CENTS = 0; // done-for-you setup is free
 export const SETUP_FEE_CURRENCY = "gbp";

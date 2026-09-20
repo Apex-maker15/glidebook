@@ -62,6 +62,7 @@ function clientProps(b: Loaded): BookingEmailProps {
     manageUrl: manageUrlFor(b),
     cancelNoticeHours: b.provider.cancelNoticeHours,
     providerPhone: b.provider.phone,
+    depositLink: b.depositLink,
   };
 }
 
@@ -116,7 +117,7 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
         location: locationFor(b),
         serviceDetails: b.serviceDetails,
         notes: b.notes,
-        paidLabel: props.paidLabel,
+        paidLabel: b.depositLink ? `${props.paidLabel} deposit via your payment link - mark it received in your schedule` : props.paidLabel,
         balanceLabel: balance > 0 ? formatMoney(balance, b.currency) : null,
         dashboardUrl: appUrl("/dashboard"),
         kind: "new",

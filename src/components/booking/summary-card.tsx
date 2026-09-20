@@ -31,9 +31,11 @@ export function SummaryCard() {
   ].filter(Boolean) as { key: string; icon: React.ReactNode; label: string; detail: string }[];
 
   const total = service ? formatMoney(service.priceCents, provider.currency) : null;
-  const depositCents = service && provider.takesDeposits ? depositFor(service.priceCents, provider.depositPercent, provider.currency) : 0;
+  const depositCents =
+    service && provider.depositMode !== "none" ? depositFor(service.priceCents, provider.depositPercent, provider.currency) : 0;
   const isDeposit = service ? depositCents > 0 && depositCents < service.priceCents : false;
-  const payOnDay = !provider.takesDeposits;
+  const payOnDay = provider.depositMode === "none";
+  const viaLink = provider.depositMode === "link";
   const dueToday = service ? formatMoney(depositCents, provider.currency) : null;
 
   return (
@@ -98,13 +100,17 @@ export function SummaryCard() {
             <Clock className="size-3" />{" "}
             {payOnDay
               ? "Pay on the day"
-              : step === "success"
+              : viaLink
                 ? isDeposit
-                  ? `${dueToday} deposit paid`
-                  : "Paid"
-                : isDeposit
-                  ? `${dueToday} deposit today, rest on the day`
-                  : "Charged at checkout"}
+                  ? `${dueToday} deposit via payment link, rest on the day`
+                  : "Paid via payment link after booking"
+                : step === "success"
+                  ? isDeposit
+                    ? `${dueToday} deposit paid`
+                    : "Paid"
+                  : isDeposit
+                    ? `${dueToday} deposit today, rest on the day`
+                    : "Charged at checkout"}
           </p>
         </motion.div>
       </motion.aside>

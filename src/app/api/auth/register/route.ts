@@ -56,8 +56,8 @@ export const POST = handle(async (req: Request) => {
         currency: input.currency,
         country: input.country ?? countryForCurrency(input.currency),
         locationMode: input.locationMode ?? CATEGORIES[input.category].defaultLocation,
-        // Beauty pros usually take a deposit; mobile trades usually take full payment.
-        depositPercent: input.category === "NAILS_BEAUTY" || input.category === "HAIR_BARBER" ? 30 : 100,
+        // Sensible starting deposit per trade; changeable in Settings.
+        depositPercent: input.category === "CAR_DETAILING" || input.category === "PET_GROOMING" ? 25 : 30,
       };
       const user = existing
         ? await prisma.user.update({
