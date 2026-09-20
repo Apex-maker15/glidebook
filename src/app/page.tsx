@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Reveal } from "@/components/reveal";
 import { Faq, HowItWorks } from "@/components/landing-sections";
 import { CategoryIcon } from "@/components/category-icon";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { CATEGORIES } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export default async function HomePage() {
   providers.sort((a, b) => Number(b.category === "CAR_DETAILING") - Number(a.category === "CAR_DETAILING"));
 
   return (
-    <div data-accent="car" className="min-h-dvh">
+    <div data-accent="neutral" className="min-h-dvh">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 pt-6 sm:px-6">
         <span className="flex items-center gap-2 text-sm font-semibold tracking-tight">
           <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
@@ -28,6 +29,7 @@ export default async function HomePage() {
           GlideBook
         </span>
         <nav className="flex items-center gap-2 text-sm">
+          <ThemeToggle className="mr-1" />
           <Link href="/login" className="rounded-xl px-3 py-2 text-ink-muted transition-colors hover:bg-white/5 hover:text-ink">
             Sign in
           </Link>

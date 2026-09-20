@@ -7,6 +7,8 @@ import { loadStripe, type Stripe, type StripeElementsOptions } from "@stripe/str
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
+import { useTheme } from "@/components/theme/use-theme";
+import type { Theme } from "@/components/theme/theme";
 
 const stripeCache = new Map<string, Promise<Stripe | null>>();
 export function getStripePromise(key: string) {
@@ -18,26 +20,38 @@ export function getStripePromise(key: string) {
   return p;
 }
 
-export const stripeAppearance: StripeElementsOptions["appearance"] = {
-  theme: "night",
-  labels: "floating",
-  variables: {
-    colorPrimary: "#a89bff",
-    colorBackground: "#0f1118",
-    colorText: "#f4f5f9",
-    colorTextSecondary: "#9298a8",
-    colorDanger: "#fca5a5",
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-    borderRadius: "14px",
-    spacingUnit: "5px",
-  },
-  rules: {
-    ".Input": { border: "1px solid rgba(255,255,255,0.09)", boxShadow: "none", backgroundColor: "rgba(255,255,255,0.04)" },
-    ".Input:focus": { border: "1px solid rgba(168,155,255,0.6)", boxShadow: "0 0 0 4px rgba(139,124,255,0.14)" },
-    ".Tab": { border: "1px solid rgba(255,255,255,0.09)", backgroundColor: "rgba(255,255,255,0.03)" },
-    ".Tab--selected": { border: "1px solid rgba(168,155,255,0.6)", boxShadow: "0 0 0 4px rgba(139,124,255,0.14)" },
-  },
-};
+/** Payment Element styling that matches whichever theme the page is showing. */
+export function stripeAppearanceFor(theme: Theme): StripeElementsOptions["appearance"] {
+  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#d9542f";
+  const dark = theme === "dark";
+  return {
+    theme: dark ? "night" : "stripe",
+    labels: "floating",
+    variables: {
+      colorPrimary: accent,
+      colorBackground: dark ? "#151518" : "#fffdf9",
+      colorText: dark ? "#f2f1ee" : "#17161a",
+      colorTextSecondary: dark ? "#9a9aa3" : "#6b6a72",
+      colorDanger: dark ? "#fca5a5" : "#b91c1c",
+      fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+      borderRadius: "14px",
+      spacingUnit: "5px",
+    },
+    rules: {
+      ".Input": {
+        border: `1px solid ${dark ? "rgba(255,255,255,0.09)" : "rgba(22,20,16,0.12)"}`,
+        boxShadow: "none",
+        backgroundColor: dark ? "rgba(255,255,255,0.04)" : "#ffffff",
+      },
+      ".Input:focus": { border: `1px solid ${accent}`, boxShadow: `0 0 0 4px ${accent}22` },
+      ".Tab": {
+        border: `1px solid ${dark ? "rgba(255,255,255,0.09)" : "rgba(22,20,16,0.12)"}`,
+        backgroundColor: dark ? "rgba(255,255,255,0.03)" : "#ffffff",
+      },
+      ".Tab--selected": { border: `1px solid ${accent}`, boxShadow: `0 0 0 4px ${accent}22` },
+    },
+  };
+}
 
 interface Props {
   publishableKey: string;
@@ -51,8 +65,10 @@ interface Props {
 /** Self-contained Payment Element form for one-off charges (setup fee, etc.). */
 export function StripePayment({ publishableKey, clientSecret, label, returnUrl, onSucceeded }: Props) {
   const stripePromise = useMemo(() => getStripePromise(publishableKey), [publishableKey]);
+  const [theme] = useTheme();
+  const appearance = useMemo(() => stripeAppearanceFor(theme), [theme]);
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance, loader: "auto" }}>
+    <Elements stripe={stripePromise} options={{ clientSecret, appearance, loader: "auto" }}>
       <Form label={label} returnUrl={returnUrl} onSucceeded={onSucceeded} />
     </Elements>
   );

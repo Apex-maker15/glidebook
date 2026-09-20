@@ -30,6 +30,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       category: true,
       depositPercent: true,
       depositLinkUrl: true,
+      tagline: true,
+      accentColor: true,
+      logoData: true,
       currency: true,
       stripeAccountId: true,
       stripeAccountLive: true,
@@ -39,7 +42,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   });
 
   const meta = CATEGORIES[p?.category ?? "OTHER"];
-  const accent = ACCENT[meta.accent];
+  const accent = p?.accentColor && /^#[0-9a-fA-F]{6}$/.test(p.accentColor) ? p.accentColor : ACCENT[meta.accent];
   const name = p?.businessName ?? "GlideBook";
   const services = p?.services ?? [];
   const deposit =
@@ -65,14 +68,18 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${accent}33`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ width: 16, height: 16, borderRadius: 999, background: accent }} />
-          </div>
-          <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.5 }}>GlideBook</div>
+          {p?.logoData ? (
+            <img src={p.logoData} width={72} height={72} style={{ borderRadius: 18, objectFit: "cover" }} alt="" />
+          ) : (
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: `${accent}33`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 16, height: 16, borderRadius: 999, background: accent }} />
+            </div>
+          )}
+          <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.5, color: "#9298a8" }}>Book online</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ fontSize: 22, letterSpacing: 5, textTransform: "uppercase", color: "#9298a8" }}>{meta.tagline}</div>
+          <div style={{ fontSize: 22, letterSpacing: 5, textTransform: "uppercase", color: "#9298a8" }}>{p?.tagline ?? meta.tagline}</div>
           <div style={{ fontSize: name.length > 22 ? 64 : 84, fontWeight: 700, letterSpacing: -2, lineHeight: 1.05, color: "#fff" }}>{name}</div>
           <div style={{ fontSize: 30, color: accent, marginTop: 6 }}>{`Book online - ${deposit}`}</div>
         </div>

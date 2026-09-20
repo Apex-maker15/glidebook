@@ -73,6 +73,14 @@ Then import the repo into Vercel, paste the env vars, deploy. Set `NEXT_PUBLIC_A
 - `Availability` - one row per weekday with `{ windows: [{start,end}], breaks: [{start,end}] }` in the provider's local time.
 - `StripeEvent` - processed webhook ids for idempotency.
 
+### Provider pages, branding, reviews
+
+`/book/<slug>` is the provider's own page, not a GlideBook form: cover and logo (uploaded from **Your page** in the dashboard, resized in the browser and stored inline as data URLs so no image host is needed), tagline, bio, Instagram, up to six work photos, a brand colour that re-tints the whole page (`src/lib/color.ts` derives light/dark "strong" shades), hours from availability, service areas, policies, and an embedded map for studio providers. Clients rate a booking from their manage link once the appointment has passed (`POST /api/bookings/:id/review`, one per booking); the average and latest reviews sit above the booking form.
+
+### Theme
+
+Light and dark are CSS-variable themes switched by `data-theme` on `<html>` (`src/components/theme/`). The choice is saved in `localStorage`, defaults to the OS preference, and is applied by a `beforeInteractive` script so there is no flash. Tailwind's `white`/`black` are aliased to theme tints so existing `bg-white/[0.06]`-style classes work in both themes.
+
 ### Service areas (mobile providers)
 
 `User.serviceAreas` is free text shown on the booking page ("We come to you across Phoenix, Scottsdale..."). `User.serviceAreaCodes` is an optional comma-separated list of ZIP/postcode prefixes; when set, the booking form asks for the client's code and both the client (inline) and `POST /api/bookings` (`OUT_OF_AREA`) reject anything outside it. Matching is prefix-based and ignores case and spaces (`src/lib/service-area.ts`).

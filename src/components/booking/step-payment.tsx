@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, ArrowLeft, Lock, ShieldCheck, TimerReset } from "lucide-react";
-import { loadStripe, type Stripe, type StripeElementsOptions } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
@@ -11,37 +10,8 @@ import { fadeVariants } from "@/components/motion";
 import { useBookingStore, selectService } from "@/store/booking-store";
 import { formatMoney } from "@/lib/utils";
 
-// Load Stripe.js exactly once per page; the promise is shared across renders.
-const stripeCache = new Map<string, Promise<Stripe | null>>();
-function getStripePromise(key: string) {
-  let p = stripeCache.get(key);
-  if (!p) {
-    p = loadStripe(key);
-    stripeCache.set(key, p);
-  }
-  return p;
-}
-
-const appearance: StripeElementsOptions["appearance"] = {
-  theme: "night",
-  labels: "floating",
-  variables: {
-    colorPrimary: "#a89bff",
-    colorBackground: "#0f1118",
-    colorText: "#f4f5f9",
-    colorTextSecondary: "#9298a8",
-    colorDanger: "#fca5a5",
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-    borderRadius: "14px",
-    spacingUnit: "5px",
-  },
-  rules: {
-    ".Input": { border: "1px solid rgba(255,255,255,0.09)", boxShadow: "none", backgroundColor: "rgba(255,255,255,0.04)" },
-    ".Input:focus": { border: "1px solid rgba(168,155,255,0.6)", boxShadow: "0 0 0 4px rgba(139,124,255,0.14)" },
-    ".Tab": { border: "1px solid rgba(255,255,255,0.09)", backgroundColor: "rgba(255,255,255,0.03)" },
-    ".Tab--selected": { border: "1px solid rgba(168,155,255,0.6)", boxShadow: "0 0 0 4px rgba(139,124,255,0.14)" },
-  },
-};
+import { getStripePromise, stripeAppearanceFor } from "@/components/stripe-payment";
+import { useTheme } from "@/components/theme/use-theme";
 
 export function StepPayment({ publishableKey }: { publishableKey: string | null }) {
   const checkout = useBookingStore((s) => s.checkout);
@@ -51,6 +21,8 @@ export function StepPayment({ publishableKey }: { publishableKey: string | null 
   const back = useBookingStore((s) => s.back);
 
   const stripePromise = useMemo(() => (publishableKey ? getStripePromise(publishableKey) : null), [publishableKey]);
+  const [theme] = useTheme();
+  const appearance = useMemo(() => stripeAppearanceFor(theme), [theme]);
   const ready = Boolean(checkout && stripePromise);
 
   return (

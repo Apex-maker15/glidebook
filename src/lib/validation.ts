@@ -72,6 +72,14 @@ export const updateBookingStatusSchema = z.object({
   status: z.enum(["CONFIRMED", "CANCELLED", "PAID"]),
 });
 
+/** Small images travel inline as data URLs; the browser resizes before upload, this is the hard ceiling. */
+function imageDataUrl(maxChars: number) {
+  return z
+    .string()
+    .max(maxChars, `Image is too large - try a smaller one (max ${Math.round(maxChars / 1400)} KB)`)
+    .regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, "Upload a JPEG, PNG or WebP image");
+}
+
 export const providerSettingsSchema = z.object({
   businessName: z.string().trim().min(2).max(80).optional(),
   slug: z
@@ -93,11 +101,35 @@ export const providerSettingsSchema = z.object({
   serviceAreaCodes: z.string().trim().max(300).optional().nullable(),
   depositPercent: z.number().int().min(10).max(100).optional(),
   depositLinkUrl: z.url({ protocol: /^https$/ }).max(300).optional().nullable(),
+  tagline: z.string().trim().max(90).optional().nullable(),
+  bio: z.string().trim().max(1500).optional().nullable(),
+  instagram: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/\/.*$/, ""))
+    .pipe(z.string().regex(/^[A-Za-z0-9._]{0,30}$/, "That does not look like an Instagram handle"))
+    .optional()
+    .nullable(),
+  accentColor: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Use a hex colour like #1f8fdd")
+    .optional()
+    .nullable(),
+  logoData: imageDataUrl(260_000).optional().nullable(),
+  coverData: imageDataUrl(480_000).optional().nullable(),
+  gallery: z.array(imageDataUrl(240_000)).max(6).optional(),
   cancelNoticeHours: z.number().int().min(0).max(168).optional(),
   slotIntervalMinutes: z.number().int().min(5).max(120).optional(),
   bufferMinutes: z.number().int().min(0).max(180).optional(),
   minNoticeMinutes: z.number().int().min(0).max(10080).optional(),
   bookingHorizonDays: z.number().int().min(1).max(365).optional(),
+});
+
+export const reviewSchema = z.object({
+  token: z.string().min(8),
+  rating: z.number().int().min(1).max(5),
+  text: z.string().trim().max(600).optional().nullable(),
 });
 
 export function flattenIssues(error: z.ZodError): Record<string, string[]> {

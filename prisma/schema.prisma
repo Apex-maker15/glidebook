@@ -50,6 +50,16 @@ model User {
   businessName        String?
   slug                String?           @unique
   category            BusinessCategory?
+
+  // ── Public page branding ────────────────────────────────────────────────
+  tagline     String? // one line under the name, e.g. "Mobile detailing across the East Valley"
+  bio         String? // "About" paragraph(s)
+  instagram   String? // handle without @
+  accentColor String? // hex like #1f8fdd; overrides the category accent on their page
+  logoData    String? // small square image as a data: URL (resized client-side, <= ~250 KB)
+  coverData   String? // wide banner image as a data: URL (resized client-side, <= ~450 KB)
+  gallery     String[] @default([]) // up to 6 photos of their work, data: URLs
+
   timezone            String            @default("Europe/London")
   currency            String            @default("gbp") // ISO 4217, lowercase (Stripe style)
   locationMode        LocationMode      @default(STUDIO)
@@ -83,6 +93,7 @@ model User {
   providerBookings Booking[]      @relation("ProviderBookings")
   customerBookings Booking[]      @relation("CustomerBookings")
   setupRequests    SetupRequest[]
+  reviews          Review[]
 
   @@index([role])
 }
@@ -148,9 +159,27 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  review Review?
+
   @@index([providerId, startTime])
   @@index([providerId, status])
   @@index([customerId])
+}
+
+// One review per booking, written by the client from their manage link after the appointment.
+model Review {
+  id         String  @id @default(cuid())
+  bookingId  String  @unique
+  booking    Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  providerId String
+  provider   User    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  rating     Int // 1-5
+  text       String?
+  clientName String // first name + initial, snapshotted so the page never needs the customer row
+
+  createdAt DateTime @default(now())
+
+  @@index([providerId, createdAt])
 }
 
 model Availability {

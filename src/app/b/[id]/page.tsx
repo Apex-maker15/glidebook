@@ -7,6 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { CATEGORIES } from "@/lib/categories";
 import { formatMoney } from "@/lib/utils";
 import { ManageBooking } from "@/components/booking/manage-booking";
+import { ReviewForm } from "@/components/booking/review-form";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { accentVars } from "@/lib/color";
 
 export const metadata: Metadata = { title: "Your booking", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -24,8 +27,9 @@ export default async function ManageBookingPage({ params, searchParams }: Props)
     include: {
       service: { select: { name: true, durationMinutes: true } },
       customer: { select: { name: true } },
+      review: { select: { rating: true, text: true } },
       provider: {
-        select: { businessName: true, name: true, slug: true, category: true, timezone: true, locationMode: true, studioAddress: true, cancelNoticeHours: true, phone: true },
+        select: { businessName: true, name: true, slug: true, category: true, timezone: true, locationMode: true, studioAddress: true, cancelNoticeHours: true, phone: true, accentColor: true },
       },
     },
   });
@@ -39,7 +43,7 @@ export default async function ManageBookingPage({ params, searchParams }: Props)
   const hoursUntil = (b.startTime.getTime() - now) / 3_600_000;
 
   return (
-    <div data-accent={meta.accent} className="min-h-dvh">
+    <div data-accent={meta.accent} style={accentVars(b.provider.accentColor)} className="min-h-dvh">
       <header className="mx-auto flex max-w-2xl items-center justify-between px-4 pt-6 sm:px-6">
         <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
           <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
@@ -47,6 +51,7 @@ export default async function ManageBookingPage({ params, searchParams }: Props)
           </span>
           GlideBook
         </Link>
+        <ThemeToggle />
       </header>
       <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
         <ManageBooking
@@ -76,6 +81,9 @@ export default async function ManageBookingPage({ params, searchParams }: Props)
             endIso: b.endTime.toISOString(),
           }}
         />
+        {b.status !== "CANCELLED" && b.endTime.getTime() < now && (
+          <ReviewForm bookingId={b.id} token={t} businessName={b.provider.businessName ?? b.provider.name} existing={b.review} />
+        )}
       </main>
     </div>
   );

@@ -1,24 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/toaster";
+import { THEME_INIT_SCRIPT } from "@/components/theme/theme";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-display", display: "swap", axes: ["opsz", "SOFT"] });
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: { default: "GlideBook", template: "%s | GlideBook" },
-  description: "Free booking pages for nail techs, lash artists and beauty pros. Clients pick a slot and pay their deposit by card.",
+  description: "Free booking pages for mobile detailers and appointment businesses. Clients pick a package, choose a time in your area and pay a deposit.",
   openGraph: { siteName: "GlideBook", type: "website" },
   twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07080c",
+  themeColor: "#f6f3ec",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -26,8 +29,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <body className="font-sans">
+        {/* Sets data-theme before hydration so the first paint is already light or dark. */}
+        <Script id="gb-theme-init" strategy="beforeInteractive">
+          {THEME_INIT_SCRIPT}
+        </Script>
         {children}
         <Toaster />
         <Analytics />

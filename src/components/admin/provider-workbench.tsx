@@ -9,6 +9,7 @@ import { Skeleton, StatusBadge } from "@/components/ui/primitives";
 import { ServicesManager } from "@/components/dashboard/services-manager";
 import { AvailabilityEditor } from "@/components/dashboard/availability-editor";
 import { SettingsForm } from "@/components/dashboard/settings-form";
+import { PageBranding } from "@/components/dashboard/page-branding";
 import { StripePill } from "@/components/admin/admin-overview";
 import { spring } from "@/components/motion";
 import { api, errorMessage } from "@/lib/client-api";
@@ -40,7 +41,7 @@ interface Detail {
   bookings: BookingDTO[];
 }
 
-type Tab = "bookings" | "services" | "availability" | "settings";
+type Tab = "bookings" | "services" | "availability" | "page" | "settings";
 
 /** Owner view of one provider: their account, their bookings, and the same editors they see - acting on their behalf. */
 export function ProviderWorkbench({ providerId }: { providerId: string }) {
@@ -142,7 +143,7 @@ export function ProviderWorkbench({ providerId }: { providerId: string }) {
       </header>
 
       <div className="glass mb-4 flex w-fit rounded-xl p-1">
-        {(["bookings", "services", "availability", "settings"] as const).map((t) => (
+        {(["bookings", "services", "availability", "page", "settings"] as const).map((t) => (
           <button
             key={t}
             type="button"
@@ -198,6 +199,7 @@ export function ProviderWorkbench({ providerId }: { providerId: string }) {
         )}
         {tab === "services" && <ServicesManager providerId={p.id} embedded />}
         {tab === "availability" && <AvailabilityEditor providerId={p.id} embedded />}
+        {tab === "page" && <PageBranding providerId={p.id} embedded />}
         {tab === "settings" && <SettingsForm providerId={p.id} embedded />}
       </div>
     </div>

@@ -42,6 +42,14 @@ export interface ProviderDTO {
   serviceAreas: string | null;
   /** MOBILE providers: comma-separated ZIP/postcode prefixes accepted at booking. */
   serviceAreaCodes: string | null;
+  tagline: string | null;
+  bio: string | null;
+  instagram: string | null;
+  /** Hex colour overriding the category accent on the public page. */
+  accentColor: string | null;
+  logoData: string | null;
+  coverData: string | null;
+  gallery: string[];
   depositPercent: number;
   /** Provider's own payment link, used for deposits when no Stripe account is connected. */
   depositLinkUrl: string | null;
@@ -62,6 +70,20 @@ export interface ProviderDTO {
 /** Dashboard-only view of the signed-in provider: adds account fields the public endpoints never expose. */
 export interface ProviderAccountDTO extends ProviderDTO {
   email: string;
+}
+
+export interface ReviewDTO {
+  id: string;
+  rating: number;
+  text: string | null;
+  clientName: string;
+  createdAt: string;
+}
+
+export interface ReviewSummary {
+  average: number | null;
+  count: number;
+  latest: ReviewDTO[];
 }
 
 export interface SlotDTO {
