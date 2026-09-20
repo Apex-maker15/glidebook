@@ -37,22 +37,36 @@ export interface ConnectStatus {
   requirementsDue: string[];
 }
 
+type V2Account = Stripe.V2.Core.Account;
+
+const ACCOUNT_INCLUDE: Stripe.V2.Core.AccountRetrieveParams.Include[] = ["configuration.merchant", "configuration.recipient", "requirements"];
+
 /** Pull the latest account state from Stripe and mirror it on the provider row. */
 export async function syncConnectAccount(providerId: string, accountId: string): Promise<ConnectStatus> {
-  const account = await getStripe().accounts.retrieve(accountId);
+  const account = await getStripe().v2.core.accounts.retrieve(accountId, { include: ACCOUNT_INCLUDE });
   return applyAccount(providerId, account);
 }
 
-export async function applyAccount(providerId: string, account: Stripe.Account): Promise<ConnectStatus> {
-  const chargesEnabled = Boolean(account.charges_enabled);
-  const payoutsEnabled = Boolean(account.payouts_enabled);
-  const detailsSubmitted = Boolean(account.details_submitted);
+/**
+ * Accounts v2: "can take card payments" is the merchant card_payments capability,
+ * "can be paid out" is the recipient stripe_balance payouts capability, and the
+ * requirements list tells us what Stripe still wants from the provider.
+ */
+export async function applyAccount(providerId: string, account: V2Account): Promise<ConnectStatus> {
+  const merchant = account.configuration?.merchant?.capabilities;
+  const recipient = account.configuration?.recipient?.capabilities?.stripe_balance;
+  const chargesEnabled = merchant?.card_payments?.status === "active" && recipient?.stripe_transfers?.status === "active";
+  const payoutsEnabled = recipient?.payouts?.status === "active";
+  const entries = account.requirements?.entries ?? [];
+  const outstanding = entries.filter((e) => e.awaiting_action_from === "user");
+  const detailsSubmitted = !outstanding.some((e) => e.minimum_deadline.status === "currently_due" || e.minimum_deadline.status === "past_due");
+
   const current = await prisma.user.findUnique({ where: { id: providerId }, select: { stripeConnectedAt: true } });
   await prisma.user.update({
     where: { id: providerId },
     data: {
       stripeAccountId: account.id,
-      stripeAccountLive: isLiveMode(),
+      stripeAccountLive: Boolean(account.livemode),
       stripeChargesEnabled: chargesEnabled,
       stripePayoutsEnabled: payoutsEnabled,
       stripeDetailsSubmitted: detailsSubmitted,
@@ -65,19 +79,18 @@ export async function applyAccount(providerId: string, account: Stripe.Account):
     chargesEnabled,
     payoutsEnabled,
     detailsSubmitted,
-    requirementsDue: [...(account.requirements?.currently_due ?? []), ...(account.requirements?.eventually_due ?? [])].filter(
-      (v, i, a) => a.indexOf(v) === i,
-    ),
+    requirementsDue: [...new Set(outstanding.map((e) => e.description))],
   };
 }
 
-/** Create the Express account on first use, then a fresh hosted-onboarding link. */
+/** Create the connected account on first use, then a fresh hosted-onboarding link. */
 export async function createOnboardingLink(provider: {
   id: string;
   email: string;
   businessName: string | null;
   slug: string | null;
   country: string;
+  currency: string;
   stripeAccountId: string | null;
   stripeAccountLive: boolean;
 }): Promise<string> {
@@ -86,20 +99,27 @@ export async function createOnboardingLink(provider: {
   let accountId = accountUsable(provider) ? provider.stripeAccountId : null;
 
   if (!accountId) {
-    const account = await stripe.accounts.create(
+    // Express-style account: Stripe collects the provider's details on its hosted
+    // pages, the provider gets the Express dashboard for payouts, and GlideBook
+    // (the "application") pays Stripe's fees out of its application fee.
+    const account = await stripe.v2.core.accounts.create(
       {
-        type: "express",
-        country: provider.country,
-        email: provider.email,
-        capabilities: { card_payments: { requested: true }, transfers: { requested: true } },
-        business_profile: {
-          name: provider.businessName ?? undefined,
-          url: provider.slug ? appUrl(`/book/${provider.slug}`) : undefined,
-          product_description: "Appointment deposits collected through a GlideBook booking page",
+        display_name: provider.businessName ?? undefined,
+        contact_email: provider.email,
+        dashboard: "express",
+        identity: { country: provider.country.toLowerCase() },
+        defaults: {
+          currency: provider.currency,
+          responsibilities: { fees_collector: "application", losses_collector: "application" },
+          ...(provider.slug ? { profile: { business_url: appUrl(`/book/${provider.slug}`) } } : {}),
+        },
+        configuration: {
+          merchant: { capabilities: { card_payments: { requested: true } } },
+          recipient: { capabilities: { stripe_balance: { stripe_transfers: { requested: true } } } },
         },
         metadata: { providerId: provider.id },
       },
-      { idempotencyKey: `connect_${provider.id}_${isLiveMode() ? "live" : "test"}` },
+      { idempotencyKey: `connect_v2_${provider.id}_${isLiveMode() ? "live" : "test"}` },
     );
     accountId = account.id;
     await prisma.user.update({
@@ -114,11 +134,16 @@ export async function createOnboardingLink(provider: {
     });
   }
 
-  const link = await stripe.accountLinks.create({
+  const link = await stripe.v2.core.accountLinks.create({
     account: accountId,
-    type: "account_onboarding",
-    refresh_url: appUrl("/dashboard/payments?refresh=1"),
-    return_url: appUrl("/dashboard/payments?return=1"),
+    use_case: {
+      type: "account_onboarding",
+      account_onboarding: {
+        configurations: ["merchant", "recipient"],
+        refresh_url: appUrl("/dashboard/payments?refresh=1"),
+        return_url: appUrl("/dashboard/payments?return=1"),
+      },
+    },
   });
   return link.url;
 }

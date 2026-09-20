@@ -6,7 +6,7 @@ import { getStripe } from "@/lib/stripe";
 import { bookingInclude, toBookingDTO } from "@/lib/bookings";
 import { publish } from "@/lib/realtime";
 import { notifyBookingConfirmed } from "@/lib/notifications";
-import { applyAccount } from "@/lib/payments";
+import { syncConnectAccount } from "@/lib/payments";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
         await markRefunded(event.data.object);
         break;
       case "account.updated":
-        await syncAccount(event.data.object);
+        await syncAccount(event.data.object.id);
         break;
       default:
         break;
@@ -132,13 +132,11 @@ async function markCancelled(intent: Stripe.PaymentIntent) {
   await publish({ type: "booking.updated", providerId: updated.providerId, booking: toBookingDTO(updated) });
 }
 
-/** Connected account finished onboarding (or lost a capability): keep the provider's flags in step. */
-async function syncAccount(account: Stripe.Account) {
-  const provider =
-    (await prisma.user.findUnique({ where: { stripeAccountId: account.id }, select: { id: true } })) ??
-    (account.metadata?.providerId ? await prisma.user.findUnique({ where: { id: account.metadata.providerId }, select: { id: true } }) : null);
+/** Connected account changed: re-read it through Accounts v2 and keep the provider's flags in step. */
+async function syncAccount(accountId: string) {
+  const provider = await prisma.user.findUnique({ where: { stripeAccountId: accountId }, select: { id: true } });
   if (!provider) return;
-  await applyAccount(provider.id, account);
+  await syncConnectAccount(provider.id, accountId);
 }
 
 async function markRefunded(charge: Stripe.Charge) {
