@@ -54,6 +54,8 @@ model User {
   currency            String            @default("gbp") // ISO 4217, lowercase (Stripe style)
   locationMode        LocationMode      @default(STUDIO)
   studioAddress       String? // shown to clients when locationMode = STUDIO
+  serviceAreas        String? // MOBILE: human-readable coverage, e.g. "Phoenix, Scottsdale, Tempe"
+  serviceAreaCodes    String? // MOBILE: comma-separated ZIP/postcode prefixes that are accepted, e.g. "850, 852, 853"
   depositPercent      Int               @default(100) // 100 = full prepayment, e.g. 30 = 30% deposit
   cancelNoticeHours   Int               @default(24) // clients cancelling with more notice than this get their deposit back
   country             String            @default("GB") // ISO 3166-1 alpha-2; fixed once the Stripe account exists
@@ -136,6 +138,7 @@ model Booking {
   // Where the mobile provider travels to, and what they are working on
   // (e.g. "2021 Tesla Model 3, black" or "Biscuit — golden retriever, 30 kg").
   address        String?
+  postcode       String? // ZIP / postcode captured for mobile visits (checked against serviceAreaCodes)
   serviceDetails String?
   notes          String?
 

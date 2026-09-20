@@ -43,7 +43,8 @@ function whenLabel(b: Loaded) {
 }
 
 function locationFor(b: Loaded) {
-  return b.provider.locationMode === "MOBILE" ? b.address : (b.provider.studioAddress ?? b.address);
+  if (b.provider.locationMode !== "MOBILE") return b.provider.studioAddress ?? b.address;
+  return [b.address, b.postcode].filter(Boolean).join(", ") || null;
 }
 
 function clientProps(b: Loaded): BookingEmailProps {

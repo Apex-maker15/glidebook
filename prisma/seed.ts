@@ -31,6 +31,8 @@ async function main() {
       timezone: "America/Los_Angeles",
       currency: "usd",
       country: "US",
+      serviceAreas: "Phoenix, Scottsdale, Tempe, Mesa and Chandler",
+      serviceAreaCodes: "850, 852, 853",
       locationMode: "MOBILE",
       slotIntervalMinutes: 30,
       bufferMinutes: 30,

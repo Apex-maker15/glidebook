@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Field, TextArea } from "@/components/ui/primitives";
 import { useBookingStore } from "@/store/booking-store";
 import { useProvider } from "./provider-context";
+import { parseAreaCodes, postcodeLabel, postcodePlaceholder } from "@/lib/service-area";
 
 export function StepCustomer() {
   const provider = useProvider();
@@ -20,6 +21,7 @@ export function StepCustomer() {
 
   const meta = CATEGORIES[provider.category];
   const mobile = provider.locationMode === "MOBILE";
+  const checksArea = mobile && parseAreaCodes(provider.serviceAreaCodes).length > 0;
 
   return (
     <form
@@ -95,16 +97,30 @@ export function StepCustomer() {
           onChange={(e) => setCustomer({ serviceDetails: e.target.value })}
         />
         {mobile ? (
-          <Field
-            className="sm:col-span-2"
-            label="Service address"
-            name="address"
-            autoComplete="street-address"
-            placeholder="Street, town, postcode"
-            value={customer.address}
-            onChange={(e) => setCustomer({ address: e.target.value })}
-            error={errors.address}
-          />
+          <>
+            <Field
+              className={checksArea ? "sm:col-span-1" : "sm:col-span-2"}
+              label="Service address"
+              name="address"
+              autoComplete="street-address"
+              placeholder={checksArea ? "Street and town" : "Street, town, postcode"}
+              value={customer.address}
+              onChange={(e) => setCustomer({ address: e.target.value })}
+              error={errors.address}
+            />
+            {checksArea && (
+              <Field
+                label={postcodeLabel(provider.country)}
+                name="postcode"
+                autoComplete="postal-code"
+                placeholder={postcodePlaceholder(provider.country)}
+                value={customer.postcode}
+                onChange={(e) => setCustomer({ postcode: e.target.value })}
+                error={errors.postcode}
+                hint={provider.serviceAreas ? `We cover ${provider.serviceAreas}` : undefined}
+              />
+            )}
+          </>
         ) : provider.studioAddress ? (
           <div className="flex items-start gap-2.5 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-sm sm:col-span-2">
             <MapPin className="mt-0.5 size-4 shrink-0 text-accent-strong" />

@@ -38,6 +38,10 @@ export interface ProviderDTO {
   currency: string;
   locationMode: LocationMode;
   studioAddress: string | null;
+  /** MOBILE providers: readable coverage shown on the booking page. */
+  serviceAreas: string | null;
+  /** MOBILE providers: comma-separated ZIP/postcode prefixes accepted at booking. */
+  serviceAreaCodes: string | null;
   depositPercent: number;
   cancelNoticeHours: number;
   slotIntervalMinutes: number;
@@ -71,6 +75,7 @@ export interface BookingDTO {
   currency: string;
   paidAt: string | null;
   address: string | null;
+  postcode: string | null;
   serviceDetails: string | null;
   notes: string | null;
   createdAt: string;

@@ -96,7 +96,7 @@ export const BookingCard = forwardRef<HTMLDivElement, Props>(function BookingCar
             className="mt-2 flex w-full items-start gap-2 text-left text-[13px] text-ink-muted transition-colors hover:text-ink"
           >
             <MapPin className="mt-0.5 size-3.5 shrink-0" />
-            <span className={cn(!expanded && "truncate")}>{booking.address ?? "No address given"}</span>
+            <span className={cn(!expanded && "truncate")}>{[booking.address, booking.postcode].filter(Boolean).join(", ") || "No address given"}</span>
           </button>
 
           <motion.div

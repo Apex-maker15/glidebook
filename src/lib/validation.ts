@@ -62,6 +62,7 @@ export const createBookingSchema = z.object({
   }),
   // Required only when the provider travels to the client (validated in the route).
   address: z.string().trim().max(200).optional().nullable(),
+  postcode: z.string().trim().max(12).optional().nullable(),
   serviceDetails: z.string().trim().max(200).optional().nullable(),
   notes: z.string().trim().max(500).optional().nullable(),
 });
@@ -77,6 +78,8 @@ export const providerSettingsSchema = z.object({
   country: z.enum(COUNTRY_CODES).optional(),
   locationMode: z.enum(["STUDIO", "MOBILE"]).optional(),
   studioAddress: z.string().trim().max(200).optional().nullable(),
+  serviceAreas: z.string().trim().max(300).optional().nullable(),
+  serviceAreaCodes: z.string().trim().max(300).optional().nullable(),
   depositPercent: z.number().int().min(10).max(100).optional(),
   cancelNoticeHours: z.number().int().min(0).max(168).optional(),
   slotIntervalMinutes: z.number().int().min(5).max(120).optional(),

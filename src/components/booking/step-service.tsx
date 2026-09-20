@@ -21,7 +21,11 @@ export function StepService() {
       <header className="mb-6">
         <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Choose a service</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          {provider.locationMode === "MOBILE" ? "Pricing is all-inclusive. We come to you." : "Pricing is all-inclusive."}
+          {provider.locationMode === "MOBILE"
+            ? provider.serviceAreas
+              ? `Pricing is all-inclusive. We come to you across ${provider.serviceAreas}.`
+              : "Pricing is all-inclusive. We come to you."
+            : "Pricing is all-inclusive."}
           {isDeposit
             ? ` A ${provider.depositPercent}% deposit secures your slot; the rest is paid on the day.`
             : provider.takesDeposits

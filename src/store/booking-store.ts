@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { api, ClientApiError, errorMessage } from "@/lib/client-api";
 import type { BookingDTO, ProviderDTO, ServiceDTO, SlotDTO } from "@/types";
+import { parseAreaCodes, postcodeInArea } from "@/lib/service-area";
 
 export const STEPS = ["service", "datetime", "customer", "payment", "success"] as const;
 export type Step = (typeof STEPS)[number];
@@ -10,6 +11,7 @@ export interface CustomerForm {
   email: string;
   phone: string;
   address: string;
+  postcode: string;
   serviceDetails: string;
   notes: string;
 }
@@ -75,7 +77,7 @@ interface BookingActions {
 
 export type BookingStore = BookingState & BookingActions;
 
-const emptyCustomer: CustomerForm = { name: "", email: "", phone: "", address: "", serviceDetails: "", notes: "" };
+const emptyCustomer: CustomerForm = { name: "", email: "", phone: "", address: "", postcode: "", serviceDetails: "", notes: "" };
 
 const initialState: BookingState = {
   provider: null,
@@ -103,11 +105,15 @@ const initialState: BookingState = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateCustomer(c: CustomerForm, requireAddress: boolean): Partial<Record<keyof CustomerForm, string>> {
+function validateCustomer(c: CustomerForm, requireAddress: boolean, areaCodes: string[]): Partial<Record<keyof CustomerForm, string>> {
   const errors: Partial<Record<keyof CustomerForm, string>> = {};
   if (c.name.trim().length < 2) errors.name = "Please enter your full name";
   if (!EMAIL_RE.test(c.email.trim())) errors.email = "Enter a valid email address";
   if (requireAddress && c.address.trim().length < 5) errors.address = "Where should we come to?";
+  if (requireAddress && areaCodes.length > 0) {
+    if (c.postcode.trim().length < 2) errors.postcode = "Needed to check we cover your area";
+    else if (!postcodeInArea(c.postcode, areaCodes)) errors.postcode = "Sorry, we don't currently travel to that area";
+  }
   if (c.phone.trim() && c.phone.trim().length < 7) errors.phone = "That phone number looks too short";
   return errors;
 }
@@ -212,7 +218,7 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
     const { provider, serviceId, slot, customer, goTo } = get();
     if (!provider || !serviceId || !slot) return;
 
-    const errors = validateCustomer(customer, provider.locationMode === "MOBILE");
+    const errors = validateCustomer(customer, provider.locationMode === "MOBILE", parseAreaCodes(provider.serviceAreaCodes));
     if (Object.keys(errors).length > 0) {
       set({ customerErrors: errors });
       return;
@@ -236,6 +242,7 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
             phone: customer.phone.trim() || null,
           },
           address: provider.locationMode === "MOBILE" ? customer.address.trim() : null,
+          postcode: provider.locationMode === "MOBILE" ? customer.postcode.trim() || null : null,
           serviceDetails: customer.serviceDetails.trim() || null,
           notes: customer.notes.trim() || null,
         },
@@ -254,6 +261,12 @@ export const useBookingStore = create<BookingStore>()((set, get) => ({
     } catch (err) {
       const message = errorMessage(err, "We could not reserve that slot");
       const slotGone = err instanceof ClientApiError && (err.code === "SLOT_UNAVAILABLE" || err.code === "HOLD_EXPIRED");
+      const outOfArea = err instanceof ClientApiError && (err.code === "OUT_OF_AREA" || err.code === "POSTCODE_REQUIRED");
+      if (outOfArea) {
+        set({ submitStatus: "idle", submitError: null, booking: null, checkout: null, customerErrors: { postcode: message } });
+        goTo("customer");
+        return;
+      }
       const stripeMissing = err instanceof ClientApiError && err.code === "STRIPE_NOT_CONFIGURED";
 
       if (stripeMissing) {

@@ -19,6 +19,8 @@ interface FormState {
   stripeConnected: boolean;
   locationMode: "STUDIO" | "MOBILE";
   studioAddress: string;
+  serviceAreas: string;
+  serviceAreaCodes: string;
   depositPercent: string;
   cancelNoticeHours: string;
   slotIntervalMinutes: string;
@@ -58,6 +60,8 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           stripeConnected: provider.stripeConnected,
           locationMode: provider.locationMode,
           studioAddress: provider.studioAddress ?? "",
+          serviceAreas: provider.serviceAreas ?? "",
+          serviceAreaCodes: provider.serviceAreaCodes ?? "",
           depositPercent: String(provider.depositPercent),
           cancelNoticeHours: String(provider.cancelNoticeHours),
           slotIntervalMinutes: String(provider.slotIntervalMinutes),
@@ -89,6 +93,8 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
           country: form.country,
           locationMode: form.locationMode,
           studioAddress: form.studioAddress.trim() || null,
+          serviceAreas: form.serviceAreas.trim() || null,
+          serviceAreaCodes: form.serviceAreaCodes.trim() || null,
           depositPercent: Number(form.depositPercent),
           cancelNoticeHours: Number(form.cancelNoticeHours),
           slotIntervalMinutes: Number(form.slotIntervalMinutes),
@@ -194,6 +200,26 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
                   hint="Shown to clients after they book"
                   placeholder="12 High Street, Croydon, CR0 1AA"
                 />
+              )}
+              {form!.locationMode === "MOBILE" && (
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <Field
+                    label="Areas you cover"
+                    value={form!.serviceAreas}
+                    onChange={set("serviceAreas")}
+                    error={issues.serviceAreas?.[0]}
+                    hint="Shown on your booking page"
+                    placeholder={form!.country === "US" ? "Phoenix, Scottsdale, Tempe, Mesa" : "Croydon, Sutton, Bromley"}
+                  />
+                  <Field
+                    label={form!.country === "US" ? "ZIP prefixes you accept (optional)" : "Postcode prefixes you accept (optional)"}
+                    value={form!.serviceAreaCodes}
+                    onChange={set("serviceAreaCodes")}
+                    error={issues.serviceAreaCodes?.[0]}
+                    hint="Comma-separated. Clients outside these cannot book; leave blank to accept anywhere."
+                    placeholder={form!.country === "US" ? "850, 852, 853" : "CR, SM, BR"}
+                  />
+                </div>
               )}
             </div>
 

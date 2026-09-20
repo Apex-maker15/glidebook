@@ -73,6 +73,10 @@ Then import the repo into Vercel, paste the env vars, deploy. Set `NEXT_PUBLIC_A
 - `Availability` - one row per weekday with `{ windows: [{start,end}], breaks: [{start,end}] }` in the provider's local time.
 - `StripeEvent` - processed webhook ids for idempotency.
 
+### Service areas (mobile providers)
+
+`User.serviceAreas` is free text shown on the booking page ("We come to you across Phoenix, Scottsdale..."). `User.serviceAreaCodes` is an optional comma-separated list of ZIP/postcode prefixes; when set, the booking form asks for the client's code and both the client (inline) and `POST /api/bookings` (`OUT_OF_AREA`) reject anything outside it. Matching is prefix-based and ignores case and spaces (`src/lib/service-area.ts`).
+
 ### Slot engine (`src/lib/slots.ts`)
 
 Pure function. For a calendar day it walks each working window at `slotIntervalMinutes`, keeps a start `t` only if `t + duration` fits the window, does not intersect a break, respects the buffer around every existing booking, and is inside the notice/horizon range. All wall-clock maths goes through `date-fns-tz`, so DST is handled.

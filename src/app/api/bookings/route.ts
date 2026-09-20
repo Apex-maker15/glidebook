@@ -13,6 +13,7 @@ import { manageUrlFor } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
 import { canTakeDeposits, platformFeeFor } from "@/lib/payments";
 import { notifyBookingConfirmed } from "@/lib/notifications";
+import { normalisePostcode, parseAreaCodes, postcodeInArea } from "@/lib/service-area";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,6 +60,7 @@ export const POST = handle(async (req: Request) => {
       currency: true,
       locationMode: true,
       studioAddress: true,
+      serviceAreaCodes: true,
       depositPercent: true,
       slotIntervalMinutes: true,
       bufferMinutes: true,
@@ -75,6 +77,14 @@ export const POST = handle(async (req: Request) => {
   const address = provider.locationMode === "MOBILE" ? (input.address ?? "").trim() : provider.studioAddress;
   if (provider.locationMode === "MOBILE" && (!address || address.length < 5)) {
     throw new HttpError(422, "Please tell us where to come to", "ADDRESS_REQUIRED");
+  }
+  const areaCodes = provider.locationMode === "MOBILE" ? parseAreaCodes(provider.serviceAreaCodes) : [];
+  const postcode = provider.locationMode === "MOBILE" && input.postcode ? normalisePostcode(input.postcode) : null;
+  if (areaCodes.length > 0) {
+    if (!postcode) throw new HttpError(422, "Please enter your postcode so we can check we cover your area", "POSTCODE_REQUIRED");
+    if (!postcodeInArea(postcode, areaCodes)) {
+      throw new HttpError(422, "Sorry, that area is outside where we currently travel", "OUT_OF_AREA");
+    }
   }
 
   const service = await prisma.service.findFirst({
@@ -144,6 +154,7 @@ export const POST = handle(async (req: Request) => {
           platformFeeCents: platformFeeFor(depositCents),
           currency: provider.currency,
           address,
+          postcode,
           serviceDetails: input.serviceDetails ?? null,
           notes: input.notes ?? null,
         },
