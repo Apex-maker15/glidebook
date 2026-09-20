@@ -25,11 +25,21 @@ export async function POST(req: Request) {
   }
 
   const rawBody = await req.text();
-  let event: Stripe.Event;
-  try {
-    event = getStripe().webhooks.constructEvent(rawBody, signature, secret);
-  } catch (err) {
-    console.warn("[stripe] signature verification failed:", (err as Error).message);
+  // Stripe's dashboard creates one endpoint for account events and another for
+  // Connect events, each with its own signing secret, so accept a comma-separated list.
+  const secrets = secret.split(",").map((s) => s.trim()).filter(Boolean);
+  let event: Stripe.Event | null = null;
+  let lastError = "";
+  for (const candidate of secrets) {
+    try {
+      event = getStripe().webhooks.constructEvent(rawBody, signature, candidate);
+      break;
+    } catch (err) {
+      lastError = (err as Error).message;
+    }
+  }
+  if (!event) {
+    console.warn("[stripe] signature verification failed:", lastError);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
