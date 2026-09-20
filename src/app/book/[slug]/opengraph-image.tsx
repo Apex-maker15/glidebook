@@ -31,6 +31,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       depositPercent: true,
       currency: true,
       stripeAccountId: true,
+      stripeAccountLive: true,
       stripeChargesEnabled: true,
       services: { where: { active: true }, orderBy: { sortOrder: "asc" }, take: 3, select: { name: true, priceCents: true } },
     },

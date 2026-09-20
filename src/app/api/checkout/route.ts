@@ -27,7 +27,7 @@ export const POST = handle(async (req: Request) => {
     where: { id: bookingId },
     include: {
       service: { select: { name: true } },
-      provider: { select: { businessName: true, stripeAccountId: true, stripeChargesEnabled: true } },
+      provider: { select: { businessName: true, stripeAccountId: true, stripeAccountLive: true, stripeChargesEnabled: true } },
       customer: { select: { email: true, name: true } },
     },
   });

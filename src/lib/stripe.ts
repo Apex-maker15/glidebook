@@ -21,6 +21,11 @@ export function isStripeConfigured(): boolean {
   return looksReal(process.env.STRIPE_SECRET_KEY, "sk_") && looksReal(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, "pk_");
 }
 
+/** True when the configured secret key is a live-mode key. */
+export function isLiveMode(): boolean {
+  return (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_live_");
+}
+
 export function publishableKey(): string | null {
   const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
   return looksReal(key, "pk_") ? key! : null;

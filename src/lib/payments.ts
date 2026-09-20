@@ -1,7 +1,7 @@
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { appUrl } from "@/lib/email";
-import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { getStripe, isLiveMode, isStripeConfigured } from "@/lib/stripe";
 
 export { COUNTRIES, COUNTRY_CODES, PLATFORM_FEE_MIN_CENTS, PLATFORM_FEE_PERCENT, countryForCurrency, platformFeeFor, type CountryCode } from "@/lib/platform";
 
@@ -13,12 +13,18 @@ export { COUNTRIES, COUNTRY_CODES, PLATFORM_FEE_MIN_CENTS, PLATFORM_FEE_PERCENT,
  */
 export interface ConnectFlags {
   stripeAccountId: string | null;
+  stripeAccountLive: boolean;
   stripeChargesEnabled: boolean;
+}
+
+/** A connected account only counts when it was created in the mode the server is running in. */
+export function accountUsable(p: Pick<ConnectFlags, "stripeAccountId" | "stripeAccountLive">): boolean {
+  return Boolean(p.stripeAccountId) && p.stripeAccountLive === isLiveMode();
 }
 
 /** True when the booking page should collect a deposit for this provider. */
 export function canTakeDeposits(p: ConnectFlags): boolean {
-  return isStripeConfigured() && Boolean(p.stripeAccountId) && p.stripeChargesEnabled;
+  return isStripeConfigured() && accountUsable(p) && p.stripeChargesEnabled;
 }
 
 export interface ConnectStatus {
@@ -46,6 +52,7 @@ export async function applyAccount(providerId: string, account: Stripe.Account):
     where: { id: providerId },
     data: {
       stripeAccountId: account.id,
+      stripeAccountLive: isLiveMode(),
       stripeChargesEnabled: chargesEnabled,
       stripePayoutsEnabled: payoutsEnabled,
       stripeDetailsSubmitted: detailsSubmitted,
@@ -72,9 +79,11 @@ export async function createOnboardingLink(provider: {
   slug: string | null;
   country: string;
   stripeAccountId: string | null;
+  stripeAccountLive: boolean;
 }): Promise<string> {
   const stripe = getStripe();
-  let accountId = provider.stripeAccountId;
+  // An account from the other mode (test vs live) is useless here: start fresh.
+  let accountId = accountUsable(provider) ? provider.stripeAccountId : null;
 
   if (!accountId) {
     const account = await stripe.accounts.create(
@@ -90,10 +99,19 @@ export async function createOnboardingLink(provider: {
         },
         metadata: { providerId: provider.id },
       },
-      { idempotencyKey: `connect_${provider.id}` },
+      { idempotencyKey: `connect_${provider.id}_${isLiveMode() ? "live" : "test"}` },
     );
     accountId = account.id;
-    await prisma.user.update({ where: { id: provider.id }, data: { stripeAccountId: accountId } });
+    await prisma.user.update({
+      where: { id: provider.id },
+      data: {
+        stripeAccountId: accountId,
+        stripeAccountLive: isLiveMode(),
+        stripeChargesEnabled: false,
+        stripePayoutsEnabled: false,
+        stripeDetailsSubmitted: false,
+      },
+    });
   }
 
   const link = await stripe.accountLinks.create({

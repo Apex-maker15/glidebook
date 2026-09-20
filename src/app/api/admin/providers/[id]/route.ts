@@ -3,6 +3,7 @@ import { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { handle, HttpError } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin";
+import { accountUsable } from "@/lib/payments";
 import { bookingInclude, expireStaleHolds, toBookingDTO } from "@/lib/bookings";
 
 export const runtime = "nodejs";
@@ -28,6 +29,7 @@ export const GET = handle(async (_req: Request, ctx: { params: Promise<{ id: str
       locationMode: true,
       depositPercent: true,
       stripeAccountId: true,
+      stripeAccountLive: true,
       stripeChargesEnabled: true,
       stripePayoutsEnabled: true,
       createdAt: true,
@@ -49,7 +51,7 @@ export const GET = handle(async (_req: Request, ctx: { params: Promise<{ id: str
       provider: {
         ...p,
         createdAt: p.createdAt.toISOString(),
-        stripe: p.stripeChargesEnabled ? "connected" : p.stripeAccountId ? "incomplete" : "none",
+        stripe: !accountUsable(p) ? "none" : p.stripeChargesEnabled ? "connected" : "incomplete",
       },
       bookings: rows.map(toBookingDTO),
     },

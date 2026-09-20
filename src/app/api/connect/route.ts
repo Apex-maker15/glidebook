@@ -8,6 +8,7 @@ import { isStripeConfigured } from "@/lib/stripe";
 import {
   PLATFORM_FEE_MIN_CENTS,
   PLATFORM_FEE_PERCENT,
+  accountUsable,
   createOnboardingLink,
   syncConnectAccount,
   type ConnectStatus,
@@ -24,6 +25,7 @@ const select = {
   country: true,
   currency: true,
   stripeAccountId: true,
+      stripeAccountLive: true,
   stripeChargesEnabled: true,
   stripePayoutsEnabled: true,
   stripeDetailsSubmitted: true,
@@ -40,15 +42,16 @@ export const GET = handle(async () => {
   if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
   const p = await prisma.user.findUniqueOrThrow({ where: { id: user.id }, select });
 
+  const usable = accountUsable(p);
   let status: ConnectStatus = {
     configured: isStripeConfigured(),
-    connected: Boolean(p.stripeAccountId),
-    chargesEnabled: p.stripeChargesEnabled,
-    payoutsEnabled: p.stripePayoutsEnabled,
-    detailsSubmitted: p.stripeDetailsSubmitted,
+    connected: usable,
+    chargesEnabled: usable && p.stripeChargesEnabled,
+    payoutsEnabled: usable && p.stripePayoutsEnabled,
+    detailsSubmitted: usable && p.stripeDetailsSubmitted,
     requirementsDue: [],
   };
-  if (status.configured && p.stripeAccountId) {
+  if (status.configured && usable && p.stripeAccountId) {
     try {
       status = await syncConnectAccount(p.id, p.stripeAccountId);
     } catch (err) {

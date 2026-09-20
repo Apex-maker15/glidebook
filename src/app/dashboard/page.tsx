@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   const session = await auth();
   const provider = await prisma.user.findUnique({
     where: { id: session!.user.id },
-    select: { timezone: true, currency: true, businessName: true, stripeAccountId: true, stripeChargesEnabled: true },
+    select: { timezone: true, currency: true, businessName: true, stripeAccountId: true, stripeAccountLive: true, stripeChargesEnabled: true },
   });
   const takesDeposits = provider ? canTakeDeposits(provider) : false;
 

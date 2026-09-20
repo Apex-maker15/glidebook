@@ -64,6 +64,7 @@ model User {
   // Deposits are charged on the platform and transferred to this account, minus the platform fee.
   // Until charges are enabled the booking page runs in "no deposit" mode and bookings confirm instantly.
   stripeAccountId        String?   @unique
+  stripeAccountLive      Boolean   @default(false) // created with live keys? test-mode accounts are ignored once live keys are in use
   stripeChargesEnabled   Boolean   @default(false)
   stripePayoutsEnabled   Boolean   @default(false)
   stripeDetailsSubmitted Boolean   @default(false)

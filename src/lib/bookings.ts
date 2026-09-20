@@ -1,7 +1,7 @@
 import { BookingStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
-import { canTakeDeposits } from "@/lib/payments";
+import { accountUsable, canTakeDeposits } from "@/lib/payments";
 import { publish } from "@/lib/realtime";
 import type { BookingDTO, ProviderDTO } from "@/types";
 
@@ -61,6 +61,7 @@ export const providerSelect = {
   email: true,
   country: true,
   stripeAccountId: true,
+  stripeAccountLive: true,
   stripeChargesEnabled: true,
 } satisfies Prisma.UserSelect;
 
@@ -89,7 +90,7 @@ export function toProviderDTO(p: ProviderRow): ProviderDTO | null {
     phone: p.phone,
     country: p.country,
     takesDeposits: canTakeDeposits(p),
-    stripeConnected: Boolean(p.stripeAccountId),
+    stripeConnected: accountUsable(p),
   };
 }
 

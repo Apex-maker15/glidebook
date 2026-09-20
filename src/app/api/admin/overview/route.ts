@@ -4,6 +4,7 @@ import { BookingStatus, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { handle } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin";
+import { accountUsable } from "@/lib/payments";
 import { isStripeConfigured } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -37,6 +38,7 @@ export const GET = handle(async () => {
         locationMode: true,
         depositPercent: true,
         stripeAccountId: true,
+        stripeAccountLive: true,
         stripeChargesEnabled: true,
         stripePayoutsEnabled: true,
         createdAt: true,
@@ -96,7 +98,7 @@ export const GET = handle(async () => {
       stripeConfigured: isStripeConfigured(),
       stats: {
         providers: providers.length,
-        providersConnected: providers.filter((p) => p.stripeChargesEnabled).length,
+        providersConnected: providers.filter((p) => accountUsable(p) && p.stripeChargesEnabled).length,
         providersLive: providers.filter((p) => p._count.services > 0 && p._count.availability > 0).length,
         customers,
         bookingsTotal,
@@ -129,7 +131,7 @@ export const GET = handle(async () => {
         country: p.country,
         locationMode: p.locationMode,
         depositPercent: p.depositPercent,
-        stripe: p.stripeChargesEnabled ? "connected" : p.stripeAccountId ? "incomplete" : "none",
+        stripe: !accountUsable(p) ? "none" : p.stripeChargesEnabled ? "connected" : "incomplete",
         payoutsEnabled: p.stripePayoutsEnabled,
         services: p._count.services,
         daysSet: p._count.availability,

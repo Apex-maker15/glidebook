@@ -67,6 +67,7 @@ export const POST = handle(async (req: Request) => {
       minNoticeMinutes: true,
       bookingHorizonDays: true,
       stripeAccountId: true,
+      stripeAccountLive: true,
       stripeChargesEnabled: true,
       availability: { select: { dayOfWeek: true, slots: true } },
     },
