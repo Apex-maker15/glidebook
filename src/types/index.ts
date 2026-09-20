@@ -55,6 +55,11 @@ export interface ProviderDTO {
   stripeConnected: boolean;
 }
 
+/** Dashboard-only view of the signed-in provider: adds account fields the public endpoints never expose. */
+export interface ProviderAccountDTO extends ProviderDTO {
+  email: string;
+}
+
 export interface SlotDTO {
   start: string; // ISO-8601 UTC instant
   end: string;

@@ -13,7 +13,7 @@ export const GET = handle(async (req: Request) => {
   const row = await prisma.user.findUnique({ where: { id: providerId }, select: providerSelect });
   const provider = row && toProviderDTO(row);
   if (!provider) throw new HttpError(404, "Provider profile not found", "NOT_FOUND");
-  return NextResponse.json({ provider });
+  return NextResponse.json({ provider: { ...provider, email: row.email } });
 });
 
 export const PATCH = handle(async (req: Request) => {
@@ -29,6 +29,11 @@ export const PATCH = handle(async (req: Request) => {
   if (input.locationMode === "STUDIO" && input.studioAddress !== undefined && !input.studioAddress?.trim()) {
     throw new HttpError(422, "Add your studio address so clients know where to go", "STUDIO_ADDRESS_REQUIRED");
   }
+  if (input.email) {
+    input.email = input.email.toLowerCase();
+    const taken = await prisma.user.findFirst({ where: { email: input.email, NOT: { id: providerId } }, select: { id: true } });
+    if (taken) throw new HttpError(409, "That email is already in use", "EMAIL_TAKEN");
+  }
   if (input.country) {
     const current = await prisma.user.findUnique({ where: { id: providerId }, select: { stripeAccountId: true, country: true } });
     if (current?.stripeAccountId && current.country !== input.country) {
@@ -39,5 +44,5 @@ export const PATCH = handle(async (req: Request) => {
   if (input.currency) {
     await prisma.service.updateMany({ where: { providerId }, data: { currency: input.currency } });
   }
-  return NextResponse.json({ provider: toProviderDTO(row) });
+  return NextResponse.json({ provider: { ...toProviderDTO(row), email: row.email } });
 });

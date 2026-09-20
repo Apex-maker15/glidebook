@@ -58,6 +58,7 @@ export const providerSelect = {
   minNoticeMinutes: true,
   bookingHorizonDays: true,
   phone: true,
+  email: true,
   country: true,
   stripeAccountId: true,
   stripeChargesEnabled: true,

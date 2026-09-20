@@ -7,12 +7,14 @@ import { Field, Skeleton } from "@/components/ui/primitives";
 import { fadeVariants } from "@/components/motion";
 import { api, ClientApiError, errorMessage } from "@/lib/client-api";
 import { useToastStore } from "@/store/toast-store";
-import type { ProviderDTO } from "@/types";
+import type { ProviderAccountDTO } from "@/types";
 import { CURRENCIES } from "@/lib/categories";
 import { COUNTRIES } from "@/lib/platform";
 
 interface FormState {
   businessName: string;
+  email: string;
+  phone: string;
   timezone: string;
   currency: string;
   country: string;
@@ -50,10 +52,12 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
   const push = useToastStore((s) => s.push);
 
   useEffect(() => {
-    api<{ provider: ProviderDTO }>(scoped("/api/settings", providerId))
+    api<{ provider: ProviderAccountDTO }>(scoped("/api/settings", providerId))
       .then(({ provider }) =>
         setForm({
           businessName: provider.businessName,
+          email: provider.email,
+          phone: provider.phone ?? "",
           timezone: provider.timezone,
           currency: provider.currency,
           country: provider.country,
@@ -88,6 +92,8 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
         method: "PATCH",
         body: {
           businessName: form.businessName,
+          email: form.email.trim(),
+          phone: form.phone.trim() || null,
           timezone: form.timezone,
           currency: form.currency,
           country: form.country,
@@ -133,6 +139,10 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
         ) : (
           <motion.form key="form" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" onSubmit={(e) => void save(e)} className="glass space-y-4 rounded-3xl p-6">
             <Field label="Business name" value={form!.businessName} onChange={set("businessName")} error={issues.businessName?.[0]} required />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Login email" type="email" value={form!.email} onChange={set("email")} error={issues.email?.[0]} hint="Booking alerts go here too" required />
+              <Field label="Phone (shown to clients after booking)" type="tel" value={form!.phone} onChange={set("phone")} error={issues.phone?.[0]} />
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Timezone" value={form!.timezone} onChange={set("timezone")} error={issues.timezone?.[0]} hint="e.g. Europe/London" required />
               <div className="flex flex-col gap-1.5">

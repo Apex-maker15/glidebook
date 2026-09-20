@@ -73,6 +73,8 @@ export const updateBookingStatusSchema = z.object({
 
 export const providerSettingsSchema = z.object({
   businessName: z.string().trim().min(2).max(80).optional(),
+  email: z.email().max(160).optional(),
+  phone: z.string().trim().max(32).optional().nullable(),
   timezone: z.string().min(3).max(64).optional(),
   currency: z.enum(["gbp", "usd", "eur"]).optional(),
   country: z.enum(COUNTRY_CODES).optional(),
