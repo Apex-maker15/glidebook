@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { motion } from "framer-motion";
-import { CalendarClock, Check, Copy, ExternalLink, Landmark, LogOut, MessageCircle, Palette, Settings, ShieldCheck, Sparkles, Wrench, LayoutDashboard, Rocket } from "lucide-react";
+import { CalendarClock, Check, Copy, ExternalLink, Landmark, LineChart, LogOut, MessageCircle, Palette, Settings, ShieldCheck, Sparkles, Wrench, LayoutDashboard, Rocket } from "lucide-react";
 import { spring } from "@/components/motion";
 import { useToastStore } from "@/store/toast-store";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const NAV = [
   { href: "/dashboard", label: "Schedule", icon: LayoutDashboard },
+  { href: "/dashboard/business", label: "Business", icon: LineChart },
   { href: "/dashboard/services", label: "Services", icon: Wrench },
   { href: "/dashboard/availability", label: "Availability", icon: CalendarClock },
   { href: "/dashboard/page", label: "Your page", icon: Palette },
@@ -55,14 +56,14 @@ export function DashboardShell({ businessName, slug, isAdmin = false, children }
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
       <aside className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-bg/85 px-4 py-3 backdrop-blur-xl lg:h-dvh lg:self-start lg:flex-col lg:items-stretch lg:justify-start lg:border-b-0 lg:border-r lg:px-4 lg:py-6">
-        <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+        <Link href="/" className="flex shrink-0 items-center gap-2 text-sm font-semibold tracking-tight">
           <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
             <Sparkles className="size-4" />
           </span>
           <span className="hidden sm:inline">GlideBook</span>
         </Link>
 
-        <nav className="flex gap-1 lg:mt-8 lg:flex-col" aria-label="Dashboard">
+        <nav className="no-scrollbar flex min-w-0 flex-1 gap-1 overflow-x-auto lg:mt-8 lg:flex-none lg:flex-col lg:overflow-visible" aria-label="Dashboard">
           {[...NAV, ...(isAdmin ? [ADMIN_NAV] : [])].map((item) => {
             const active = item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -71,7 +72,7 @@ export function DashboardShell({ businessName, slug, isAdmin = false, children }
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors",
+                  "relative flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors",
                   active ? "text-ink" : "text-ink-muted hover:text-ink",
                 )}
               >
@@ -128,7 +129,7 @@ export function DashboardShell({ businessName, slug, isAdmin = false, children }
           </div>
         </div>
 
-        <div className="flex items-center gap-1 lg:hidden">
+        <div className="flex shrink-0 items-center gap-1 lg:hidden">
           <ThemeToggle className="mr-1 scale-90" />
           <button type="button" onClick={() => void copyLink()} aria-label="Copy booking link" className="rounded-lg p-2 text-ink-muted hover:bg-white/[0.08] hover:text-ink">
             {copied ? <Check className="size-4 text-emerald-300" /> : <Copy className="size-4" />}

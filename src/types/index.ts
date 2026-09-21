@@ -86,6 +86,55 @@ export interface ReviewSummary {
   latest: ReviewDTO[];
 }
 
+export interface BusinessInsights {
+  range: {
+    days: number;
+    /** First and last calendar date of the period, in the provider's timezone. */
+    start: string;
+    end: string;
+    previousStart: string;
+    /** True when `trend` is bucketed by week rather than by day. */
+    weekly: boolean;
+  };
+  currency: string;
+  timezone: string;
+  totals: {
+    /** Full value of the work done in the period, however it was paid for. */
+    earnedCents: number;
+    /** Deposits already taken online, net of the platform fee. */
+    collectedCents: number;
+    /** Balance clients still hand over on the day. */
+    dueOnTheDayCents: number;
+    appointments: number;
+    clients: number;
+    newClients: number;
+    returningClients: number;
+    repeatRate: number | null;
+    averageTicketCents: number;
+    cancelled: number;
+    cancelledByClient: number;
+    cancellationRate: number | null;
+    /** Mean days between booking and appointment. */
+    leadTimeDays: number | null;
+  };
+  previous: { earnedCents: number; appointments: number; clients: number };
+  upcoming: {
+    appointments: number;
+    valueCents: number;
+    dueCents: number;
+    nextAt: string | null;
+    week: number;
+    weekValueCents: number;
+  };
+  /** Sold time against open time. `rate` is null until the provider sets hours. */
+  utilisation: { bookedMinutes: number; openMinutes: number; rate: number | null };
+  trend: { start: string; label: string; earnedCents: number; appointments: number }[];
+  services: { id: string; name: string; appointments: number; earnedCents: number; share: number; averageCents: number }[];
+  clients: { id: string; name: string; appointments: number; earnedCents: number; lastAt: string; returning: boolean }[];
+  weekdays: { day: number; label: string; appointments: number; earnedCents: number; openMinutes: number }[];
+  hours: { hour: number; label: string; appointments: number }[];
+}
+
 export interface SlotDTO {
   start: string; // ISO-8601 UTC instant
   end: string;

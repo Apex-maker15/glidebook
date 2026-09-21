@@ -113,6 +113,26 @@ Enable Connect once in the Stripe dashboard (Connect → Get started → platfor
 - `POST /api/webhooks/stripe` verifies the signature on the raw body, records the event id, then marks the booking `PAID` (or `CANCELLED` on cancel/refund) and publishes a realtime event.
 - Cancelling a paid booking from the dashboard issues a full refund.
 
+### Business insights (`/dashboard/business`)
+
+**Business** in the dashboard nav answers "how am I actually doing?" over the last 7, 30 or 90 days,
+with the period before it as the comparison. `GET /api/business?range=30` loads the provider's
+bookings once and `src/lib/insights.ts` — pure, like the slot engine — derives every panel from that
+single pass, so the screen costs three queries however many panels it grows.
+
+What it shows: what was earned (full service value of the work done), what of that was already taken
+online (deposit minus the platform fee) and what is still collected on the day; the value booked
+ahead and when the next appointment is; **chair time sold** — booked minutes against the minutes the
+provider was actually open, read from their availability with breaks removed and today clipped to
+now; repeat-client rate, average booking, cancellations, and how far ahead clients book; then money
+by day (by week past 31 days), which services pay best, best clients, and the busiest days and hours.
+
+Two rules hold throughout: a booking counts only when it is `CONFIRMED` or `PAID`, so unpaid holds
+never inflate a figure, and periods are whole calendar days in the provider's timezone. A client is
+"returning" when their first-ever booking predates the period, not merely when they booked twice
+inside it. The owner sees the same panel for any provider under the **Business** tab of
+`/admin/providers/:id`.
+
 ### Owner panel (`/admin`)
 
 The owner's email (`DEFAULT_ADMIN_EMAILS` in `src/lib/admin.ts`, extendable with `ADMIN_EMAILS`) sees an **Owner** link: platform revenue and deposits per currency, every provider with their Stripe state and activity, the latest bookings across the platform, and a per-provider workbench (`/admin/providers/:id`) with that provider's bookings and the same services / hours / settings editors, acting on their behalf via `?providerId=`.
