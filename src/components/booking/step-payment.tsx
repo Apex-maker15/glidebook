@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, ArrowLeft, Lock, ShieldCheck, TimerReset } from "lucide-react";
+import { ArrowLeft, ClockCounterClockwise, Lock, ShieldCheck, Warning } from "@/components/icons";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
@@ -206,11 +206,11 @@ function HoldCountdown({ expiresAt }: { expiresAt: string }) {
       type="button"
       onClick={expired ? () => goTo("datetime") : undefined}
       className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium tabular-nums transition-colors ${
-        expired ? "border-red-500/30 bg-red-500/10 text-red-200" : "border-white/10 bg-white/[0.04] text-ink-muted"
+        expired ? "border-bad/30 bg-bad/10 text-bad" : "border-white/10 bg-white/[0.04] text-ink-muted"
       }`}
       title={expired ? "Pick a new time" : "Your slot is held while you pay"}
     >
-      <TimerReset className="size-3.5" />
+      <ClockCounterClockwise className="size-3.5" />
       {expired ? "Hold expired - choose a time" : `Held for ${mins}:${String(secs).padStart(2, "0")}`}
     </button>
   );
@@ -218,11 +218,11 @@ function HoldCountdown({ expiresAt }: { expiresAt: string }) {
 
 function Notice({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2.5 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm text-amber-100">
-      <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+    <div className="flex items-start gap-2.5 rounded-2xl border border-warn/25 bg-warn/10 p-4 text-sm text-warn">
+      <Warning className="mt-0.5 size-4 shrink-0" />
       <div>
         <p className="font-semibold">{title}</p>
-        <p className="mt-0.5 text-amber-100/80">{children}</p>
+        <p className="mt-0.5 text-warn/80">{children}</p>
       </div>
     </div>
   );

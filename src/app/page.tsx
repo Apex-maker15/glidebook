@@ -1,164 +1,172 @@
 import Link from "next/link";
-import { ArrowRight, CreditCard, MapPinned, Radio, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { Reveal } from "@/components/reveal";
-import { Faq, HowItWorks } from "@/components/landing-sections";
-import { CategoryIcon } from "@/components/category-icon";
+import { appUrl } from "@/lib/email";
+import { Faq, HowItWorks, LiveDemo } from "@/components/landing-sections";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { Wordmark } from "@/components/wordmark";
+import { SiteFooter } from "@/components/site-footer";
 import { CATEGORIES } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 
+const FEATURES = [
+  {
+    title: "Deposits that lock the slot",
+    body: "Choose 25%, 50% or full payment. The client pays when they book, by card through your own Stripe account or through your own payment link. Cancel late and the deposit stays with you.",
+  },
+  {
+    title: "A service area that says no",
+    body: "List the cities you cover and the ZIP or postcode prefixes you accept. The form asks for the client's ZIP first and turns away anything outside it, before they can pick a time.",
+  },
+  {
+    title: "Packages priced by vehicle size",
+    body: "Gold, Platinum, Diamond, or whatever you call them, each with a price and a duration for cars, SUVs, trucks and vans. A travel buffer sits between jobs so you are never booked back to back across town.",
+  },
+  {
+    title: "Your page, your brand",
+    body: "Logo, cover photo, six photos of recent work, your Instagram handle and your accent colour. Reviews come only from clients who actually booked, after the appointment.",
+  },
+  {
+    title: "Fewer no-shows",
+    body: "Every booking gets a confirmation with a calendar invite, a reminder the day before, and a link the client can use to cancel themselves inside your rules.",
+  },
+  {
+    title: "DM bookings still count",
+    body: "Agreed a job over Instagram? Add it to your schedule and the slot disappears from your page, so nobody double-books you.",
+  },
+];
+
 export default async function HomePage() {
-  const providers = await prisma.user.findMany({
-    where: { role: "PROVIDER", slug: { not: null }, businessName: { not: null }, services: { some: { active: true } } },
-    select: { slug: true, businessName: true, category: true, _count: { select: { services: { where: { active: true } } } } },
-    orderBy: { createdAt: "desc" },
-    take: 12,
-  });
+  const listed = { role: "PROVIDER" as const, slug: { not: null }, businessName: { not: null }, services: { some: { active: true } } };
+  const [providers, withCover] = await Promise.all([
+    prisma.user.findMany({
+      where: listed,
+      select: { slug: true, businessName: true, category: true, serviceAreas: true, _count: { select: { services: { where: { active: true } } } } },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+    }),
+    // The embedded demo is a real page: the longest-standing detailer with a cover photo.
+    prisma.user.findFirst({
+      where: { ...listed, category: "CAR_DETAILING", coverData: { not: null } },
+      select: { slug: true, businessName: true, serviceAreas: true },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
   // Detailers are the focus right now: show them first, then everyone else.
   providers.sort((a, b) => Number(b.category === "CAR_DETAILING") - Number(a.category === "CAR_DETAILING"));
+  const demo = withCover ?? providers[0] ?? null;
+  const host = new URL(appUrl()).host;
 
   return (
     <div data-accent="neutral" className="min-h-dvh">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 pt-6 sm:px-6">
-        <span className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-          <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
-            <Sparkles className="size-4" />
-          </span>
-          GlideBook
-        </span>
+        <Wordmark />
         <nav className="flex items-center gap-2 text-sm">
           <ThemeToggle className="mr-1" />
-          <Link href="/login" className="rounded-xl px-3 py-2 text-ink-muted transition-colors hover:bg-white/5 hover:text-ink">
+          <Link href="/login" className="rounded-lg px-3 py-2 text-ink-muted hover:text-ink">
             Sign in
           </Link>
-          <Link href="/register" className="rounded-xl bg-white/[0.06] px-3.5 py-2 font-medium transition-colors hover:bg-white/10">
+          <Link href="/register" className="rounded-lg border border-line-strong px-3.5 py-2 font-medium hover:bg-white/[0.04]">
             Start free
           </Link>
         </nav>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-        <section className="pt-20 text-center sm:pt-28">
-          <Reveal>
-            <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[12px] text-ink-muted">
-              <Sparkles className="size-3 text-accent-strong" /> For mobile detailers & car valeters
+      <main className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+        <section className="grid items-center gap-12 pt-16 sm:pt-24 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-16">
+          <div>
+            <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-muted">Free booking pages for mobile detailers</p>
+            <h1 className="mt-5 max-w-2xl text-[44px] leading-[1.02] sm:text-6xl">Deposits before you drive out.</h1>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-muted sm:text-lg">
+              A booking page for mobile detailing. Clients pick a package by vehicle size, choose a time inside your service area
+              and pay a deposit, so the job is real before you load the van.
             </p>
-          </Reveal>
-          <Reveal delay={0.06}>
-            <h1 className="text-gradient mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-tight sm:text-6xl">
-              Deposits before you drive out.
-            </h1>
-          </Reveal>
-          <Reveal delay={0.12}>
-            <p className="mx-auto mt-5 max-w-xl text-base text-ink-muted sm:text-lg">
-              A free booking page for mobile detailing. Clients pick a package by vehicle size, choose a time inside your
-              service area and pay a deposit - so the job is real before you load the van. No monthly fee, no commission.
-            </p>
-          </Reveal>
-          <Reveal delay={0.18}>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/register"
-                className="inline-flex h-12 items-center gap-2 rounded-2xl bg-accent px-6 text-sm font-semibold text-black shadow-glow transition-transform hover:-translate-y-0.5"
-              >
-                Create your booking page <ArrowRight className="size-4" />
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link href="/register" className="inline-flex h-12 items-center rounded-lg bg-accent px-6 text-sm font-semibold text-black hover:bg-accent-strong">
+                Create your booking page
               </Link>
-              <Link
-                href="/login"
-                className="glass inline-flex h-12 items-center rounded-2xl px-6 text-sm font-medium transition-colors hover:bg-white/10"
-              >
-                Open the dashboard
-              </Link>
+              {demo && (
+                <Link href={`/book/${demo.slug}`} className="inline-flex h-12 items-center rounded-lg border border-line-strong px-6 text-sm font-medium hover:bg-white/[0.04]">
+                  Open a live page
+                </Link>
+              )}
             </div>
-          </Reveal>
+            <p className="mt-5 text-[13px] text-ink-muted">
+              No monthly fee and no commission. Deposits go to your Stripe account or your own payment link, never through us.
+            </p>
+          </div>
+
+          {demo && <LiveDemo host={host} slug={demo.slug!} name={demo.businessName!} areas={demo.serviceAreas} />}
         </section>
 
-        <section className="mt-24 grid gap-4 sm:grid-cols-3">
-          {[
-            {
-              icon: <CreditCard className="size-5" />,
-              title: "Deposits, automatically",
-              body: "Set 25%, 50% or full payment. Clients pay before the slot is theirs, so a cancelled Saturday stops costing you fuel and a day.",
-            },
-            {
-              icon: <MapPinned className="size-5" />,
-              title: "Your service area, enforced",
-              body: "List the cities you cover and the ZIP prefixes you accept. Anyone outside them cannot book, so you never drive across the state for one wash.",
-            },
-            {
-              icon: <Radio className="size-5" />,
-              title: "Packages by vehicle size",
-              body: "Gold, Platinum, Diamond - priced for cars, SUVs, trucks and vans - with the time each really takes, plus a travel buffer between jobs.",
-            },
-          ].map((f, i) => (
-            <Reveal key={f.title} delay={0.08 * i}>
-              <div className="glass h-full rounded-3xl p-6">
-                <span className="flex size-10 items-center justify-center rounded-2xl bg-accent/[0.12] text-accent-strong">{f.icon}</span>
-                <h3 className="mt-4 font-semibold">{f.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">{f.body}</p>
-              </div>
-            </Reveal>
-          ))}
+        <section className="mt-28 border-t border-line pt-10">
+          <div className="grid gap-10 lg:grid-cols-[260px_minmax(0,1fr)]">
+            <div>
+              <h2 className="text-2xl">What the page does</h2>
+              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                Built with a Phoenix detailer whose first two questions were about deposits and service areas. Everything below is live today.
+              </p>
+            </div>
+            <dl className="grid gap-x-12 sm:grid-cols-2">
+              {FEATURES.map((f) => (
+                <div key={f.title} className="border-t border-line py-6 first:border-t-0 sm:[&:nth-child(2)]:border-t-0">
+                  <dt className="font-semibold">{f.title}</dt>
+                  <dd className="mt-2 text-sm leading-relaxed text-ink-muted">{f.body}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <p className="mt-8 text-[13px] text-ink-muted">Also used by nail techs, barbers and pet groomers. Anything booked by the hour works.</p>
         </section>
-
-        <Reveal>
-          <p className="mt-10 text-center text-[13px] text-ink-muted">
-            Also works for nail techs, barbers, pet groomers and any appointment-based service.
-          </p>
-        </Reveal>
 
         <HowItWorks />
 
         {providers.length > 0 && (
-          <section className="mt-24">
-            <Reveal>
-              <h2 className="text-center text-sm font-semibold uppercase tracking-[0.2em] text-ink-muted">Try a live booking page</h2>
-            </Reveal>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {providers.map((p, i) => {
-                const meta = CATEGORIES[p.category ?? "OTHER"];
-                return (
-                  <Reveal key={p.slug} delay={0.06 * i}>
-                    <Link
-                      href={`/book/${p.slug}`}
-                      data-accent={meta.accent}
-                      className="glass group flex items-center gap-4 rounded-3xl p-5 transition-all hover:-translate-y-0.5 hover:bg-white/[0.07]"
-                    >
-                      <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent-strong ring-1 ring-accent/30">
-                        <CategoryIcon category={p.category ?? "OTHER"} className="size-6" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate font-semibold">{p.businessName}</span>
-                        <span className="block text-[13px] text-ink-muted">
-                          {meta.tagline} · {p._count.services} services
+          <section className="mt-28 border-t border-line pt-10">
+            <div className="grid gap-10 lg:grid-cols-[260px_minmax(0,1fr)]">
+              <div>
+                <h2 className="text-2xl">Live pages</h2>
+                <p className="mt-3 text-sm leading-relaxed text-ink-muted">Pages built on GlideBook. Open one and try the flow.</p>
+              </div>
+              <ul className="divide-y divide-line border-y border-line">
+                {providers.map((p) => {
+                  const meta = CATEGORIES[p.category ?? "OTHER"];
+                  return (
+                    <li key={p.slug}>
+                      <Link href={`/book/${p.slug}`} className="group flex items-baseline gap-4 py-4 hover:bg-white/[0.03]">
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-semibold group-hover:underline">{p.businessName}</span>
+                          <span className="block text-[13px] text-ink-muted">
+                            {meta.tagline}
+                            {p.serviceAreas ? ` in ${p.serviceAreas}` : ""}
+                          </span>
                         </span>
-                      </span>
-                      <ArrowRight className="size-4 text-ink-muted transition-transform group-hover:translate-x-0.5 group-hover:text-ink" />
-                    </Link>
-                  </Reveal>
-                );
-              })}
+                        <span className="shrink-0 text-[13px] tabular-nums text-ink-muted">
+                          {p._count.services} {p._count.services === 1 ? "service" : "services"}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           </section>
         )}
 
         <Faq />
 
-        <Reveal>
-          <section className="mt-24 text-center">
-            <h2 className="text-gradient text-3xl font-semibold tracking-tight sm:text-4xl">Your booking page in 10 minutes.</h2>
-            <p className="mx-auto mt-3 max-w-md text-sm text-ink-muted">Free forever. Deposits from your very first client.</p>
-            <Link
-              href="/register"
-              className="mt-6 inline-flex h-12 items-center gap-2 rounded-2xl bg-accent px-6 text-sm font-semibold text-black shadow-glow transition-transform hover:-translate-y-0.5"
-            >
-              Create your booking page <ArrowRight className="size-4" />
+        <section className="mt-28 border-t border-line pt-12">
+          <h2 className="max-w-xl text-3xl sm:text-4xl">Your booking page in ten minutes. Or send us your price list and we build it.</h2>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link href="/register" className="inline-flex h-12 items-center rounded-lg bg-accent px-6 text-sm font-semibold text-black hover:bg-accent-strong">
+              Create your booking page
             </Link>
-          </section>
-        </Reveal>
+            <span className="text-[13px] text-ink-muted">Free. Deposits from your first client.</span>
+          </div>
+        </section>
       </main>
+
+      <SiteFooter className="pb-10" />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Coffee, Plus, Trash2 } from "lucide-react";
+import { Coffee, Plus, Trash } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
 import { fadeVariants, spring } from "@/components/motion";
@@ -99,7 +99,7 @@ export function AvailabilityEditor({ providerId, embedded }: ManagerProps = {}) 
             ))}
           </motion.div>
         ) : error ? (
-          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-red-300">
+          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-bad">
             {error}
           </motion.p>
         ) : (
@@ -182,8 +182,8 @@ function TimeRow({ label, value, onChange, onRemove, muted }: { label: string; v
       <span className="text-ink-muted">-</span>
       <input type="time" className={input} value={value.end} onChange={(e) => onChange({ ...value, end: e.target.value })} required />
       {onRemove && (
-        <button type="button" onClick={onRemove} aria-label="Remove" className="ml-auto rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-red-500/15 hover:text-red-300">
-          <Trash2 className="size-3.5" />
+        <button type="button" onClick={onRemove} aria-label="Remove" className="ml-auto rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-bad/15 hover:text-bad">
+          <Trash className="size-3.5" />
         </button>
       )}
     </motion.div>

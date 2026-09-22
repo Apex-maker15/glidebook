@@ -18,7 +18,7 @@ import { normalisePostcode, parseAreaCodes, postcodeInArea } from "@/lib/service
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** GET /api/bookings?from&to — the signed-in provider's schedule. */
+/** GET /api/bookings?from&to - the signed-in provider's schedule. */
 export const GET = handle(async (req: Request) => {
   const user = await requireProvider();
   if (!user) throw new HttpError(401, "Sign in as a provider", "UNAUTHENTICATED");
@@ -42,7 +42,7 @@ export const GET = handle(async (req: Request) => {
   return NextResponse.json({ bookings: rows.map(toBookingDTO) }, { headers: { "Cache-Control": "no-store" } });
 });
 
-/** POST /api/bookings — public: create a PENDING hold after server-side slot validation. */
+/** POST /api/bookings - public: create a PENDING hold after server-side slot validation. */
 export const POST = handle(async (req: Request) => {
   rateLimit(req, "bookings", 20, 10 * 60_000);
   const input = createBookingSchema.parse(await readJson(req));

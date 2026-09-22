@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera, Star, X } from "lucide-react";
+import { Camera, Star, X } from "@/components/icons";
 import { formatDistanceToNowStrict } from "date-fns";
 import { spring } from "@/components/motion";
 import type { ReviewSummary } from "@/types";
@@ -36,7 +36,7 @@ export function Gallery({ photos, businessName }: { photos: string[]; businessNa
             aria-label={`Open photo ${i + 1}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- inline data URL */}
-            <img src={src} alt={`${businessName} work ${i + 1}`} className="size-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+            <img src={src} alt={`${businessName} work ${i + 1}`} className="size-full object-cover" loading="lazy" />
           </button>
         ))}
       </div>
@@ -57,7 +57,7 @@ export function Gallery({ photos, businessName }: { photos: string[]; businessNa
               transition={spring.soft}
               src={photos[open]}
               alt=""
-              className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-pop"
+              className="max-h-[85vh] max-w-full rounded-2xl object-contain"
               onClick={(e) => e.stopPropagation()}
             />
             <button type="button" aria-label="Close" className="absolute right-4 top-4 rounded-full p-2 text-white/80 hover:text-white" style={{ color: "#fff" }}>

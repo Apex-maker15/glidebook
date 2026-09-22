@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
-import { CalendarDays, Columns3, Inbox, List, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { ArrowsClockwise, CalendarBlank, Columns, ListBullets, Tray, WifiHigh, WifiSlash } from "@/components/icons";
 import { Skeleton } from "@/components/ui/primitives";
 import { fadeVariants, spring } from "@/components/motion";
 import { sortBookings, useDashboardStore, type Connection, type StatusFilter } from "@/store/dashboard-store";
@@ -75,8 +75,8 @@ export function BookingBoard({ timezone, currency }: { timezone: string; currenc
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="glass flex rounded-xl p-1">
-          <ToggleButton active={view === "board"} onClick={() => setView("board")} icon={<Columns3 className="size-4" />} label="Board" id="view-board" />
-          <ToggleButton active={view === "list"} onClick={() => setView("list")} icon={<List className="size-4" />} label="List" id="view-list" />
+          <ToggleButton active={view === "board"} onClick={() => setView("board")} icon={<Columns className="size-4" />} label="Board" id="view-board" />
+          <ToggleButton active={view === "list"} onClick={() => setView("list")} icon={<ListBullets className="size-4" />} label="List" id="view-list" />
         </div>
         <AnimatePresence initial={false}>
           {view === "list" && (
@@ -113,7 +113,7 @@ export function BookingBoard({ timezone, currency }: { timezone: string; currenc
             aria-label="Refresh"
             className="rounded-xl p-2 text-ink-muted transition-colors hover:bg-white/[0.08] hover:text-ink"
           >
-            <RefreshCw className={cn("size-4", status === "loading" && "animate-spin")} />
+            <ArrowsClockwise className={cn("size-4", status === "loading" && "animate-spin")} />
           </button>
         </div>
       </div>
@@ -132,7 +132,7 @@ export function BookingBoard({ timezone, currency }: { timezone: string; currenc
           </motion.div>
         ) : status === "error" ? (
           <motion.div key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="glass rounded-3xl p-10 text-center">
-            <p className="text-sm text-red-300">{error}</p>
+            <p className="text-sm text-bad">{error}</p>
             <button type="button" onClick={() => void load()} className="mt-3 text-sm text-ink-muted hover:text-ink">
               Try again
             </button>
@@ -170,7 +170,7 @@ export function BookingBoard({ timezone, currency }: { timezone: string; currenc
                               exit={{ opacity: 0 }}
                               className="flex h-28 flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-white/10 text-[13px] text-ink-muted"
                             >
-                              <Inbox className="size-4" /> Nothing here
+                              <Tray className="size-4" /> Nothing here
                             </motion.div>
                           ) : (
                             items.map((b) => <BookingCard key={b.id} booking={b} timezone={timezone} highlighted={Boolean(highlighted[b.id])} />)
@@ -195,7 +195,7 @@ export function BookingBoard({ timezone, currency }: { timezone: string; currenc
                     exit={{ opacity: 0 }}
                     className="flex h-40 flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-white/10 text-sm text-ink-muted"
                   >
-                    <CalendarDays className="size-5" /> No bookings match this filter
+                    <CalendarBlank className="size-5" /> No bookings match this filter
                   </motion.div>
                 ) : (
                   listItems.map(([day, items]) => (
@@ -225,7 +225,7 @@ export function BookingBoard({ timezone, currency }: { timezone: string; currenc
 
 function Stat({ label, value, loading, accent }: { label: string; value: string; loading: boolean; accent?: boolean }) {
   return (
-    <div className={cn("glass rounded-2xl p-4", accent && "ring-1 ring-amber-400/30")}>
+    <div className={cn("glass rounded-2xl p-4", accent && "ring-1 ring-warn/30")}>
       <p className="text-[12px] font-medium uppercase tracking-wider text-ink-muted">{label}</p>
       <div className="mt-1.5 h-7">
         <AnimatePresence mode="wait" initial={false}>
@@ -263,18 +263,18 @@ function ToggleButton({ active, onClick, icon, label, id }: { active: boolean; o
 
 function ConnectionPill({ connection }: { connection: Connection }) {
   const map: Record<Connection, { label: string; cls: string; icon: React.ReactNode }> = {
-    live: { label: "Live", cls: "text-emerald-300", icon: <Wifi className="size-3.5" /> },
-    connecting: { label: "Connecting", cls: "text-ink-muted", icon: <Wifi className="size-3.5 animate-pulse" /> },
-    polling: { label: "Syncing every 15s", cls: "text-amber-200", icon: <RefreshCw className="size-3.5" /> },
-    offline: { label: "Offline", cls: "text-red-300", icon: <WifiOff className="size-3.5" /> },
+    live: { label: "Live", cls: "text-ok", icon: <WifiHigh className="size-3.5" /> },
+    connecting: { label: "Connecting", cls: "text-ink-muted", icon: <WifiHigh className="size-3.5 animate-pulse" /> },
+    polling: { label: "Syncing every 15s", cls: "text-warn", icon: <ArrowsClockwise className="size-3.5" /> },
+    offline: { label: "Offline", cls: "text-bad", icon: <WifiSlash className="size-3.5" /> },
   };
   const c = map[connection];
   return (
     <span className={cn("flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[12px] font-medium", c.cls)}>
       {connection === "live" && (
         <span className="relative flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-          <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-ok opacity-60" />
+          <span className="relative inline-flex size-2 rounded-full bg-ok" />
         </span>
       )}
       {connection !== "live" && c.icon}

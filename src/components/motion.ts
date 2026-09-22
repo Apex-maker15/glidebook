@@ -4,7 +4,7 @@ import type { Transition, Variants } from "framer-motion";
  * Spring presets. Low stiffness + high damping = weighty, non-bouncy motion.
  */
 export const spring = {
-  /** Buttons, chips, hover/tap feedback. */
+  /** Buttons, chips, tap feedback. */
   snappy: { type: "spring", stiffness: 380, damping: 32, mass: 0.8 } satisfies Transition,
   /** Cards, panels, step transitions. */
   soft: { type: "spring", stiffness: 210, damping: 28, mass: 1 } satisfies Transition,
@@ -15,13 +15,11 @@ export const spring = {
 } as const;
 
 export const pressable = {
-  whileHover: { scale: 1.015, y: -1 },
   whileTap: { scale: 0.975, y: 0 },
   transition: spring.snappy,
 } as const;
 
 export const pressableSubtle = {
-  whileHover: { y: -1 },
   whileTap: { scale: 0.985 },
   transition: spring.snappy,
 } as const;

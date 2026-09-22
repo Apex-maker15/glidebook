@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
-import { CalendarPlus, CreditCard, ExternalLink, MapPin, RotateCcw } from "lucide-react";
+import { ArrowCounterClockwise, ArrowSquareOut, CalendarPlus, CreditCard, MapPin } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { spring } from "@/components/motion";
 import { useBookingStore, selectService } from "@/store/booking-store";
@@ -93,7 +93,7 @@ export function StepSuccess() {
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ ...spring.gentle, delay: 0.05 }}
-        className="relative mb-6 flex size-24 items-center justify-center rounded-full bg-accent/15 ring-1 ring-accent/40 shadow-glow-lg"
+        className="relative mb-6 flex size-24 items-center justify-center rounded-full bg-accent/15 ring-1 ring-accent/40"
       >
         <motion.span
           className="absolute inset-0 rounded-full bg-accent/20"
@@ -152,7 +152,7 @@ export function StepSuccess() {
         <div className="mt-1 flex items-center gap-2 text-[12px]">
           <motion.span
             layout
-            className={`size-2 rounded-full ${confirmed ? "bg-emerald-400" : "bg-amber-300"}`}
+            className={`size-2 rounded-full ${confirmed ? "bg-ok" : "bg-warn"}`}
             animate={confirmed ? {} : { opacity: [1, 0.4, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
           />
@@ -174,7 +174,7 @@ export function StepSuccess() {
             href={booking.depositLink!}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-accent px-5 text-sm font-semibold text-black shadow-glow transition-transform hover:-translate-y-0.5"
+            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-accent px-5 text-sm font-semibold text-black"
           >
             <CreditCard className="size-4" /> Pay {formatMoney(booking.depositCents, booking.currency)} deposit
           </a>
@@ -184,11 +184,11 @@ export function StepSuccess() {
         </Button>
         {manageUrl && (
           <a href={manageUrl} className="inline-flex h-11 items-center gap-2 rounded-2xl px-5 text-sm font-medium text-ink-muted transition-colors hover:bg-white/5 hover:text-ink">
-            <ExternalLink className="size-4" /> Manage booking
+            <ArrowSquareOut className="size-4" /> Manage booking
           </a>
         )}
         <Button variant="ghost" onClick={reset}>
-          <RotateCcw className="size-4" /> Book another
+          <ArrowCounterClockwise className="size-4" /> Book another
         </Button>
       </motion.div>
     </div>

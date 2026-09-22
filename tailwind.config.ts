@@ -7,6 +7,18 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
+    // Crisp corners everywhere. Components still say rounded-2xl/3xl; the scale is what changed.
+    borderRadius: {
+      none: "0",
+      sm: "2px",
+      DEFAULT: "3px",
+      md: "4px",
+      lg: "5px",
+      xl: "6px",
+      "2xl": "8px",
+      "3xl": "8px",
+      full: "9999px",
+    },
     extend: {
       colors: {
         white: "rgb(var(--tint-rgb) / <alpha-value>)",
@@ -21,19 +33,14 @@ const config: Config = {
         "ink-muted": "rgb(var(--ink-muted-rgb) / <alpha-value>)",
         line: "var(--line)",
         "line-strong": "var(--line-strong)",
+        ok: "rgb(var(--ok-rgb) / <alpha-value>)",
+        warn: "rgb(var(--warn-rgb) / <alpha-value>)",
+        bad: "rgb(var(--bad-rgb) / <alpha-value>)",
+        info: "rgb(var(--info-rgb) / <alpha-value>)",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "Georgia", "Times New Roman", "serif"],
-      },
-      boxShadow: {
-        glow: "0 0 0 1px rgb(var(--accent-rgb) / 0.35), 0 12px 32px -14px rgb(var(--accent-rgb) / 0.5)",
-        "glow-lg": "0 0 0 1px rgb(var(--accent-rgb) / 0.45), 0 24px 60px -18px rgb(var(--accent-rgb) / 0.6)",
-        card: "var(--shadow-card)",
-        pop: "var(--shadow-pop)",
-      },
-      keyframes: {
-        shimmer: { "100%": { transform: "translateX(100%)" } },
       },
     },
   },

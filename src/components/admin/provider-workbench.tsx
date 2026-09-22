@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
-import { ArrowLeft, Copy, ExternalLink, Mail, Phone } from "lucide-react";
+import { ArrowLeft, ArrowSquareOut, Copy, Envelope, Phone } from "@/components/icons";
 import { Skeleton, StatusBadge } from "@/components/ui/primitives";
 import { ServicesManager } from "@/components/dashboard/services-manager";
 import { AvailabilityEditor } from "@/components/dashboard/availability-editor";
@@ -67,7 +67,7 @@ export function ProviderWorkbench({ providerId }: { providerId: string }) {
     }
   };
 
-  if (error) return <p className="text-sm text-red-300">{error}</p>;
+  if (error) return <p className="text-sm text-bad">{error}</p>;
   if (!data) {
     return (
       <div className="mx-auto max-w-6xl space-y-4">
@@ -100,7 +100,7 @@ export function ProviderWorkbench({ providerId }: { providerId: string }) {
             <p className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-ink-muted">
               <span>{p.name}</span>
               <a href={`mailto:${p.email}`} className="flex items-center gap-1 hover:text-ink">
-                <Mail className="size-3.5" /> {p.email}
+                <Envelope className="size-3.5" /> {p.email}
               </a>
               {p.phone && (
                 <a href={`tel:${p.phone}`} className="flex items-center gap-1 hover:text-ink">
@@ -121,7 +121,7 @@ export function ProviderWorkbench({ providerId }: { providerId: string }) {
                   <Copy className="size-3.5" /> Copy link
                 </button>
                 <Link href={`/book/${p.slug}`} target="_blank" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-white/[0.06] px-3 text-[13px] font-medium hover:bg-white/10">
-                  <ExternalLink className="size-3.5" /> /book/{p.slug}
+                  <ArrowSquareOut className="size-3.5" /> /book/{p.slug}
                 </Link>
               </>
             )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, ArrowLeft, Lock, MapPin } from "lucide-react";
+import { ArrowLeft, Lock, MapPin, Warning } from "@/components/icons";
 import { CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Field, TextArea } from "@/components/ui/primitives";
@@ -48,8 +48,8 @@ export function StepCustomer() {
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <div className="flex items-start gap-2.5 rounded-2xl border border-red-500/25 bg-red-500/10 p-3.5 text-sm text-red-200">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <div className="flex items-start gap-2.5 rounded-2xl border border-bad/25 bg-bad/10 p-3.5 text-sm text-bad">
+              <Warning className="mt-0.5 size-4 shrink-0" />
               <p>{submitError}</p>
             </div>
           </motion.div>

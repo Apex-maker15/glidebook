@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarX2, RefreshCw } from "lucide-react";
+import { ArrowsClockwise, CalendarX } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { fadeVariants, spring } from "@/components/motion";
 import { Skeleton } from "@/components/ui/primitives";
@@ -43,7 +43,6 @@ export function TimeSlots({ slots, status, error, selected, onSelect, onRetry, h
       <AnimatePresence mode="wait" initial={false}>
         {!hasDate ? (
           <motion.div key="empty" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="flex h-full min-h-[280px] flex-col items-center justify-center gap-2 text-center text-sm text-ink-muted">
-            <span className="text-2xl">👈</span>
             Pick a day to see open times
           </motion.div>
         ) : status === "loading" || status === "idle" ? (
@@ -61,14 +60,14 @@ export function TimeSlots({ slots, status, error, selected, onSelect, onRetry, h
           </motion.div>
         ) : status === "error" ? (
           <motion.div key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="flex min-h-[280px] flex-col items-center justify-center gap-3 text-center">
-            <p className="text-sm text-red-300">{error}</p>
+            <p className="text-sm text-bad">{error}</p>
             <button type="button" onClick={onRetry} className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink">
-              <RefreshCw className="size-3.5" /> Try again
+              <ArrowsClockwise className="size-3.5" /> Try again
             </button>
           </motion.div>
         ) : slots.length === 0 ? (
           <motion.div key="none" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="flex min-h-[280px] flex-col items-center justify-center gap-2 text-center text-sm text-ink-muted">
-            <CalendarX2 className="size-6 text-ink-muted/60" />
+            <CalendarX className="size-6 text-ink-muted/60" />
             Fully booked that day. Try another date.
           </motion.div>
         ) : (
@@ -86,7 +85,6 @@ export function TimeSlots({ slots, status, error, selected, onSelect, onRetry, h
                         role="radio"
                         aria-checked={active}
                         onClick={() => onSelect(slot)}
-                        whileHover={{ y: -1 }}
                         whileTap={{ scale: 0.95 }}
                         transition={spring.snappy}
                         className={cn(
@@ -98,7 +96,7 @@ export function TimeSlots({ slots, status, error, selected, onSelect, onRetry, h
                           <motion.span
                             layoutId="slot-active"
                             transition={spring.morph}
-                            className="absolute inset-0 rounded-xl bg-accent shadow-[0_10px_30px_-10px_var(--accent)]"
+                            className="absolute inset-0 rounded-xl bg-accent"
                           />
                         )}
                         <span className="relative">{slot.label}</span>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowDown, AtSign, MapPin, Phone, ShieldCheck } from "lucide-react";
+import { ArrowDown, At, MapPin, Phone, ShieldCheck } from "@/components/icons";
 import { CATEGORIES } from "@/lib/categories";
 import { CategoryIcon } from "@/components/category-icon";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -53,23 +53,9 @@ export function ProviderHero({ provider }: { provider: ProviderDTO }) {
           style={
             provider.coverData
               ? { backgroundImage: `url(${provider.coverData})`, backgroundSize: "cover", backgroundPosition: "center" }
-              : {
-                  background:
-                    "linear-gradient(135deg, rgb(var(--accent-rgb) / 0.9) 0%, rgb(var(--accent-rgb) / 0.55) 55%, rgb(var(--accent-strong-rgb) / 0.75) 100%)",
-                }
+              : { background: "var(--accent)" }
           }
-        >
-          {!provider.coverData && (
-            <div
-              aria-hidden
-              className="absolute inset-0 opacity-30"
-              style={{
-                backgroundImage: "radial-gradient(rgb(255 255 255 / 0.35) 1px, transparent 1px)",
-                backgroundSize: "18px 18px",
-              }}
-            />
-          )}
-        </motion.div>
+        />
 
         <div className="relative flex flex-col gap-5 px-2 sm:flex-row sm:items-end sm:justify-between sm:px-5">
           <div className="flex items-end gap-4">
@@ -77,7 +63,7 @@ export function ProviderHero({ provider }: { provider: ProviderDTO }) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ ...spring.gentle, delay: 0.08 }}
-              className="-mt-12 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-bg bg-surface text-xl font-semibold shadow-pop sm:-mt-14 sm:size-28"
+              className="-mt-12 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-bg bg-surface text-xl font-semibold sm:-mt-14 sm:size-28"
             >
               {provider.logoData ? (
                 // eslint-disable-next-line @next/next/no-img-element -- inline data URL, no optimisation possible
@@ -97,7 +83,7 @@ export function ProviderHero({ provider }: { provider: ProviderDTO }) {
           <button
             type="button"
             onClick={scrollToBooking}
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-accent px-6 text-sm font-semibold text-black shadow-glow transition-transform hover:-translate-y-0.5 sm:mb-1"
+            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-accent px-6 text-sm font-semibold text-black sm:mb-1"
           >
             Book now <ArrowDown className="size-4" />
           </button>
@@ -115,7 +101,7 @@ export function ProviderHero({ provider }: { provider: ProviderDTO }) {
                 rel="noreferrer"
                 className="flex items-center gap-1.5 transition-colors hover:text-ink"
               >
-                <AtSign className="size-3.5 shrink-0 text-accent-strong" /> {provider.instagram} on Instagram
+                <At className="size-3.5 shrink-0 text-accent-strong" /> {provider.instagram} on Instagram
               </a>
             </li>
           )}

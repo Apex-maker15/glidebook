@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
-import { CalendarDays, Clock, Receipt, Sparkles } from "lucide-react";
+import { CalendarBlank, Clock, Receipt, Tag } from "@/components/icons";
 import { spring } from "@/components/motion";
 import { useBookingStore, selectService } from "@/store/booking-store";
 import { useProvider } from "./provider-context";
@@ -18,13 +18,13 @@ export function SummaryCard() {
   const rows = [
     service && {
       key: "service",
-      icon: <Sparkles className="size-4" />,
+      icon: <Tag className="size-4" />,
       label: service.name,
       detail: formatDuration(service.durationMinutes),
     },
     slot && {
       key: "slot",
-      icon: <CalendarDays className="size-4" />,
+      icon: <CalendarBlank className="size-4" />,
       label: formatInTimeZone(new Date(slot.start), provider.timezone, "EEE, MMM d"),
       detail: `${slot.label} - ${formatInTimeZone(new Date(slot.end), provider.timezone, "h:mm a")}`,
     },

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft, CaretRight } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
 
@@ -75,7 +75,7 @@ export function Calendar({ value, onChange, min, max, availability, onMonthChang
           aria-label="Previous month"
           className="rounded-xl p-2 text-ink-muted transition-colors hover:bg-white/[0.08] hover:text-ink disabled:opacity-30"
         >
-          <ChevronLeft className="size-4" />
+          <CaretLeft className="size-4" />
         </button>
         <div className="relative h-6 overflow-hidden text-center">
           <AnimatePresence mode="popLayout" custom={dir} initial={false}>
@@ -99,7 +99,7 @@ export function Calendar({ value, onChange, min, max, availability, onMonthChang
           aria-label="Next month"
           className="rounded-xl p-2 text-ink-muted transition-colors hover:bg-white/[0.08] hover:text-ink disabled:opacity-30"
         >
-          <ChevronRight className="size-4" />
+          <CaretRight className="size-4" />
         </button>
       </div>
 
@@ -139,7 +139,6 @@ export function Calendar({ value, onChange, min, max, availability, onMonthChang
                     aria-selected={selected}
                     disabled={disabled}
                     onClick={() => onChange(date)}
-                    whileHover={disabled ? undefined : { scale: 1.08 }}
                     whileTap={disabled ? undefined : { scale: 0.94 }}
                     transition={spring.snappy}
                     className={cn(
@@ -152,7 +151,7 @@ export function Calendar({ value, onChange, min, max, availability, onMonthChang
                       <motion.span
                         layoutId="calendar-selected"
                         transition={spring.morph}
-                        className="absolute inset-0 rounded-full bg-accent shadow-[0_8px_24px_-8px_var(--accent)]"
+                        className="absolute inset-0 rounded-full bg-accent"
                       />
                     )}
                     <span className="relative">{Number(date.slice(8, 10))}</span>

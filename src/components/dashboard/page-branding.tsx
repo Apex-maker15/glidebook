@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera, ExternalLink, ImagePlus, Trash2 } from "lucide-react";
+import { ArrowSquareOut, Camera, ImageSquare, Trash } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Field, Skeleton, TextArea } from "@/components/ui/primitives";
 import { fadeVariants } from "@/components/motion";
@@ -124,7 +124,7 @@ export function PageBranding({ providerId, embedded }: ManagerProps = {}) {
         </div>
         {form?.slug && (
           <Link href={`/book/${form.slug}`} target="_blank" className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted hover:text-ink">
-            <ExternalLink className="size-3.5" /> View page
+            <ArrowSquareOut className="size-3.5" /> View page
           </Link>
         )}
       </header>
@@ -136,7 +136,7 @@ export function PageBranding({ providerId, embedded }: ManagerProps = {}) {
             <Skeleton className="h-64 rounded-3xl" />
           </motion.div>
         ) : error ? (
-          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-red-300">
+          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-bad">
             {error}
           </motion.p>
         ) : (
@@ -148,22 +148,22 @@ export function PageBranding({ providerId, embedded }: ManagerProps = {}) {
                 style={
                   form!.coverData
                     ? { backgroundImage: `url(${form!.coverData})`, backgroundSize: "cover", backgroundPosition: "center" }
-                    : { background: `linear-gradient(135deg, ${form!.accentColor || DEFAULT_ACCENT}e6, ${form!.accentColor || DEFAULT_ACCENT}80)` }
+                    : { background: form!.accentColor || DEFAULT_ACCENT }
                 }
               >
                 <div className="absolute bottom-3 right-3 flex gap-2">
                   <Button type="button" size="sm" variant="secondary" loading={busy === "cover"} onClick={() => coverInput.current?.click()}>
-                    <ImagePlus className="size-3.5" /> {form!.coverData ? "Change cover" : "Add cover photo"}
+                    <ImageSquare className="size-3.5" /> {form!.coverData ? "Change cover" : "Add cover photo"}
                   </Button>
                   {form!.coverData && (
                     <Button type="button" size="sm" variant="ghost" onClick={() => set("coverData", null)} aria-label="Remove cover">
-                      <Trash2 className="size-3.5" />
+                      <Trash className="size-3.5" />
                     </Button>
                   )}
                 </div>
               </div>
               <div className="flex items-end gap-4 px-5 pb-5">
-                <div className="-mt-10 flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-surface bg-surface-2 shadow-pop">
+                <div className="-mt-10 flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-surface bg-surface-2">
                   {form!.logoData ? (
                     // eslint-disable-next-line @next/next/no-img-element -- inline data URL
                     <img src={form!.logoData} alt="Logo" className="size-full object-cover" />
@@ -173,7 +173,7 @@ export function PageBranding({ providerId, embedded }: ManagerProps = {}) {
                 </div>
                 <div className="flex flex-wrap gap-2 pb-1">
                   <Button type="button" size="sm" variant="secondary" loading={busy === "logo"} onClick={() => logoInput.current?.click()}>
-                    <ImagePlus className="size-3.5" /> {form!.logoData ? "Change logo" : "Add logo"}
+                    <ImageSquare className="size-3.5" /> {form!.logoData ? "Change logo" : "Add logo"}
                   </Button>
                   {form!.logoData && (
                     <Button type="button" size="sm" variant="ghost" onClick={() => set("logoData", null)}>
@@ -233,7 +233,7 @@ export function PageBranding({ providerId, embedded }: ManagerProps = {}) {
                       </button>
                     )}
                   </div>
-                  {issues.accentColor?.[0] && <p className="text-xs text-red-300">{issues.accentColor[0]}</p>}
+                  {issues.accentColor?.[0] && <p className="text-xs text-bad">{issues.accentColor[0]}</p>}
                 </div>
               </div>
             </div>
@@ -245,7 +245,7 @@ export function PageBranding({ providerId, embedded }: ManagerProps = {}) {
                   <p className="mt-0.5 text-[13px] text-ink-muted">Up to 6 photos. Before-and-afters do best.</p>
                 </div>
                 <Button type="button" size="sm" variant="secondary" loading={busy === "gallery"} disabled={form!.gallery.length >= 6} onClick={() => galleryInput.current?.click()}>
-                  <ImagePlus className="size-3.5" /> Add photos
+                  <ImageSquare className="size-3.5" /> Add photos
                 </Button>
                 <input ref={galleryInput} type="file" accept="image/*" multiple className="hidden" onChange={(e) => void pick("gallery", e.target.files)} />
               </div>
@@ -262,13 +262,13 @@ export function PageBranding({ providerId, embedded }: ManagerProps = {}) {
                         className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
                         style={{ color: "#fff", backgroundColor: "rgb(0 0 0 / 0.6)" }}
                       >
-                        <Trash2 className="size-3.5" />
+                        <Trash className="size-3.5" />
                       </button>
                     </div>
                   ))}
                 </div>
               )}
-              {issues.gallery?.[0] && <p className="mt-2 text-xs text-red-300">{issues.gallery[0]}</p>}
+              {issues.gallery?.[0] && <p className="mt-2 text-xs text-bad">{issues.gallery[0]}</p>}
             </div>
 
             <div className="flex justify-end">

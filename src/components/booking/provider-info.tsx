@@ -1,4 +1,4 @@
-import { Clock, MapPinned, Sparkles, Wallet } from "lucide-react";
+import { Clock, Info, MapTrifold, Wallet } from "@/components/icons";
 import type { ProviderDTO } from "@/types";
 
 export interface DayHours {
@@ -29,7 +29,7 @@ export function ProviderInfo({ provider, hours }: { provider: ProviderDTO; hours
       {provider.bio && (
         <div className="glass rounded-3xl p-6 lg:col-span-2">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <Sparkles className="size-4 text-accent-strong" /> About
+            <Info className="size-4 text-accent-strong" /> About
           </h2>
           <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-ink-muted">{provider.bio}</p>
         </div>
@@ -56,7 +56,7 @@ export function ProviderInfo({ provider, hours }: { provider: ProviderDTO; hours
       {provider.locationMode === "MOBILE" && provider.serviceAreas && (
         <div className="glass rounded-3xl p-6">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <MapPinned className="size-4 text-accent-strong" /> Where we go
+            <MapTrifold className="size-4 text-accent-strong" /> Where we go
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">{provider.serviceAreas}</p>
           {provider.serviceAreaCodes && (
@@ -75,7 +75,7 @@ export function ProviderInfo({ provider, hours }: { provider: ProviderDTO; hours
             referrerPolicy="no-referrer-when-downgrade"
           />
           <p className="flex items-center gap-2 px-5 py-3 text-[13px] text-ink-muted">
-            <MapPinned className="size-3.5 text-accent-strong" /> {provider.studioAddress}
+            <MapTrifold className="size-3.5 text-accent-strong" /> {provider.studioAddress}
           </p>
         </div>
       )}

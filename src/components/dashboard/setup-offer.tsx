@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarClock, CheckCircle2, Clock, Sparkles, Wrench } from "lucide-react";
+import { CalendarDots, CheckCircle, Clock, Toolbox, Wrench } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Skeleton, TextArea } from "@/components/ui/primitives";
 import { StripePayment } from "@/components/stripe-payment";
@@ -117,7 +117,7 @@ export function SetupOffer({ publishableKey }: Props) {
           <motion.div key="status" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="glass rounded-3xl p-6">
             {request?.status === "DONE" ? (
               <>
-                <CheckCircle2 className="size-8 text-emerald-300" />
+                <CheckCircle className="size-8 text-ok" />
                 <h2 className="mt-3 text-lg font-semibold">Your page is ready</h2>
                 <p className="mt-1 text-sm text-ink-muted">
                   We have added your services and hours. Check them under Services and Availability, then share your link.
@@ -157,7 +157,7 @@ export function SetupOffer({ publishableKey }: Props) {
           </motion.div>
         ) : (
           <motion.div key="choose" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="grid gap-4 sm:grid-cols-2">
-            <motion.div whileHover={{ y: -2 }} transition={spring.soft} className="glass flex flex-col rounded-3xl p-6">
+            <motion.div transition={spring.soft} className="glass flex flex-col rounded-3xl p-6">
               <span className="flex size-10 items-center justify-center rounded-2xl bg-white/[0.06] text-ink">
                 <Wrench className="size-5" />
               </span>
@@ -172,15 +172,15 @@ export function SetupOffer({ publishableKey }: Props) {
                   <Wrench className="size-4" /> Add services
                 </Link>
                 <Link href="/dashboard/availability" className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-white/[0.06] text-sm font-medium transition-colors hover:bg-white/[0.1]">
-                  <CalendarClock className="size-4" /> Set hours
+                  <CalendarDots className="size-4" /> Set hours
                 </Link>
               </div>
             </motion.div>
 
-            <motion.div whileHover={{ y: -2 }} transition={spring.soft} className="glass-strong relative flex flex-col rounded-3xl p-6 ring-1 ring-accent/40 shadow-glow">
+            <motion.div transition={spring.soft} className="glass-strong relative flex flex-col rounded-3xl p-6 ring-1 ring-accent/40">
               <span className="absolute right-4 top-4 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-black">Popular</span>
               <span className="flex size-10 items-center justify-center rounded-2xl bg-accent/15 text-accent-strong">
-                <Sparkles className="size-5" />
+                <Toolbox className="size-5" />
               </span>
               <h2 className="mt-4 text-lg font-semibold">We set it up for you</h2>
               <p className="mt-1 text-2xl font-semibold tracking-tight">
@@ -200,7 +200,7 @@ export function SetupOffer({ publishableKey }: Props) {
                 error={error ?? undefined}
               />
               {!free && !publishableKey && (
-                <p className="mt-2 text-[12px] text-amber-200">Payments are not configured on this server yet.</p>
+                <p className="mt-2 text-[12px] text-warn">Payments are not configured on this server yet.</p>
               )}
               <Button className="mt-4 w-full" size="lg" loading={submitting} disabled={(!free && !publishableKey) || notes.trim().length < 20} onClick={() => void start()}>
                 {free ? "Send it - we'll build it" : `Continue to pay ${feeLabel}`}

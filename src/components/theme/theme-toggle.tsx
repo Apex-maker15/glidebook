@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
 import { useTheme } from "./use-theme";
@@ -27,7 +27,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       <motion.span
         layout
         transition={spring.snappy}
-        className="relative z-10 flex size-6 items-center justify-center rounded-full bg-surface text-ink shadow-card"
+        className="relative z-10 flex size-6 items-center justify-center rounded-full bg-surface text-ink"
         style={{ marginLeft: dark ? "auto" : 0 }}
       >
         {dark ? <Moon className="size-3.5" /> : <Sun className="size-3.5" />}

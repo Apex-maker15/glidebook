@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
 import { STEPS, useBookingStore, type Step } from "@/store/booking-store";
@@ -55,7 +55,7 @@ export function StepIndicator() {
                 <motion.span
                   layoutId="step-pill"
                   transition={spring.morph}
-                  className="absolute inset-0 rounded-full bg-accent shadow-[0_6px_24px_-8px_var(--accent)]"
+                  className="absolute inset-0 rounded-full bg-accent"
                 />
               )}
               <span className="relative flex items-center gap-1.5">
@@ -65,7 +65,7 @@ export function StepIndicator() {
                     active ? "bg-black/20 text-black" : done ? "bg-accent/25 text-accent-strong" : "bg-white/[0.08] text-ink-muted",
                   )}
                 >
-                  {done ? <Check className="size-3" strokeWidth={3} /> : i + 1}
+                  {done ? <Check className="size-3" /> : i + 1}
                 </span>
                 <span className={cn("hidden sm:inline", active && "font-semibold")}>{labels[s]}</span>
               </span>

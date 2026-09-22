@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, ArrowUpRight, BadgeCheck, Banknote, CircleDashed, Landmark, RefreshCw, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, ArrowsClockwise, Bank, CircleDashed, Money, SealCheck, ShieldCheck, Warning } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
 import { fadeVariants, spring } from "@/components/motion";
@@ -126,7 +126,7 @@ export function PaymentsPanel() {
             <Skeleton className="h-28 rounded-3xl" />
           </motion.div>
         ) : error ? (
-          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-red-300">
+          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-bad">
             {error}
           </motion.p>
         ) : (
@@ -167,11 +167,11 @@ function StatusCard({
 
   if (!s.configured) {
     return (
-      <div className="flex items-start gap-3 rounded-3xl border border-amber-400/25 bg-amber-400/10 p-5 text-sm text-amber-100">
-        <AlertTriangle className="mt-0.5 size-5 shrink-0" />
+      <div className="flex items-start gap-3 rounded-3xl border border-warn/25 bg-warn/10 p-5 text-sm text-warn">
+        <Warning className="mt-0.5 size-5 shrink-0" />
         <div>
           <p className="font-semibold">Payments are not configured on this server yet</p>
-          <p className="mt-1 text-amber-100/80">
+          <p className="mt-1 text-warn/80">
             Until Stripe keys are added, your booking page still works: clients book without a deposit and pay you on the day.
           </p>
         </div>
@@ -181,11 +181,11 @@ function StatusCard({
 
   if (s.chargesEnabled) {
     return (
-      <motion.div layout transition={spring.soft} className="glass-strong rounded-3xl p-6 ring-1 ring-emerald-400/30">
+      <motion.div layout transition={spring.soft} className="glass-strong rounded-3xl p-6 ring-1 ring-ok/30">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-emerald-400/15 text-emerald-300">
-              <BadgeCheck className="size-6" />
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-ok/15 text-ok">
+              <SealCheck className="size-6" />
             </span>
             <div>
               <h2 className="text-lg font-semibold">You&apos;re taking deposits</h2>
@@ -194,19 +194,19 @@ function StatusCard({
                 {s.payoutsEnabled ? "." : " once your bank details are verified."}
               </p>
               {!s.payoutsEnabled && s.requirementsDue.length > 0 && (
-                <p className="mt-2 text-[13px] text-amber-200">
+                <p className="mt-2 text-[13px] text-warn">
                   Stripe still needs: {s.requirementsDue.slice(0, 3).map(humanRequirement).join(", ")}.
                 </p>
               )}
             </div>
           </div>
           <button type="button" onClick={refresh} aria-label="Refresh status" className="rounded-lg p-2 text-ink-muted hover:bg-white/[0.08] hover:text-ink">
-            <RefreshCw className={cn("size-4", busy === "refresh" && "animate-spin")} />
+            <ArrowsClockwise className={cn("size-4", busy === "refresh" && "animate-spin")} />
           </button>
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
           <Button variant="secondary" onClick={openDashboard} loading={busy === "dashboard"}>
-            <Landmark className="size-4" /> Payouts &amp; balance <ArrowUpRight className="size-3.5" />
+            <Bank className="size-4" /> Payouts &amp; balance <ArrowUpRight className="size-3.5" />
           </Button>
           {!s.payoutsEnabled && (
             <Button variant="ghost" onClick={onboard} loading={busy === "onboard"}>
@@ -220,10 +220,10 @@ function StatusCard({
 
   const resuming = s.connected;
   return (
-    <motion.div layout transition={spring.soft} className="glass-strong rounded-3xl p-6 ring-1 ring-accent/40 shadow-glow">
+    <motion.div layout transition={spring.soft} className="glass-strong rounded-3xl p-6 ring-1 ring-accent/40">
       <div className="flex items-start gap-3">
         <span className="flex size-11 items-center justify-center rounded-2xl bg-accent/15 text-accent-strong">
-          {resuming ? <CircleDashed className="size-6" /> : <Banknote className="size-6" />}
+          {resuming ? <CircleDashed className="size-6" /> : <Money className="size-6" />}
         </span>
         <div className="flex-1">
           <h2 className="text-lg font-semibold">{resuming ? "Almost there" : "Start taking deposits"}</h2>
@@ -235,7 +235,7 @@ function StatusCard({
               : "Stripe will ask for your name, date of birth, address and the bank account to pay you into. Takes about two minutes and you never leave your phone."}
           </p>
           {resuming && s.requirementsDue.length > 0 && (
-            <p className="mt-2 text-[13px] text-amber-200">
+            <p className="mt-2 text-[13px] text-warn">
               Still needed: {s.requirementsDue.slice(0, 4).map(humanRequirement).join(", ")}.
             </p>
           )}
@@ -254,7 +254,7 @@ function StatusCard({
         </Button>
         {resuming && (
           <Button variant="ghost" onClick={refresh} loading={busy === "refresh"}>
-            <RefreshCw className="size-4" /> Check again
+            <ArrowsClockwise className="size-4" /> Check again
           </Button>
         )}
       </div>

@@ -140,6 +140,8 @@ The dashboard opens an `EventSource`. Server side, `publish()` emits to an in-pr
 - Every interactive element uses spring physics (`src/components/motion.ts`), low stiffness / high damping.
 - Skeletons cross-fade into content via `AnimatePresence mode="wait"`; the Stripe iframe has a reserved min-height to avoid CLS.
 - Optimistic UI: the wizard jumps to the payment step while the hold is created (rolling back on failure); dashboard status changes apply instantly and revert with a toast if the server disagrees.
+- Visual rules: Instrument Sans for text and Fraunces for headings (`h1`/`h2`); icons come only from `src/components/icons.ts` (Phosphor, duotone, hook-free SSR build so one import works in server and client components); no drop shadows, gradients, hover lifts or pill badges; corners are 3 to 8px (`borderRadius` scale in `tailwind.config.ts`); status colours are the theme-aware `ok`/`warn`/`bad`/`info` tokens rather than Tailwind's palette.
+- The homepage embeds a real booking page (the oldest detailer with a cover photo) as its demo. `/terms` and `/privacy` are linked from every footer; `SUPPORT_EMAIL` sets the contact address shown there.
 
 ---
 

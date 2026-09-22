@@ -62,7 +62,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 64,
-          background: `radial-gradient(900px 500px at 0% 0%, ${accent}33, transparent 60%), #07080c`,
+          background: "#0d0d10",
           color: "#f4f5f9",
           fontFamily: "Inter, system-ui, sans-serif",
         }}

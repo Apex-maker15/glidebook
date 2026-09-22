@@ -24,9 +24,6 @@
   --ink-muted-rgb: 107 106 114;
   --on-accent: #0c0b0a;
 
-  --shadow-card: 0 1px 2px rgb(22 20 16 / 0.04), 0 12px 32px -20px rgb(22 20 16 / 0.18);
-  --shadow-pop: 0 1px 2px rgb(22 20 16 / 0.06), 0 24px 60px -24px rgb(22 20 16 / 0.28);
-
   /* GlideBook's own accent: terracotta on paper */
   --accent: #d9542f;
   --accent-rgb: 217 84 47;
@@ -38,6 +35,12 @@
 
   --accent-strong: var(--accent-strong-light);
   --accent-strong-rgb: var(--accent-strong-light-rgb);
+
+  /* Status colours: deep on paper, light on dark. */
+  --ok-rgb: 31 122 77;
+  --warn-rgb: 154 91 0;
+  --bad-rgb: 179 38 30;
+  --info-rgb: 15 95 156;
 }
 
 :root[data-theme="dark"] {
@@ -55,31 +58,33 @@
   --ink-muted-rgb: 154 154 163;
   --on-accent: #0c0b0a;
 
-  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 20px 50px -30px rgb(0 0 0 / 0.8);
-  --shadow-pop: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 30px 70px -30px rgb(0 0 0 / 0.9);
-
   --accent-strong: var(--accent-strong-dark);
   --accent-strong-rgb: var(--accent-strong-dark-rgb);
+
+  --ok-rgb: 110 231 168;
+  --warn-rgb: 246 195 92;
+  --bad-rgb: 240 122 114;
+  --info-rgb: 134 204 255;
 }
 
 /* Category accents. Each carries a darker "strong" for light mode and a lighter one for dark mode. */
 [data-accent="beauty"] {
-  --accent: #e64a8f;
-  --accent-rgb: 230 74 143;
-  --accent-strong-light: #b3236a;
-  --accent-strong-light-rgb: 179 35 106;
-  --accent-strong-dark: #f7a3cb;
-  --accent-strong-dark-rgb: 247 163 203;
-  --accent-soft: rgb(230 74 143 / 0.12);
+  --accent: #c43d74;
+  --accent-rgb: 196 61 116;
+  --accent-strong-light: #8e2451;
+  --accent-strong-light-rgb: 142 36 81;
+  --accent-strong-dark: #eea1c0;
+  --accent-strong-dark-rgb: 238 161 192;
+  --accent-soft: rgb(196 61 116 / 0.12);
 }
 [data-accent="hair"] {
-  --accent: #7c5cf2;
-  --accent-rgb: 124 92 242;
-  --accent-strong-light: #5b3fc4;
-  --accent-strong-light-rgb: 91 63 196;
-  --accent-strong-dark: #c3b4fb;
-  --accent-strong-dark-rgb: 195 180 251;
-  --accent-soft: rgb(124 92 242 / 0.12);
+  --accent: #1f7a6d;
+  --accent-rgb: 31 122 109;
+  --accent-strong-light: #125a50;
+  --accent-strong-light-rgb: 18 90 80;
+  --accent-strong-dark: #8fd6c9;
+  --accent-strong-dark-rgb: 143 214 201;
+  --accent-soft: rgb(31 122 109 / 0.12);
 }
 [data-accent="car"] {
   --accent: #1f8fdd;
@@ -122,10 +127,10 @@
     color: var(--ink);
     background: var(--bg);
     overflow-x: hidden;
-    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
-  h1 {
+  h1,
+  h2 {
     font-family: var(--font-display), Georgia, "Times New Roman", serif;
     font-weight: 500;
     letter-spacing: -0.015em;
@@ -147,12 +152,10 @@
   .glass {
     background: var(--surface);
     border: 1px solid var(--line);
-    box-shadow: var(--shadow-card);
   }
   .glass-strong {
     background: var(--surface-2);
     border: 1px solid var(--line-strong);
-    box-shadow: var(--shadow-pop);
   }
   .text-gradient {
     color: var(--ink);

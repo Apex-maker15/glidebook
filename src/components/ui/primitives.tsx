@@ -3,7 +3,6 @@
 import { forwardRef, useId } from "react";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { spring } from "@/components/motion";
 import type { BookingStatus } from "@/types";
 
 /* ───────────────────────── Glass card ───────────────────────── */
@@ -20,8 +19,6 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(function Gla
   return (
     <motion.div
       ref={ref}
-      whileHover={interactive ? { y: -2 } : undefined}
-      transition={spring.soft}
       className={cn(strong ? "glass-strong" : "glass", "rounded-3xl", interactive && "cursor-pointer", className)}
       {...props}
     />
@@ -35,7 +32,7 @@ export function Skeleton({ className }: { className?: string }) {
     <div
       aria-hidden
       className={cn(
-        "relative overflow-hidden rounded-xl bg-white/[0.06] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.6s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/[0.07] before:to-transparent",
+        "animate-pulse rounded-lg bg-white/[0.06]",
         className,
       )}
     >
@@ -66,12 +63,12 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field({ l
         className={cn(
           "h-12 w-full rounded-2xl border bg-white/[0.04] px-4 text-[15px] text-ink placeholder:text-ink-muted/60 outline-none transition-[border-color,box-shadow,background-color] duration-300",
           "border-line focus:border-accent/60 focus:bg-white/[0.06] focus:shadow-[0_0_0_4px_var(--accent-soft)]",
-          error && "border-red-500/60 focus:border-red-500/70 focus:shadow-[0_0_0_4px_rgb(239_68_68/0.15)]",
+          error && "border-bad/60 focus:border-bad/70 focus:shadow-[0_0_0_4px_rgb(239_68_68/0.15)]",
         )}
         {...props}
       />
       {error ? (
-        <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-300">
+        <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-bad">
           {error}
         </motion.p>
       ) : hint ? (
@@ -99,11 +96,11 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         id={inputId}
         className={cn(
           "min-h-24 w-full resize-y rounded-2xl border border-line bg-white/[0.04] px-4 py-3 text-[15px] text-ink placeholder:text-ink-muted/60 outline-none transition-[border-color,box-shadow,background-color] duration-300 focus:border-accent/60 focus:bg-white/[0.06] focus:shadow-[0_0_0_4px_var(--accent-soft)]",
-          error && "border-red-500/60",
+          error && "border-bad/60",
         )}
         {...props}
       />
-      {error && <p className="text-xs text-red-300">{error}</p>}
+      {error && <p className="text-xs text-bad">{error}</p>}
     </div>
   );
 });
@@ -111,9 +108,9 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
 /* ───────────────────────── Status badge ───────────────────────── */
 
 const statusStyles: Record<BookingStatus, string> = {
-  PENDING: "bg-amber-400/15 text-amber-200 border-amber-400/25",
-  CONFIRMED: "bg-sky-400/15 text-sky-200 border-sky-400/25",
-  PAID: "bg-emerald-400/15 text-emerald-200 border-emerald-400/25",
+  PENDING: "bg-warn/15 text-warn border-warn/25",
+  CONFIRMED: "bg-info/15 text-info border-info/25",
+  PAID: "bg-ok/15 text-ok border-ok/25",
   CANCELLED: "bg-white/[0.06] text-ink-muted border-white/10",
 };
 
@@ -128,7 +125,7 @@ export function StatusBadge({ status, className }: { status: BookingStatus; clas
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+        "inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
         statusStyles[status],
         className,
       )}
@@ -142,7 +139,7 @@ export function StatusBadge({ status, className }: { status: BookingStatus; clas
 /* ───────────────────────── Misc ───────────────────────── */
 
 export function Divider({ className }: { className?: string }) {
-  return <div className={cn("h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent", className)} />;
+  return <div className={cn("h-px w-full bg-line", className)} />;
 }
 
 export function Kbd({ children }: { children: React.ReactNode }) {

@@ -3,7 +3,7 @@
 import { forwardRef, useState } from "react";
 import { motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
-import { Check, Clock, Mail, MapPin, Phone, StickyNote, X } from "lucide-react";
+import { Check, Clock, Envelope, MapPin, Note, Phone, X } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { StatusBadge } from "@/components/ui/primitives";
@@ -111,12 +111,12 @@ export const BookingCard = forwardRef<HTMLDivElement, Props>(function BookingCar
             <div className="mt-2 space-y-1.5 border-t border-white/[0.08] pt-3 text-[13px] text-ink-muted">
               {booking.serviceDetails && (
                 <p className="flex items-start gap-2">
-                  <StickyNote className="mt-0.5 size-3.5 shrink-0" /> {booking.serviceDetails}
+                  <Note className="mt-0.5 size-3.5 shrink-0" /> {booking.serviceDetails}
                 </p>
               )}
               {booking.notes && <p className="pl-[22px] text-ink-muted/90">{booking.notes}</p>}
               <p className="flex items-center gap-2">
-                <Mail className="size-3.5" />
+                <Envelope className="size-3.5" />
                 <a href={`mailto:${booking.customer.email}`} className="hover:text-ink">
                   {booking.customer.email}
                 </a>

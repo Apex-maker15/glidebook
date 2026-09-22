@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Fraunces, Instrument_Sans } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { THEME_INIT_SCRIPT } from "@/components/theme/theme";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans", display: "swap", axes: ["wdth"] });
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-display", display: "swap", axes: ["opsz", "SOFT"] });
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${sans.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <body className="font-sans">
         {/* Sets data-theme before hydration so the first paint is already light or dark. */}
         <Script id="gb-theme-init" strategy="beforeInteractive">

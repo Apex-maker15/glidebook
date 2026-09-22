@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { Clock, Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
+import { Clock, Eye, EyeSlash, Pencil, Plus, Trash } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Field, Skeleton, TextArea } from "@/components/ui/primitives";
@@ -139,7 +139,7 @@ export function ServicesManager({ providerId, embedded }: ManagerProps = {}) {
             ))}
           </motion.div>
         ) : error ? (
-          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-red-300">
+          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-bad">
             {error}
           </motion.p>
         ) : (
@@ -177,13 +177,13 @@ export function ServicesManager({ providerId, embedded }: ManagerProps = {}) {
                       </div>
                       <div className="flex shrink-0 gap-1">
                         <IconButton label={s.active ? "Hide from booking page" : "Show on booking page"} onClick={() => void toggleActive(s)}>
-                          {s.active ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                          {s.active ? <Eye className="size-4" /> : <EyeSlash className="size-4" />}
                         </IconButton>
                         <IconButton label="Edit" onClick={() => openEdit(s)}>
                           <Pencil className="size-4" />
                         </IconButton>
                         <IconButton label="Delete" onClick={() => void remove(s)} danger>
-                          <Trash2 className="size-4" />
+                          <Trash className="size-4" />
                         </IconButton>
                       </div>
                     </motion.li>
@@ -246,7 +246,7 @@ function IconButton({ children, label, onClick, danger }: { children: React.Reac
       onClick={onClick}
       whileTap={{ scale: 0.92 }}
       transition={spring.snappy}
-      className={cn("rounded-xl p-2 text-ink-muted transition-colors hover:bg-white/[0.08] hover:text-ink", danger && "hover:bg-red-500/15 hover:text-red-300")}
+      className={cn("rounded-xl p-2 text-ink-muted transition-colors hover:bg-white/[0.08] hover:text-ink", danger && "hover:bg-bad/15 hover:text-bad")}
     >
       {children}
     </motion.button>

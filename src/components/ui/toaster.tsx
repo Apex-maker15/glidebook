@@ -1,15 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
+import { CheckCircle, Info, WarningCircle, X } from "@/components/icons";
 import { useToastStore, type Toast } from "@/store/toast-store";
 import { spring } from "@/components/motion";
 import { cn } from "@/lib/utils";
 
 const icons: Record<Toast["tone"], React.ReactNode> = {
-  success: <CheckCircle2 className="size-4 text-emerald-300" />,
-  error: <AlertCircle className="size-4 text-red-300" />,
-  info: <Info className="size-4 text-sky-300" />,
+  success: <CheckCircle className="size-4 text-ok" />,
+  error: <WarningCircle className="size-4 text-bad" />,
+  info: <Info className="size-4 text-info" />,
 };
 
 export function Toaster() {
@@ -29,7 +29,7 @@ export function Toaster() {
             transition={spring.soft}
             className={cn(
               "glass-strong pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl p-4",
-              t.tone === "error" && "border-red-500/30",
+              t.tone === "error" && "border-bad/30",
             )}
           >
             <span className="mt-0.5 shrink-0">{icons[t.tone]}</span>

@@ -72,7 +72,7 @@ export const POST = handle(async (req: Request) => {
       currency: booking.currency,
       automatic_payment_methods: { enabled: true },
       receipt_email: booking.customer.email,
-      description: `${booking.depositCents < booking.amountCents ? "Deposit for " : ""}${booking.service.name} — ${booking.provider.businessName ?? "GlideBook"}`,
+      description: `${booking.depositCents < booking.amountCents ? "Deposit for " : ""}${booking.service.name} - ${booking.provider.businessName ?? "GlideBook"}`,
       transfer_data: { destination },
       on_behalf_of: destination,
       ...(booking.platformFeeCents > 0 ? { application_fee_amount: booking.platformFeeCents } : {}),

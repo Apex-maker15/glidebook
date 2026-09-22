@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatInTimeZone } from "date-fns-tz";
-import { Sparkles } from "lucide-react";
+import { Wordmark } from "@/components/wordmark";
+import { SiteFooter } from "@/components/site-footer";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES } from "@/lib/categories";
 import { formatMoney } from "@/lib/utils";
@@ -45,12 +45,7 @@ export default async function ManageBookingPage({ params, searchParams }: Props)
   return (
     <div data-accent={meta.accent} style={accentVars(b.provider.accentColor)} className="min-h-dvh">
       <header className="mx-auto flex max-w-2xl items-center justify-between px-4 pt-6 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-          <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
-            <Sparkles className="size-4" />
-          </span>
-          GlideBook
-        </Link>
+        <Wordmark />
         <ThemeToggle />
       </header>
       <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
@@ -85,6 +80,7 @@ export default async function ManageBookingPage({ params, searchParams }: Props)
           <ReviewForm bookingId={b.id} token={t} businessName={b.provider.businessName ?? b.provider.name} existing={b.review} />
         )}
       </main>
+      <SiteFooter poweredBy className="pb-10" />
     </div>
   );
 }

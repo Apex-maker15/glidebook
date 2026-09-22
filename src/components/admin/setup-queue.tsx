@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, ExternalLink, Inbox, Mail, Phone, RotateCcw } from "lucide-react";
+import { ArrowCounterClockwise, ArrowLeft, ArrowSquareOut, CheckCircle, Envelope, Phone, Tray } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
 import { ServicesManager } from "@/components/dashboard/services-manager";
@@ -83,7 +83,7 @@ export function SetupQueue() {
       </header>
 
       {error ? (
-        <p className="text-sm text-red-300">{error}</p>
+        <p className="text-sm text-bad">{error}</p>
       ) : items === null ? (
         <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
           <Skeleton className="h-64 rounded-3xl" />
@@ -91,7 +91,7 @@ export function SetupQueue() {
         </div>
       ) : items.length === 0 ? (
         <div className="flex h-48 flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-white/10 text-sm text-ink-muted">
-          <Inbox className="size-5" /> No paid setup requests yet
+          <Tray className="size-5" /> No paid setup requests yet
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
@@ -111,7 +111,7 @@ export function SetupQueue() {
                   <span
                     className={cn(
                       "rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase",
-                      item.status === "PAID" ? "bg-amber-400/15 text-amber-200" : "bg-emerald-400/15 text-emerald-200",
+                      item.status === "PAID" ? "bg-warn/15 text-warn" : "bg-ok/15 text-ok",
                     )}
                   >
                     {item.status === "PAID" ? "To do" : "Done"}
@@ -136,7 +136,7 @@ export function SetupQueue() {
                       <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-ink-muted">
                         <span>{active.provider.name}</span>
                         <a href={`mailto:${active.provider.email}`} className="flex items-center gap-1 hover:text-ink">
-                          <Mail className="size-3.5" /> {active.provider.email}
+                          <Envelope className="size-3.5" /> {active.provider.email}
                         </a>
                         {active.provider.phone && (
                           <a href={`tel:${active.provider.phone}`} className="flex items-center gap-1 hover:text-ink">
@@ -145,18 +145,18 @@ export function SetupQueue() {
                         )}
                         {active.provider.slug && (
                           <Link href={`/book/${active.provider.slug}`} target="_blank" className="flex items-center gap-1 hover:text-ink">
-                            <ExternalLink className="size-3.5" /> /book/{active.provider.slug}
+                            <ArrowSquareOut className="size-3.5" /> /book/{active.provider.slug}
                           </Link>
                         )}
                       </p>
                     </div>
                     {active.status === "PAID" ? (
                       <Button onClick={() => void setStatus(active.id, "DONE")}>
-                        <CheckCircle2 className="size-4" /> Mark done
+                        <CheckCircle className="size-4" /> Mark done
                       </Button>
                     ) : (
                       <Button variant="ghost" onClick={() => void setStatus(active.id, "PAID")}>
-                        <RotateCcw className="size-4" /> Reopen
+                        <ArrowCounterClockwise className="size-4" /> Reopen
                       </Button>
                     )}
                   </div>

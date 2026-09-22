@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
 import { formatDistanceToNowStrict } from "date-fns";
-import { AlertTriangle, ArrowUpRight, BadgeCheck, CircleDashed, ExternalLink, Search, Users } from "lucide-react";
+import { ArrowSquareOut, ArrowUpRight, CircleDashed, MagnifyingGlass, SealCheck, Users, Warning } from "@/components/icons";
 import { Skeleton, StatusBadge } from "@/components/ui/primitives";
 import { fadeVariants, spring } from "@/components/motion";
 import { api, errorMessage } from "@/lib/client-api";
@@ -129,7 +129,7 @@ export function AdminOverview() {
       </header>
 
       {error ? (
-        <p className="text-sm text-red-300">{error}</p>
+        <p className="text-sm text-bad">{error}</p>
       ) : !data ? (
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -144,8 +144,8 @@ export function AdminOverview() {
           {tab === "overview" && (
             <motion.div key="overview" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
               {!data.stripeConfigured && (
-                <div className="flex items-start gap-3 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm text-amber-100">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                <div className="flex items-start gap-3 rounded-2xl border border-warn/25 bg-warn/10 p-4 text-sm text-warn">
+                  <Warning className="mt-0.5 size-4 shrink-0" />
                   <p>
                     <span className="font-semibold">Stripe keys are not set on this deployment.</span> Nobody can take deposits or pay the setup fee until{" "}
                     <code className="font-mono text-xs">STRIPE_SECRET_KEY</code>, <code className="font-mono text-xs">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> and{" "}
@@ -167,7 +167,7 @@ export function AdminOverview() {
           {tab === "providers" && (
             <motion.div key="providers" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
               <label className="glass flex h-11 max-w-md items-center gap-2 rounded-2xl px-4 text-sm">
-                <Search className="size-4 text-ink-muted" />
+                <MagnifyingGlass className="size-4 text-ink-muted" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -217,7 +217,7 @@ function Stats({ data }: { data: Overview }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((c) => (
-        <div key={c.label} className={cn("glass rounded-2xl p-4", c.accent && "ring-1 ring-accent/40 shadow-glow")}>
+        <div key={c.label} className={cn("glass rounded-2xl p-4", c.accent && "ring-1 ring-accent/40")}>
           <p className="text-[12px] font-medium uppercase tracking-wider text-ink-muted">{c.label}</p>
           <p className="mt-1.5 text-2xl font-semibold tabular-nums tracking-tight">{c.value}</p>
           <p className="mt-1 text-[12px] text-ink-muted">{c.sub}</p>
@@ -230,13 +230,13 @@ function Stats({ data }: { data: Overview }) {
 export function StripePill({ state }: { state: StripeState }) {
   if (state === "connected")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-200">
-        <BadgeCheck className="size-3" /> Deposits on
+      <span className="inline-flex items-center gap-1 rounded-full bg-ok/15 px-2 py-0.5 text-[11px] font-semibold text-ok">
+        <SealCheck className="size-3" /> Deposits on
       </span>
     );
   if (state === "incomplete")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-2 py-0.5 text-[11px] font-semibold text-amber-200">
+      <span className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[11px] font-semibold text-warn">
         <CircleDashed className="size-3" /> Stripe pending
       </span>
     );
@@ -281,9 +281,9 @@ function ProvidersTable({ providers }: { providers: AdminProvider[] }) {
                 </td>
                 <td className="px-4 py-3">
                   {live ? (
-                    <span className="text-[12px] text-emerald-200">Live · {p.services} services</span>
+                    <span className="text-[12px] text-ok">Live · {p.services} services</span>
                   ) : (
-                    <span className="text-[12px] text-amber-200">{p.services === 0 ? "No services yet" : "No hours yet"}</span>
+                    <span className="text-[12px] text-warn">{p.services === 0 ? "No services yet" : "No hours yet"}</span>
                   )}
                 </td>
                 <td className="px-4 py-3">
@@ -299,7 +299,7 @@ function ProvidersTable({ providers }: { providers: AdminProvider[] }) {
                   <div className="flex items-center justify-end gap-1">
                     {p.slug && (
                       <Link href={`/book/${p.slug}`} target="_blank" aria-label="Open booking page" className="rounded-lg p-1.5 text-ink-muted hover:bg-white/[0.08] hover:text-ink">
-                        <ExternalLink className="size-3.5" />
+                        <ArrowSquareOut className="size-3.5" />
                       </Link>
                     )}
                     <Link href={`/admin/providers/${p.id}`} aria-label="Manage provider" className="rounded-lg p-1.5 text-ink-muted hover:bg-white/[0.08] hover:text-ink">

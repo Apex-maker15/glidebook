@@ -10,7 +10,7 @@ export const maxDuration = 300;
 const HEARTBEAT_MS = 25_000;
 
 /**
- * GET /api/events — Server-Sent Events stream of the signed-in provider's
+ * GET /api/events - Server-Sent Events stream of the signed-in provider's
  * booking changes. The dashboard reconnects automatically via EventSource.
  */
 export async function GET(req: Request) {

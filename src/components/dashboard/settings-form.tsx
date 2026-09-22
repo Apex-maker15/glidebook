@@ -139,7 +139,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
             ))}
           </motion.div>
         ) : error ? (
-          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-red-300">
+          <motion.p key="error" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="text-sm text-bad">
             {error}
           </motion.p>
         ) : (
@@ -189,7 +189,7 @@ export function SettingsForm({ providerId, embedded }: ManagerProps = {}) {
               <p className="text-xs text-ink-muted/80">
                 {form!.stripeConnected ? "Locked: your Stripe account is registered here." : "Where your business is registered. Used when you connect Stripe for payouts."}
               </p>
-              {issues.country?.[0] && <p className="text-xs text-red-300">{issues.country[0]}</p>}
+              {issues.country?.[0] && <p className="text-xs text-bad">{issues.country[0]}</p>}
             </div>
 
             <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">

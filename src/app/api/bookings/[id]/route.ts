@@ -45,7 +45,7 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
   );
 });
 
-/** PATCH /api/bookings/:id — provider confirms or cancels (refunding if already paid). */
+/** PATCH /api/bookings/:id - provider confirms or cancels (refunding if already paid). */
 export const PATCH = handle(async (req: Request, ctx: Ctx) => {
   const { id } = await ctx.params;
   const session = await auth();

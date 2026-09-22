@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Sparkles } from "lucide-react";
+import { Warning } from "@/components/icons";
+import { Wordmark } from "@/components/wordmark";
 import type { BusinessCategory } from "@prisma/client";
 import { CATEGORIES, CATEGORY_ORDER, CURRENCIES } from "@/lib/categories";
 import { CategoryIcon } from "@/components/category-icon";
@@ -18,12 +19,7 @@ import { cn } from "@/lib/utils";
 function Shell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: React.ReactNode; footer: React.ReactNode }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-12 sm:px-6">
-      <Link href="/" className="mb-8 flex items-center gap-2 self-center text-sm font-semibold tracking-tight">
-        <span className="flex size-8 items-center justify-center rounded-xl bg-accent/15 text-accent-strong">
-          <Sparkles className="size-4" />
-        </span>
-        GlideBook
-      </Link>
+      <Wordmark className="mb-8 self-center" />
       <motion.div initial={{ opacity: 0, y: 16, scale: 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={spring.soft} className="glass rounded-3xl p-6 sm:p-8">
         <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
         <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>
@@ -45,8 +41,8 @@ function ErrorBanner({ message }: { message: string | null }) {
           exit={{ opacity: 0, height: 0, marginBottom: 0 }}
           className="overflow-hidden"
         >
-          <div className="flex items-start gap-2.5 rounded-2xl border border-red-500/25 bg-red-500/10 p-3.5 text-sm text-red-200">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" /> {message}
+          <div className="flex items-start gap-2.5 rounded-2xl border border-bad/25 bg-bad/10 p-3.5 text-sm text-bad">
+            <Warning className="mt-0.5 size-4 shrink-0" /> {message}
           </div>
         </motion.div>
       )}
@@ -171,7 +167,7 @@ export function RegisterForm() {
                   active ? "border-accent/60 bg-accent-soft text-ink" : "border-white/[0.08] bg-white/[0.03] text-ink-muted hover:bg-white/[0.06]",
                 )}
               >
-                {active && <motion.span layoutId="category-active" transition={spring.morph} className="absolute inset-0 rounded-2xl ring-1 ring-accent/60 shadow-glow" />}
+                {active && <motion.span layoutId="category-active" transition={spring.morph} className="absolute inset-0 rounded-2xl ring-1 ring-accent/60" />}
                 <span className="relative flex items-center gap-2">
                   <CategoryIcon category={value} className="size-4" /> {meta.label}
                 </span>

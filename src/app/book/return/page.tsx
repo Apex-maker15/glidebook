@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formatInTimeZone } from "date-fns-tz";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import { CheckCircle, Clock, XCircle } from "@/components/icons";
 import { prisma } from "@/lib/prisma";
 import { formatMoney } from "@/lib/utils";
 
@@ -29,18 +29,18 @@ export default async function ReturnPage({ searchParams }: Props) {
       <div className="glass w-full rounded-3xl p-8">
         {!booking ? (
           <>
-            <XCircle className="mx-auto size-10 text-red-300" />
+            <XCircle className="mx-auto size-10 text-bad" />
             <h1 className="mt-4 text-xl font-semibold">We could not find that booking</h1>
           </>
         ) : failed ? (
           <>
-            <XCircle className="mx-auto size-10 text-red-300" />
+            <XCircle className="mx-auto size-10 text-bad" />
             <h1 className="mt-4 text-xl font-semibold">Payment did not go through</h1>
             <p className="mt-2 text-sm text-ink-muted">Your slot was not charged. You can start again below.</p>
           </>
         ) : (
           <>
-            {paid ? <CheckCircle2 className="mx-auto size-10 text-emerald-300" /> : <Clock className="mx-auto size-10 text-amber-300" />}
+            {paid ? <CheckCircle className="mx-auto size-10 text-ok" /> : <Clock className="mx-auto size-10 text-warn" />}
             <h1 className="mt-4 text-xl font-semibold">{paid ? "You're booked" : "Payment is processing"}</h1>
             <p className="mt-2 text-sm text-ink-muted">
               {booking.service.name} with {booking.provider.businessName} on{" "}

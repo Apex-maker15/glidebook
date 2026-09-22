@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { KeyRound } from "lucide-react";
+import { Key } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/primitives";
 import { api, ClientApiError, errorMessage } from "@/lib/client-api";
@@ -42,7 +42,7 @@ export function PasswordForm() {
     <form onSubmit={(e) => void submit(e)} className="glass mt-6 space-y-4 rounded-3xl p-6">
       <div>
         <h2 className="flex items-center gap-2 text-base font-semibold">
-          <KeyRound className="size-4 text-accent-strong" /> Change password
+          <Key className="size-4 text-accent-strong" /> Change password
         </h2>
         <p className="mt-1 text-[13px] text-ink-muted">Use at least 8 characters. You stay signed in on this device.</p>
       </div>
@@ -51,7 +51,7 @@ export function PasswordForm() {
         <Field label="New password" type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} required minLength={8} />
         <Field label="Repeat new password" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={8} />
       </div>
-      {error && <p className="text-sm text-red-300">{error}</p>}
+      {error && <p className="text-sm text-bad">{error}</p>}
       <div className="flex justify-end">
         <Button type="submit" variant="secondary" loading={saving}>
           Update password

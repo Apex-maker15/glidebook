@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatInTimeZone } from "date-fns-tz";
 import { prisma } from "@/lib/prisma";
@@ -13,6 +12,7 @@ import { BookingWizard } from "@/components/booking/booking-wizard";
 import { ProviderHero } from "@/components/booking/provider-hero";
 import { ProviderInfo, type DayHours } from "@/components/booking/provider-info";
 import { Gallery, Reviews } from "@/components/booking/provider-social";
+import { SiteFooter } from "@/components/site-footer";
 
 export const dynamic = "force-dynamic";
 
@@ -92,13 +92,7 @@ export default async function BookPage({ params }: Props) {
       {/* The wizard never shows the images, so keep them out of its serialised props. */}
       <BookingWizard provider={{ ...provider, coverData: null, gallery: [] }} services={services} stripePublishableKey={publishableKey()} />
       <ProviderInfo provider={provider} hours={hoursFor(availability, provider.timezone)} />
-      <footer className="mx-auto max-w-6xl px-4 pb-28 pt-12 text-center text-[12px] text-ink-muted/70 sm:px-6 lg:pb-10">
-        Powered by{" "}
-        <Link href="/?ref=book" className="font-medium text-ink-muted transition-colors hover:text-ink">
-          GlideBook
-        </Link>{" "}
-        · Get your own booking page, free
-      </footer>
+      <SiteFooter poweredBy className="pb-28 pt-12 lg:pb-10" />
     </div>
   );
 }

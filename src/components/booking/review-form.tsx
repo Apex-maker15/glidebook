@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { TextArea } from "@/components/ui/primitives";
 import { api, errorMessage } from "@/lib/client-api";
@@ -71,7 +71,7 @@ export function ReviewForm({ bookingId, token, businessName, existing }: Props) 
                 setRating(n);
                 setSaved(false);
               }}
-              className="p-1 transition-transform hover:scale-110"
+              className="p-1"
             >
               <Star className={`size-7 ${n <= shown ? "fill-accent text-accent" : "text-ink-muted/40"}`} />
             </button>
@@ -91,7 +91,7 @@ export function ReviewForm({ bookingId, token, businessName, existing }: Props) 
         placeholder="What stood out?"
         maxLength={600}
       />
-      {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
+      {error && <p className="mt-2 text-sm text-bad">{error}</p>}
       <div className="mt-4 flex justify-end">
         <Button type="submit" loading={busy} disabled={saved}>
           {saved ? "Saved" : existing ? "Update review" : "Post review"}

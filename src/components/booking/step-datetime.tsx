@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { ArrowLeft, ArrowRight, Globe } from "lucide-react";
+import { ArrowLeft, ArrowRight, Globe } from "@/components/icons";
 import { formatInTimeZone } from "date-fns-tz";
 import { addDays } from "date-fns";
 import { Button } from "@/components/ui/button";

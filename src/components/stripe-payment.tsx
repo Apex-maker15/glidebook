@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, Lock } from "lucide-react";
+import { Lock, Warning } from "@/components/icons";
 import { loadStripe, type Stripe, type StripeElementsOptions } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
@@ -125,8 +125,8 @@ function Form({ label, returnUrl, onSucceeded }: Omit<Props, "publishableKey" | 
         </motion.div>
       </div>
       {error && (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-red-500/25 bg-red-500/10 p-3.5 text-sm text-red-200">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0" /> {error}
+        <div className="flex items-start gap-2.5 rounded-2xl border border-bad/25 bg-bad/10 p-3.5 text-sm text-bad">
+          <Warning className="mt-0.5 size-4 shrink-0" /> {error}
         </div>
       )}
       <Button type="submit" size="lg" className="w-full" disabled={!stripe || !elements || !ready} loading={busy}>

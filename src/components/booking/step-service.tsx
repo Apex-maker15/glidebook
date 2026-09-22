@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Clock } from "lucide-react";
+import { ArrowRight, Check, Clock } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { spring, staggerContainer, riseVariants } from "@/components/motion";
 import { useBookingStore } from "@/store/booking-store";
@@ -64,7 +64,6 @@ export function StepService() {
                     selectService(svc.id);
                     next();
                   }}
-                  whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.985 }}
                   transition={spring.snappy}
                   className={cn(
@@ -76,7 +75,7 @@ export function StepService() {
                     <motion.span
                       layoutId="service-active"
                       transition={spring.morph}
-                      className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-accent/70 shadow-glow"
+                      className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-accent/70"
                     />
                   )}
                   <div className="relative flex items-start justify-between gap-3">
@@ -90,7 +89,7 @@ export function StepService() {
                         active ? "border-accent bg-accent text-black" : "border-white/15 text-transparent",
                       )}
                     >
-                      <Check className="size-3.5" strokeWidth={3} />
+                      <Check className="size-3.5" />
                     </span>
                   </div>
                   <div className="relative mt-4 flex items-center justify-between">

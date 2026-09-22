@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarPlus, CreditCard, Clock, MapPin, Phone, XCircle } from "lucide-react";
+import { CalendarPlus, Clock, CreditCard, MapPin, Phone, XCircle } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { StatusBadge } from "@/components/ui/primitives";
@@ -155,7 +155,7 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
       {!cancelled && !b.isPast && (
         <div className="mt-6 flex flex-wrap gap-2">
           {b.depositLink && (
-            <a href={b.depositLink} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-accent px-4 text-sm font-semibold text-black shadow-glow">
+            <a href={b.depositLink} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-accent px-4 text-sm font-semibold text-black">
               <CreditCard className="size-4" /> Pay {b.paidLabel} deposit
             </a>
           )}
@@ -196,7 +196,7 @@ export function ManageBooking({ booking: b }: ManageBookingProps) {
               : `This is within ${b.cancelNoticeHours} hours of the appointment, so the ${b.paidLabel} deposit will not be refunded.`
         }
       >
-        {error && <p className="mb-3 text-sm text-red-300">{error}</p>}
+        {error && <p className="mb-3 text-sm text-bad">{error}</p>}
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setConfirm(false)} disabled={busy}>
             Keep booking
